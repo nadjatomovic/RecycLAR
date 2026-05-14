@@ -3,8 +3,7 @@
 > **Skeniraj. Loči. Uči se.**  
 > Point your camera at waste. Find out exactly which bin it belongs in.
 
-RecycLAR is a mobile app for Slovenian school students that uses AI to
-identify waste items and tell users exactly where to throw them — with
+RecycLAR is a mobile app for identifying waste items and telling users exactly where to throw them — with
 municipality-specific bin rules and guidance from the mascot Lari.
 
 ---
