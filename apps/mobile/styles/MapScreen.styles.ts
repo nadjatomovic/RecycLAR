@@ -1,209 +1,453 @@
 import { StyleSheet, Dimensions } from "react-native";
 
+const { height } = Dimensions.get("window");
+
+const colors = {
+  green: "#35A936",
+  purple: "#6B35C9",
+  purpleLight: "#EFE8FF",
+  text: "#252733",
+  muted: "#7A7A86",
+  border: "#ECECF2",
+  white: "#FFFFFF",
+  bg: "#FFFFFF",
+};
+
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FB",
+    backgroundColor: colors.bg,
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: 22,
+    paddingTop: 6,
+    marginBottom: 10,
   },
-  logoRow: {
+
+  brandRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-  miniIcon: {
-    width: 30,
-    height: 30,
-    marginRight: 8,
+
+  brandIcon: {
+    width: 44,
+    height: 44,
+    marginRight: 10,
   },
-  miniLogoText: {
-    width: 100,
-    height: 25,
-    resizeMode: "contain",
+
+  brandText: {
+    fontSize: 27,
+    fontWeight: "900",
+    letterSpacing: 0.2,
   },
+
+  brandGreen: {
+    color: colors.green,
+  },
+
+  brandPurple: {
+    color: colors.purple,
+  },
+
   notificationBtn: {
-    padding: 10,
-    backgroundColor: "white",
-    borderRadius: 20,
-    elevation: 4,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+    position: "relative",
   },
+
+  notificationText: {
+    fontSize: 23,
+    color: "#4D4D59",
+  },
+
+  notificationDot: {
+    position: "absolute",
+    top: 9,
+    right: 9,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: colors.purple,
+  },
+
   titleSection: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    alignItems: "flex-start",
+    paddingHorizontal: 22,
+    marginBottom: 14,
   },
+
+  titleTextWrap: {
+    flex: 1,
+  },
+
   mainTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#1A1A1A",
+    fontSize: 42,
+    lineHeight: 48,
+    fontWeight: "900",
+    color: colors.text,
+    marginBottom: 8,
   },
+
   subTitle: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 20,
+    fontSize: 18,
+    lineHeight: 25,
+    color: colors.muted,
   },
+
   mascotSmall: {
-    width: 70,
-    height: 70,
+    width: 112,
+    height: 112,
+    marginTop: -8,
+    marginRight: 4,
   },
+
   searchContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 15,
+    paddingHorizontal: 22,
+    marginBottom: 14,
   },
+
   searchBar: {
     flexDirection: "row",
-    backgroundColor: "white",
-    borderRadius: 15,
-    paddingHorizontal: 15,
+    backgroundColor: colors.white,
+    borderRadius: 25,
+    paddingHorizontal: 18,
     alignItems: "center",
-    height: 55,
-    elevation: 5,
+    height: 58,
+    borderWidth: 1,
+    borderColor: colors.border,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 5,
   },
+
   searchIcon: {
-    fontSize: 18,
-    marginRight: 10,
+    fontSize: 24,
+    marginRight: 12,
+    color: "#6E6E78",
   },
+
   searchInput: {
     flex: 1,
-    fontSize: 15,
-    color: "#333",
+    fontSize: 16,
+    color: colors.text,
   },
+
   filterBtn: {
-    padding: 5,
+    width: 34,
+    height: 34,
+    alignItems: "center",
+    justifyContent: "center",
   },
+
+  filterText: {
+    fontSize: 22,
+    color: "#6E6E78",
+  },
+
   mapWrapper: {
     flex: 1,
-    marginHorizontal: 15,
-    borderRadius: 30,
+    marginHorizontal: 0,
     overflow: "hidden",
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: "#EEE",
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#EFF0F4",
+    minHeight: height * 0.44,
   },
+
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  categoriesOverlay: {
-    position: "absolute",
-    bottom: 15,
-    left: 0,
-    right: 0,
-    paddingLeft: 15,
-  },
-  chip: {
-    flexDirection: "row",
-    backgroundColor: "white",
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-    alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-  },
-  chipText: {
-    marginLeft: 5,
-    fontWeight: "600",
-    fontSize: 12,
-  },
+
   customMarker: {
-    backgroundColor: "#6A1B9A",
-    padding: 6,
-    borderRadius: 15,
-    borderWidth: 2,
-    borderColor: "white",
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 3,
+    borderColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.22,
+    shadowRadius: 7,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+
+  markerIcon: {
+    fontSize: 20,
+    color: colors.white,
+    fontWeight: "900",
+  },
+
+  floatingMapButtons: {
+    position: "absolute",
+    right: 18,
+    bottom: 84,
+    gap: 12,
+  },
+
+  mapCircleBtn: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
     elevation: 5,
   },
-  infoCard: {
+
+  mapCircleIcon: {
+    fontSize: 26,
+    color: "#686873",
+  },
+
+  categoriesOverlay: {
     position: "absolute",
-    bottom: 95,
-    left: 20,
-    right: 20,
-    backgroundColor: "white",
-    borderRadius: 25,
-    padding: 12,
+    bottom: 18,
+    left: 0,
+    right: 0,
+    paddingLeft: 18,
+  },
+
+  chip: {
     flexDirection: "row",
-    alignItems: "center",
-    elevation: 12,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-  },
-  locationImg: {
-    width: 85,
-    height: 85,
-    borderRadius: 18,
-  },
-  infoDetails: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  closestTag: {
-    color: "#6A1B9A",
-    fontSize: 10,
-    fontWeight: "bold",
-    textTransform: "uppercase",
-  },
-  locationTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  iconRow: {
-    marginVertical: 2,
-  },
-  locationItems: {
-    fontSize: 11,
-    color: "#777",
-  },
-  openStatus: {
-    fontSize: 11,
-    color: "#4CAF50",
-    fontWeight: "600",
-  },
-  arrowBtn: {
-    backgroundColor: "#6A1B9A",
-    width: 44,
-    height: 44,
+    backgroundColor: colors.white,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     borderRadius: 22,
-    justifyContent: "center",
+    marginRight: 9,
     alignItems: "center",
-  },
-  bottomTab: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "white",
-    paddingVertical: 12,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderWidth: 1,
+    borderColor: colors.border,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 20,
+    shadowRadius: 9,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
   },
-  tabItem: {
+
+  chipActive: {
+    backgroundColor: colors.purpleLight,
+    borderColor: "#D8C8F8",
+  },
+
+  chipIcon: {
+    fontSize: 17,
+    marginRight: 7,
+    fontWeight: "800",
+  },
+
+  chipText: {
+    fontWeight: "700",
+    fontSize: 13,
+    color: colors.text,
+  },
+
+  chipTextActive: {
+    color: colors.purple,
+    fontWeight: "900",
+  },
+
+  infoCard: {
+    position: "absolute",
+    bottom: 86,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingTop: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 18,
+    flexDirection: "row",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.16,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: -6 },
+    elevation: 14,
   },
+
+  locationImgWrap: {
+    width: 104,
+    height: 94,
+    borderRadius: 22,
+    overflow: "hidden",
+    marginRight: 14,
+    position: "relative",
+  },
+
+  locationImg: {
+    width: "100%",
+    height: "100%",
+  },
+
+  distanceBadge: {
+    position: "absolute",
+    left: 10,
+    bottom: 8,
+    backgroundColor: colors.purple,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+
+  distanceText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+  infoDetails: {
+    flex: 1,
+    paddingRight: 42,
+  },
+
+  closestTag: {
+    color: colors.purple,
+    fontSize: 12,
+    fontWeight: "900",
+    marginBottom: 3,
+  },
+
+  locationTitle: {
+    fontSize: 21,
+    lineHeight: 26,
+    fontWeight: "900",
+    color: colors.text,
+    marginBottom: 6,
+  },
+
+  typeDotsRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 6,
+  },
+
+  typeDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+
+  locationItems: {
+    fontSize: 14,
+    color: colors.text,
+    marginBottom: 5,
+  },
+
+  openStatus: {
+    fontSize: 13,
+    color: colors.green,
+    fontWeight: "800",
+  },
+
+  favoriteBtn: {
+    position: "absolute",
+    right: 22,
+    top: 18,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+
+  favoriteIcon: {
+    color: "#777782",
+    fontSize: 23,
+  },
+
+  arrowBtn: {
+    position: "absolute",
+    right: 24,
+    bottom: 24,
+    backgroundColor: colors.purple,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: colors.purple,
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+
+  arrowText: {
+    color: colors.white,
+    fontSize: 24,
+    fontWeight: "900",
+  },
+
+  bottomTab: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 86,
+    backgroundColor: colors.white,
+    borderTopWidth: 1,
+    borderTopColor: "#EFEFF4",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingBottom: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 12,
+  },
+
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   tabIcon: {
-    fontSize: 22,
-    color: "#BBB",
+    fontSize: 25,
+    color: colors.purple,
+    marginBottom: 2,
   },
+
+  tabIconActive: {
+    color: colors.green,
+  },
+
   tabLabel: {
-    fontSize: 10,
-    color: "#BBB",
-    marginTop: 3,
+    fontSize: 12,
+    color: colors.muted,
+  },
+
+  tabLabelActive: {
+    color: colors.green,
+    fontWeight: "900",
   },
 });
