@@ -1,0 +1,107 @@
+import { StyleSheet, Dimensions } from "react-native";
+
+const { width } = Dimensions.get("window");
+
+export const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFFFFF" },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 100 },
+  header: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignItems: "flex-start",
+  },
+  miniLogoRow: { flexDirection: "row", alignItems: "center" },
+  miniIcon: { width: 30, height: 30, marginRight: 8 },
+  miniLogoText: { width: 100, height: 25 },
+
+  welcomeSection: { marginTop: 10 },
+  welcomeTitle: { fontSize: 28, fontWeight: "bold", color: "#333" },
+  welcomeSub: { fontSize: 16, color: "#777", marginTop: 5 },
+
+  locationCard: {
+    flexDirection: "row",
+    backgroundColor: "#F9F9F9",
+    borderRadius: 20,
+    padding: 15,
+    marginTop: 20,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  locationIconBg: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#EEEBFF",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 15,
+  },
+  locationLabel: { fontSize: 12, color: "#999" },
+  locationName: { fontSize: 20, fontWeight: "bold", color: "#6A1B9A" },
+  changeLocation: { fontSize: 14, color: "#6A1B9A", marginTop: 2 },
+
+  mascotSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    marginTop: 10,
+  },
+  speechBubble: {
+    backgroundColor: "#FFF",
+    padding: 12,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#EEE",
+    width: "50%",
+    marginRight: -10,
+    zIndex: 1,
+    elevation: 2,
+  },
+  bubbleText: { fontSize: 13, color: "#555" },
+  mascotImage: { width: 130, height: 130 },
+
+  scanButton: {
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    marginVertical: 15,
+  },
+  row: { flexDirection: "row", alignItems: "center" },
+  camIcon: { fontSize: 20, marginRight: 10 },
+  scanButtonText: { color: "#FFF", fontSize: 18, fontWeight: "bold" },
+  whiteArrowCircle: {
+    backgroundColor: "#FFF",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  greenArrow: { color: "#4CAF50", fontWeight: "bold" },
+
+  binsSection: { marginTop: 10 },
+  binItem: { alignItems: "center", marginRight: 20 },
+  binImg: { width: 50, height: 70 },
+  binLabel: { fontSize: 12, color: "#666", marginTop: 5 },
+  tapHint: { textAlign: "center", fontSize: 11, color: "#AAA", marginTop: 15 },
+
+  bottomTab: {
+    position: "absolute",
+    bottom: 0,
+    flexDirection: "row",
+    width: "100%",
+    backgroundColor: "#FFF",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#EEE",
+    justifyContent: "space-around",
+  },
+  tabItem: { alignItems: "center" },
+  tabIcon: { fontSize: 22, color: "#BBB" },
+  tabLabel: { fontSize: 12, color: "#BBB" },
+});
