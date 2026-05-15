@@ -1,213 +1,271 @@
 import { StyleSheet, Dimensions } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
-export const GREEN = "#2EAA4A";
-export const PURPLE = "#7C3AED";
+const colors = {
+  green: "#34A936",
+  greenDark: "#238A2E",
+  purple: "#6B35C9",
+  purpleLight: "#EFE8FF",
+  text: "#242631",
+  muted: "#777782",
+  border: "#EDEDF3",
+  white: "#FFFFFF",
+  bg: "#FFFFFF",
+};
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-  scrollContent: {
-    paddingBottom: 36,
-    alignItems: "center",
+    backgroundColor: colors.bg,
   },
 
-  // ── Header ──
+  scrollContent: {
+    paddingHorizontal: 22,
+    paddingTop: 4,
+    paddingBottom: 28,
+    minHeight: height,
+  },
+
   header: {
     alignItems: "center",
-    marginTop: 10,
-    marginBottom: 0,
+    marginTop: 0,
   },
+
   mainIcon: {
-    width: 140,
-    height: 140,
+    width: 136,
+    height: 136,
+    marginBottom: -4,
   },
+
   logoText: {
-    width: width * 0.82,
-    height: 80,
-    marginTop: -8,
+    width: 250,
+    height: 74,
+    marginTop: -14,
   },
+
   tagline: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: PURPLE,
-    marginTop: 4,
-    letterSpacing: 0.2,
-  },
-  description: {
-    fontSize: 15,
-    color: "#888",
+    marginTop: 0,
+    fontSize: 28,
+    lineHeight: 35,
+    fontWeight: "900",
+    color: colors.purple,
     textAlign: "center",
-    marginTop: 6,
-    lineHeight: 22,
   },
 
-  // ── Hero ──
+  description: {
+    marginTop: 8,
+    fontSize: 17,
+    lineHeight: 24,
+    color: colors.muted,
+    textAlign: "center",
+  },
+
   heroSection: {
-    marginVertical: 8,
+    marginTop: 18,
+    width: "100%",
+    height: width * 0.68,
     alignItems: "center",
-  },
-  heroImage: {
-    width: width * 0.95,
-    height: 300,
+    justifyContent: "center",
   },
 
-  // ── Dropdown ──
+  heroImage: {
+    width: width * 0.98,
+    height: width * 0.72,
+  },
+
   dropdownContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#F9F9F9",
-    width: width * 0.88,
-    padding: 15,
-    borderRadius: 30,
+    marginTop: 10,
+    height: 74,
+    borderRadius: 37,
+    paddingLeft: 16,
+    paddingRight: 22,
+    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: "#EFEFEF",
-    marginBottom: 14,
+    borderColor: colors.border,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
   },
-  row: {
+
+  dropdownLeft: {
     flexDirection: "row",
     alignItems: "center",
   },
+
   locationIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: PURPLE,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: colors.purpleLight,
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 14,
+  },
+
+  locationIcon: {
+    width: 30,
+    height: 30,
+  },
+
+  dropdownLabel: {
+    fontSize: 20,
+    color: colors.text,
+    fontWeight: "500",
+  },
+
+  selectedCityText: {
+    color: colors.purple,
+    fontWeight: "900",
+  },
+
+  chevron: {
+    fontSize: 27,
+    color: "#A8A8B2",
+    marginBottom: 8,
+  },
+
+  mainButton: {
+    marginTop: 18,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: colors.green,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: colors.green,
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 9 },
+    elevation: 6,
+  },
+
+  mainButtonLeftIcon: {
+    position: "absolute",
+    left: 25,
+    width: 28,
+    height: 28,
+    tintColor: colors.white,
+  },
+
+  mainButtonLeaf: {
+    position: "absolute",
+    left: 28,
+    color: colors.white,
+    fontSize: 28,
+    fontWeight: "800",
+  },
+
+  mainButtonText: {
+    color: colors.white,
+    fontSize: 25,
+    fontWeight: "900",
+  },
+
+  arrowCircle: {
+    position: "absolute",
+    right: 14,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: colors.white,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  arrowText: {
+    color: colors.green,
+    fontSize: 38,
+    lineHeight: 38,
+    marginTop: -3,
+  },
+
+  loginButton: {
+    marginTop: 16,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: "#DCCBF6",
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+  },
+
+  loginIcon: {
+    color: colors.purple,
+    fontSize: 25,
     marginRight: 12,
   },
-  dropdownLabel: {
-    fontSize: 16,
-    color: "#444",
-  },
-  selectedCityText: {
-    fontWeight: "800",
-    color: PURPLE,
-  },
-  chevron: {
-    fontSize: 22,
-    color: "#CCC",
-  },
 
-  // ── Main Button ──
-  mainButton: {
-    backgroundColor: GREEN,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: width * 0.88,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 35,
-    marginBottom: 12,
-    shadowColor: GREEN,
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
-  },
-  leafIcon: {
-    fontSize: 22,
-    marginRight: 10,
-  },
-  mainButtonText: {
-    color: "#FFF",
-    fontSize: 20,
-    fontWeight: "800",
-  },
-  whiteArrowCircle: {
-    backgroundColor: "#FFF",
-    borderRadius: 18,
-    width: 36,
-    height: 36,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  greenArrow: {
-    color: GREEN,
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-
-  // ── Login Button ──
-  loginButton: {
-    width: width * 0.88,
-    paddingVertical: 14,
-    borderRadius: 35,
-    borderWidth: 2,
-    borderColor: "#DDD0F5",
-    alignItems: "center",
-    backgroundColor: "#FDFAFF",
-  },
-  userIcon: {
-    fontSize: 20,
-    marginRight: 10,
-  },
   loginButtonText: {
-    color: PURPLE,
-    fontSize: 18,
-    fontWeight: "700",
+    color: colors.purple,
+    fontSize: 22,
+    fontWeight: "800",
   },
 
-  // ── Footer ──
-  footer: {
-    marginTop: 22,
+  bottomInfo: {
+    marginTop: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
   },
-  footerText: {
+
+  bottomInfoIcon: {
+    color: colors.green,
+    fontSize: 17,
+    marginRight: 7,
+  },
+
+  bottomInfoText: {
     fontSize: 13,
-    color: "#BBB",
-    textAlign: "center",
+    color: colors.muted,
   },
 
-  // ── Modal ──
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.45)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.28)",
+    justifyContent: "flex-end",
   },
+
   modalContent: {
-    backgroundColor: "white",
-    width: "80%",
-    borderRadius: 24,
-    padding: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 10,
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    padding: 24,
+    paddingBottom: 36,
   },
+
   modalTitle: {
-    fontSize: 19,
-    fontWeight: "800",
-    color: PURPLE,
-    textAlign: "center",
-    marginBottom: 14,
+    fontSize: 24,
+    fontWeight: "900",
+    color: colors.text,
+    marginBottom: 16,
   },
+
   cityOption: {
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    borderRadius: 18,
+    marginBottom: 8,
+    backgroundColor: "#F7F7FA",
   },
-  cityOptionSelected: {
-    backgroundColor: "#F5F0FF",
-    borderRadius: 12,
+
+  cityOptionActive: {
+    backgroundColor: colors.purpleLight,
   },
+
   cityText: {
-    fontSize: 17,
-    color: "#333",
+    fontSize: 18,
+    color: colors.text,
   },
-  cityTextSelected: {
-    fontWeight: "800",
-    color: PURPLE,
+
+  cityTextActive: {
+    color: colors.purple,
+    fontWeight: "900",
   },
 });
