@@ -10,7 +10,7 @@ const colors = {
   text: "#252733",
   muted: "#7A7A86",
   border: "#ECECF2",
-  bg: "#FFFFFF",
+  bg: "#F8FAF5",
   white: "#FFFFFF",
   red: "#D84343",
 };

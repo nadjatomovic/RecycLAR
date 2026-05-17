@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/DashboardScreen.styles";
+import BottomNavBar from "../components/BottomNavBar";
 
 const bins = [
   { id: "yellow", label: "Rumeni", img: require("../assets/bin-yellow.png") },
@@ -183,34 +184,9 @@ const DashboardScreen = ({ navigation, route }: any) => {
         </TouchableOpacity>
       </ScrollView>
 
-      <View style={styles.bottomTab}>
-        <TabItem label="Domov" icon="⌂" active />
-        <TabItem
-          label="Skeniraj"
-          icon="⌗"
-          onPress={() => navigation.navigate("Scanner")}
-        />
-        <TabItem
-          label="Občina"
-          icon="⌖"
-          onPress={() => navigation.navigate("Map")}
-        />
-      </View>
+      <BottomNavBar navigation={navigation} activeRoute="Dashboard" />
     </SafeAreaView>
   );
 };
-
-const TabItem = ({ label, icon, active, onPress }: any) => (
-  <TouchableOpacity
-    style={styles.tabItem}
-    onPress={onPress}
-    activeOpacity={0.8}
-  >
-    <Text style={[styles.tabIcon, active && styles.tabIconActive]}>{icon}</Text>
-    <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
 
 export default DashboardScreen;

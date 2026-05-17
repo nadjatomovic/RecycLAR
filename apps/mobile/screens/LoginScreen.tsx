@@ -8,21 +8,48 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 import { styles } from "../styles/LoginScreen.styles";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    // Kasnije ovde povezujemo Firebase Auth
-    console.log("Login:", email, password);
-
-    // Za sada može da vodi na Dashboard ili školski dashboard kada ga napravite
+  const handleLogin = async () => {
+  if (!email || !password) {
+    setError("Prosimo, vnesi e-pošto in geslo.");
+    return;
+  }
+  setLoading(true);
+  setError("");
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
     navigation.navigate("Dashboard");
-  };
+  } catch (err: any) {
+    switch (err.code) {
+      case "auth/user-not-found":
+        setError("Uporabnik ne obstaja.");
+        break;
+      case "auth/wrong-password":
+        setError("Napačno geslo.");
+        break;
+      case "auth/invalid-email":
+        setError("Neveljaven email.");
+        break;
+      default:
+        setError("Napaka pri prijavi. Poskusi znova.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -48,7 +75,6 @@ export default function LoginScreen({ navigation }: any) {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-
             <Text style={styles.brandText}>
               <Text style={styles.brandGreen}>Recyc</Text>
               <Text style={styles.brandPurple}>LAR</Text>
@@ -71,7 +97,10 @@ export default function LoginScreen({ navigation }: any) {
                 placeholder="vnesi e-pošto"
                 placeholderTextColor="#A0A0AA"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setError("");
+                }}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -84,24 +113,41 @@ export default function LoginScreen({ navigation }: any) {
                 placeholder="vnesi geslo"
                 placeholderTextColor="#A0A0AA"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setError("");
+                }}
                 secureTextEntry
               />
             </View>
+
+            {/* Error message */}
+            {error ? (
+              <View style={errorStyles.errorBox}>
+                <Text style={errorStyles.errorText}>⚠ {error}</Text>
+              </View>
+            ) : null}
 
             <TouchableOpacity style={styles.forgotButton} activeOpacity={0.8}>
               <Text style={styles.forgotText}>Pozabljeno geslo?</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, loading && { opacity: 0.7 }]}
               onPress={handleLogin}
               activeOpacity={0.9}
+              disabled={loading}
             >
-              <Text style={styles.primaryButtonText}>Prijavi se</Text>
-              <View style={styles.arrowCircle}>
-                <Text style={styles.arrowText}>›</Text>
-              </View>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Text style={styles.primaryButtonText}>Prijavi se</Text>
+                  <View style={styles.arrowCircle}>
+                    <Text style={styles.arrowText}>›</Text>
+                  </View>
+                </>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -128,3 +174,17 @@ export default function LoginScreen({ navigation }: any) {
     </SafeAreaView>
   );
 }
+
+// Simple inline error styles
+const errorStyles = {
+  errorBox: {
+    backgroundColor: "#FEE2E2",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  errorText: {
+    color: "#DC2626",
+    fontSize: 13,
+  },
+};
