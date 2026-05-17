@@ -8,19 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/RegisterScreen.styles";
 
 const schoolRoles = [
-  {
-    id: "student",
-    label: "Učenec",
-  },
-  {
-    id: "teacher",
-    label: "Učitelj",
-  },
+  { id: "student", label: "Učenec" },
+  { id: "teacher", label: "Učitelj" },
 ];
 
 export default function RegisterScreen({ navigation }: any) {
@@ -28,31 +26,70 @@ export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [municipality, setMunicipality] = useState("Maribor");
   const [password, setPassword] = useState("");
-
   const [isSchoolAccount, setIsSchoolAccount] = useState(false);
   const [selectedSchoolRole, setSelectedSchoolRole] = useState<"student" | "teacher">("student");
   const [groupCode, setGroupCode] = useState("");
   const [schoolName, setSchoolName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleRegister = () => {
-    const role = isSchoolAccount ? selectedSchoolRole : "user";
+  const handleRegister = async () => {
+    // Validation
+    if (!fullName || !email || !password) {
+      setError("Prosimo, izpolni vsa obvezna polja.");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Geslo mora imeti vsaj 6 znakov.");
+      return;
+    }
 
-    const registerData = {
-      fullName,
-      email,
-      municipality,
-      password,
-      role,
-      isSchoolAccount,
-      groupCode: isSchoolAccount && selectedSchoolRole === "student" ? groupCode : "",
-      schoolName: isSchoolAccount && selectedSchoolRole === "teacher" ? schoolName : "",
-    };
+    setLoading(true);
+    setError("");
 
-    console.log("Register:", registerData);
+    try {
+      // Step 1 — Create Firebase Auth user
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    // Kasnije ovde ide Firebase Auth + Firestore users kolekcija.
-    // Za sada šaljemo korisnika nazad na Dashboard.
-    navigation.navigate("Dashboard", { selectedCity: municipality });
+      // Step 2 — Save user data to Firestore users collection
+      // This matches your existing database structure exactly!
+      await setDoc(doc(db, "users", user.uid), {
+        name: fullName,
+        email: email,
+        municipalityId: municipality,
+        role: isSchoolAccount ? selectedSchoolRole : "user",
+        groupId: isSchoolAccount && selectedSchoolRole === "student" ? groupCode : "",
+        schoolId: isSchoolAccount && selectedSchoolRole === "teacher" ? schoolName : "",
+        totalPoints: 0,
+        weeklyPoints: 0,
+        scanCount: 0,
+        quizCompleted: 0,
+        streakDays: 0,
+        createdAt: serverTimestamp(),
+        lastActiveAt: serverTimestamp(),
+      });
+
+      // Step 3 — Navigate to Dashboard
+      navigation.navigate("Dashboard", { selectedCity: municipality });
+
+    } catch (err: any) {
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          setError("Ta e-poštni naslov je že v uporabi.");
+          break;
+        case "auth/invalid-email":
+          setError("Neveljaven e-poštni naslov.");
+          break;
+        case "auth/weak-password":
+          setError("Geslo je prešibko. Uporabi vsaj 6 znakov.");
+          break;
+        default:
+          setError("Napaka pri registraciji. Poskusi znova.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -79,7 +116,6 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-
             <Text style={styles.brandText}>
               <Text style={styles.brandGreen}>Recyc</Text>
               <Text style={styles.brandPurple}>LAR</Text>
@@ -102,7 +138,7 @@ export default function RegisterScreen({ navigation }: any) {
                 placeholder="npr. Nika Zupančič"
                 placeholderTextColor="#A0A0AA"
                 value={fullName}
-                onChangeText={setFullName}
+                onChangeText={(t) => { setFullName(t); setError(""); }}
               />
             </View>
 
@@ -110,10 +146,10 @@ export default function RegisterScreen({ navigation }: any) {
               <Text style={styles.label}>E-pošta</Text>
               <TextInput
                 style={styles.input}
-                placeholder="npr. nika@gemail.com"
+                placeholder="npr. nika@gmail.com"
                 placeholderTextColor="#A0A0AA"
                 value={email}
-                onChangeText={setEmail}
+                onChangeText={(t) => { setEmail(t); setError(""); }}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -134,13 +170,20 @@ export default function RegisterScreen({ navigation }: any) {
               <Text style={styles.label}>Geslo</Text>
               <TextInput
                 style={styles.input}
-                placeholder="ustvari geslo"
+                placeholder="vsaj 6 znakov"
                 placeholderTextColor="#A0A0AA"
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(t) => { setPassword(t); setError(""); }}
                 secureTextEntry
               />
             </View>
+
+            {/* Error message */}
+            {error ? (
+              <View style={errorStyle.box}>
+                <Text style={errorStyle.text}>⚠ {error}</Text>
+              </View>
+            ) : null}
 
             <TouchableOpacity
               style={[
@@ -151,25 +194,14 @@ export default function RegisterScreen({ navigation }: any) {
               activeOpacity={0.85}
             >
               <View>
-                <Text
-                  style={[
-                    styles.schoolToggleTitle,
-                    isSchoolAccount && styles.schoolToggleTitleActive,
-                  ]}
-                >
+                <Text style={[styles.schoolToggleTitle, isSchoolAccount && styles.schoolToggleTitleActive]}>
                   Registracija za šolo
                 </Text>
                 <Text style={styles.schoolToggleSubtitle}>
                   Učenci in učitelji lahko zbirajo točke za skupino.
                 </Text>
               </View>
-
-              <Text
-                style={[
-                  styles.schoolToggleIcon,
-                  isSchoolAccount && styles.schoolToggleIconActive,
-                ]}
-              >
+              <Text style={[styles.schoolToggleIcon, isSchoolAccount && styles.schoolToggleIconActive]}>
                 {isSchoolAccount ? "✓" : "+"}
               </Text>
             </TouchableOpacity>
@@ -177,27 +209,15 @@ export default function RegisterScreen({ navigation }: any) {
             {isSchoolAccount && (
               <View style={styles.schoolBox}>
                 <Text style={styles.schoolBoxTitle}>Izberi vlogo</Text>
-
                 <View style={styles.roleRow}>
                   {schoolRoles.map((role) => (
                     <TouchableOpacity
                       key={role.id}
-                      style={[
-                        styles.roleCard,
-                        selectedSchoolRole === role.id && styles.roleCardActive,
-                      ]}
-                      onPress={() =>
-                        setSelectedSchoolRole(role.id as "student" | "teacher")
-                      }
+                      style={[styles.roleCard, selectedSchoolRole === role.id && styles.roleCardActive]}
+                      onPress={() => setSelectedSchoolRole(role.id as "student" | "teacher")}
                       activeOpacity={0.85}
                     >
-                      <Text
-                        style={[
-                          styles.roleText,
-                          selectedSchoolRole === role.id &&
-                            styles.roleTextActive,
-                        ]}
-                      >
+                      <Text style={[styles.roleText, selectedSchoolRole === role.id && styles.roleTextActive]}>
                         {role.label}
                       </Text>
                     </TouchableOpacity>
@@ -240,14 +260,21 @@ export default function RegisterScreen({ navigation }: any) {
             )}
 
             <TouchableOpacity
-              style={styles.primaryButton}
+              style={[styles.primaryButton, loading && { opacity: 0.7 }]}
               onPress={handleRegister}
               activeOpacity={0.9}
+              disabled={loading}
             >
-              <Text style={styles.primaryButtonText}>Ustvari račun</Text>
-              <View style={styles.arrowCircle}>
-                <Text style={styles.arrowText}>›</Text>
-              </View>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Text style={styles.primaryButtonText}>Ustvari račun</Text>
+                  <View style={styles.arrowCircle}>
+                    <Text style={styles.arrowText}>›</Text>
+                  </View>
+                </>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -265,3 +292,8 @@ export default function RegisterScreen({ navigation }: any) {
     </SafeAreaView>
   );
 }
+
+const errorStyle = {
+  box: { backgroundColor: "#FEE2E2", borderRadius: 8, padding: 10, marginBottom: 10 },
+  text: { color: "#DC2626", fontSize: 13 },
+};

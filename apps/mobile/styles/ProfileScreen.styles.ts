@@ -11,7 +11,7 @@ const colors = {
   muted: "#7A7A86",
   border: "#ECECF2",
   white: "#FFFFFF",
-  bg: "#FFFFFF",
+  bg: "#F8FAF5",
 };
 
 export const styles = StyleSheet.create({
