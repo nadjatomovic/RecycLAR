@@ -7,13 +7,11 @@ import {
   ActivityIndicator,
   ScrollView,
   Alert,
-  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { CameraView as BarcodeCameraView } from "expo-camera";
-import * as ImagePicker from "expo-image-picker";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 
@@ -27,7 +25,7 @@ type BinData = {
   notAllowed: string[];
 };
 type BinsMap = Record<string, BinData>;
-type ScanMode = "camera" | "barcode" | "manual";
+type ScanMode = "camera" | "barcode";
 
 // ─── Bin colors ───────────────────────────────────────────────────────────────
 const BIN_COLORS: Record<string, string> = {
@@ -39,7 +37,7 @@ const BIN_COLORS: Record<string, string> = {
   red: "#EF4444",
 };
 
-// ─── Map item name → bin (used by barcode + manual) ──────────────────────────
+// ─── Map item name → bin ──────────────────────────────────────────────────────
 const mapItemToBin = (item: string): string => {
   const lower = item.toLowerCase();
   if (lower.includes("paper") || lower.includes("papir") || lower.includes("cardboard") || lower.includes("karton") || lower.includes("newspaper") || lower.includes("časopis")) return "blue";
@@ -83,7 +81,6 @@ export default function ScannerScreen({ navigation }: any) {
   const [result, setResult] = useState<{ item: string; bin: BinData; binId: string } | null>(null);
   const [bins, setBins] = useState<BinsMap>({});
   const [scanMode, setScanMode] = useState<ScanMode>("camera");
-  const [manualInput, setManualInput] = useState("");
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const cameraRef = useRef<any>(null);
 
@@ -91,7 +88,6 @@ export default function ScannerScreen({ navigation }: any) {
     loadBinsFromFirebase();
   }, []);
 
-  // ─── Load bins from Firebase ────────────────────────────────────────────────
   const loadBinsFromFirebase = async () => {
     setLoadingBins(true);
     try {
@@ -101,31 +97,27 @@ export default function ScannerScreen({ navigation }: any) {
       setBins(binsData);
     } catch {
       setBins({
-        blue:   { name: "Modri zabojnik",   color: "blue",   description: "Zabojnik za papir.",       tip: "Papir naj bo čist in suh.",              allowed: ["Čist papir", "Karton"],    notAllowed: ["Masten papir"] },
-        yellow: { name: "Rumeni zabojnik",  color: "yellow", description: "Zabojnik za embalažo.",    tip: "Stisni plastenko pred odlaganjem.",       allowed: ["Plastika", "Kovine"],      notAllowed: ["Umazana embalaža"] },
-        green:  { name: "Zeleni zabojnik",  color: "green",  description: "Zabojnik za steklo.",      tip: "Izprazni steklenico pred odlaganjem.",   allowed: ["Steklo"],                  notAllowed: ["Keramika"] },
-        brown:  { name: "Rjavi zabojnik",   color: "brown",  description: "Zabojnik za bio odpadke.", tip: "Samo organski odpadki.",                  allowed: ["Hrana", "Bio"],            notAllowed: ["Plastične vrečke"] },
-        mixed:  { name: "Mešani odpadki",   color: "mixed",  description: "Za kar ne gre drugam.",    tip: "Sem gre kar se ne da razvrstiti.",        allowed: ["Mešani odpadki"],          notAllowed: [] },
+        blue:   { name: "Modri zabojnik",   color: "blue",   description: "Zabojnik za papir.",       tip: "Papir naj bo čist in suh.",            allowed: ["Čist papir", "Karton"],  notAllowed: ["Masten papir"] },
+        yellow: { name: "Rumeni zabojnik",  color: "yellow", description: "Zabojnik za embalažo.",    tip: "Stisni plastenko pred odlaganjem.",     allowed: ["Plastika", "Kovine"],    notAllowed: ["Umazana embalaža"] },
+        green:  { name: "Zeleni zabojnik",  color: "green",  description: "Zabojnik za steklo.",      tip: "Izprazni steklenico pred odlaganjem.", allowed: ["Steklo"],                notAllowed: ["Keramika"] },
+        brown:  { name: "Rjavi zabojnik",   color: "brown",  description: "Zabojnik za bio odpadke.", tip: "Samo organski odpadki.",               allowed: ["Hrana", "Bio"],          notAllowed: ["Plastične vrečke"] },
+        mixed:  { name: "Mešani odpadki",   color: "mixed",  description: "Za kar ne gre drugam.",    tip: "Sem gre kar se ne da razvrstiti.",     allowed: ["Mešani odpadki"],        notAllowed: [] },
       });
     } finally {
       setLoadingBins(false);
     }
   };
 
-  // ─── Show result with optional Gemini tip ──────────────────────────────────
   const showResult = async (itemName: string) => {
     const binId = mapItemToBin(itemName);
     const bin = bins[binId] ?? bins["mixed"];
-    // Set result immediately with Firebase tip
     setResult({ item: itemName, bin, binId });
-    // Then try to get Gemini Lari tip
     const geminiTip = await getLariTip(itemName, bin.name);
     if (geminiTip) {
       setResult({ item: itemName, bin: { ...bin, tip: geminiTip }, binId });
     }
   };
 
-  // ─── Camera: take picture ──────────────────────────────────────────────────
   const takePicture = async () => {
     if (!cameraRef.current) return;
     setLoading(true);
@@ -133,13 +125,11 @@ export default function ScannerScreen({ navigation }: any) {
     try {
       const pic = await cameraRef.current.takePictureAsync({ base64: false });
       setPhoto(pic.uri);
-      // Without Gemini vision — ask user to identify manually or use barcode
       Alert.alert(
         "Odpadek posnet! 📷",
         "Kako želiš identificirati odpadek?",
         [
           { text: "🔲 Skeniraj črtno kodo", onPress: () => { setPhoto(null); setScanMode("barcode"); setBarcodeScanning(true); } },
-          { text: "✍️ Vnesi ročno", onPress: () => { setScanMode("manual"); } },
           { text: "Prekliči", onPress: () => setPhoto(null), style: "cancel" },
         ]
       );
@@ -150,33 +140,15 @@ export default function ScannerScreen({ navigation }: any) {
     }
   };
 
-  // ─── Gallery pick ──────────────────────────────────────────────────────────
-  const pickFromGallery = async () => {
-    const picked = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Images,
-      quality: 0.7,
-    });
-    if (!picked.canceled && picked.assets[0]) {
-      setPhoto(picked.assets[0].uri);
-      Alert.alert(
-        "Slika izbrana! 🖼",
-        "Kako želiš identificirati odpadek?",
-        [
-          { text: "🔲 Skeniraj črtno kodo", onPress: () => { setPhoto(null); setScanMode("barcode"); setBarcodeScanning(true); } },
-          { text: "✍️ Vnesi ročno", onPress: () => setScanMode("manual") },
-          { text: "Prekliči", onPress: () => setPhoto(null), style: "cancel" },
-        ]
-      );
-    }
-  };
-
-  // ─── Barcode scan ──────────────────────────────────────────────────────────
   const handleBarcodeScan = async ({ data: barcode }: { data: string }) => {
     if (!barcodeScanning) return;
     setBarcodeScanning(false);
     setLoading(true);
     try {
-      const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const res = await fetch(
+        `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`,
+        { signal: AbortSignal.timeout(15000) }
+      );
       const data = await res.json();
       if (data.status === 1 && data.product) {
         const product = data.product;
@@ -189,37 +161,22 @@ export default function ScannerScreen({ navigation }: any) {
       } else {
         setLoading(false);
         setScanMode("camera");
-        Alert.alert("Produkt ni najden", "Ta produkt ni v bazi. Poskusi ročni vnos.", [
-          { text: "✍️ Vnesi ročno", onPress: () => setScanMode("manual") },
-          { text: "Prekliči" },
-        ]);
+        Alert.alert("Produkt ni najden", "Ta produkt ni v bazi. Poskusi s črtno kodo drugega produkta.");
       }
     } catch {
       setLoading(false);
       setScanMode("camera");
-      Alert.alert("Napaka", "Ni se uspelo povezati z bazo produktov.");
+      Alert.alert("Napaka", "Ni se uspelo povezati z bazo produktov. Preveri internet.");
     }
-  };
-
-  // ─── Manual search ─────────────────────────────────────────────────────────
-  const handleManualSearch = async () => {
-    if (!manualInput.trim()) return;
-    setLoading(true);
-    setScanMode("camera");
-    setManualInput("");
-    await showResult(manualInput.trim());
-    setLoading(false);
   };
 
   const resetScan = () => {
     setPhoto(null);
     setResult(null);
     setScanMode("camera");
-    setManualInput("");
     setBarcodeScanning(false);
   };
 
-  // ─── Permission screen ─────────────────────────────────────────────────────
   if (!permission) return <View />;
   if (!permission.granted) {
     return (
@@ -265,54 +222,8 @@ export default function ScannerScreen({ navigation }: any) {
           </View>
         )}
         <View style={s.buttonsRow}>
-          <TouchableOpacity style={s.secondBtn} onPress={() => { setScanMode("manual"); }}>
-            <Text style={s.secondBtnText}>✍️ Vnesi ročno</Text>
-          </TouchableOpacity>
           <TouchableOpacity style={s.mainBtn} onPress={() => setScanMode("camera")}>
-            <Text style={s.mainBtnText}>← Nazaj</Text>
-          </TouchableOpacity>
-        </View>
-        <BottomNavBar navigation={navigation} activeRoute="Scanner" />
-      </SafeAreaView>
-    );
-  }
-
-  // ─── Manual mode ──────────────────────────────────────────────────────────
-  if (scanMode === "manual") {
-    return (
-      <SafeAreaView style={s.container}>
-        <View style={s.header}>
-          <TouchableOpacity onPress={() => setScanMode("camera")} style={s.backBtn}>
-            <Text style={s.backText}>‹</Text>
-          </TouchableOpacity>
-          <Text style={s.headerTitle}>
-            <Text style={s.headerGreen}>Recyc</Text>
-            <Text style={s.headerPurple}>LAR</Text>
-          </Text>
-          <View style={{ width: 40 }} />
-        </View>
-        <View style={s.manualContainer}>
-          <Text style={s.title}>Ročni vnos ✦</Text>
-          <Text style={s.subtitle}>Vpiši ime odpadka ali produkta</Text>
-          <TextInput
-            style={s.manualInput}
-            placeholder="npr. plastenka, karton, steklenica..."
-            placeholderTextColor="#A0A0AA"
-            value={manualInput}
-            onChangeText={setManualInput}
-            autoFocus
-            returnKeyType="search"
-            onSubmitEditing={handleManualSearch}
-          />
-          <TouchableOpacity
-            style={[s.mainBtn, !manualInput.trim() && { opacity: 0.4 }]}
-            onPress={handleManualSearch}
-            disabled={!manualInput.trim() || loading}
-          >
-            {loading
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={s.mainBtnText}>🔍 Poišči</Text>
-            }
+            <Text style={s.mainBtnText}>← Nazaj na kamero</Text>
           </TouchableOpacity>
         </View>
         <BottomNavBar navigation={navigation} activeRoute="Scanner" />
@@ -323,7 +234,6 @@ export default function ScannerScreen({ navigation }: any) {
   // ─── Main camera mode ──────────────────────────────────────────────────────
   return (
     <SafeAreaView style={s.container}>
-      {/* Header */}
       <View style={s.header}>
         <View style={{ width: 40 }} />
         <Text style={s.headerTitle}>
@@ -333,7 +243,6 @@ export default function ScannerScreen({ navigation }: any) {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* Title */}
       <View style={s.titleRow}>
         <Text style={s.title}>Skener ✦</Text>
         <Text style={s.subtitle}>Slikaj odpadek ali skeniraj črtno kodo.</Text>
@@ -345,7 +254,6 @@ export default function ScannerScreen({ navigation }: any) {
         )}
       </View>
 
-      {/* Camera / photo */}
       <View style={s.cameraBox}>
         {!photo ? (
           <>
@@ -369,7 +277,6 @@ export default function ScannerScreen({ navigation }: any) {
         )}
       </View>
 
-      {/* Results */}
       <ScrollView style={s.resultsScroll} contentContainerStyle={s.resultsContent}>
         {result && !loading && (
           <View style={s.resultCard}>
@@ -409,7 +316,6 @@ export default function ScannerScreen({ navigation }: any) {
         )}
       </ScrollView>
 
-      {/* Buttons */}
       <View style={s.buttonsRow}>
         {!result ? (
           <>
@@ -419,19 +325,11 @@ export default function ScannerScreen({ navigation }: any) {
             <TouchableOpacity style={s.secondBtn} onPress={() => { setScanMode("barcode"); setBarcodeScanning(true); }} disabled={loadingBins}>
               <Text style={s.secondBtnText}>🔲 Črtna koda</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={s.secondBtn} onPress={pickFromGallery} disabled={loadingBins}>
-              <Text style={s.secondBtnText}>🖼</Text>
-            </TouchableOpacity>
           </>
         ) : (
-          <>
-            <TouchableOpacity style={s.mainBtn} onPress={resetScan}>
-              <Text style={s.mainBtnText}>🔄 Znova</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={s.secondBtn} onPress={() => setScanMode("manual")}>
-              <Text style={s.secondBtnText}>✍️ Ročno</Text>
-            </TouchableOpacity>
-          </>
+          <TouchableOpacity style={s.mainBtn} onPress={resetScan}>
+            <Text style={s.mainBtnText}>🔄 Skeniraj znova</Text>
+          </TouchableOpacity>
         )}
       </View>
 
@@ -486,8 +384,6 @@ const s = {
   mainBtnText:     { color: "#fff", fontWeight: "700" as const, fontSize: 15 },
   secondBtn:       { flex: 1, backgroundColor: "#fff", borderRadius: 14, padding: 16, alignItems: "center" as const, borderWidth: 1.5, borderColor: "#7C3AED" },
   secondBtnText:   { color: "#7C3AED", fontWeight: "700" as const, fontSize: 15 },
-  manualContainer: { flex: 1, padding: 20, gap: 12 },
-  manualInput:     { backgroundColor: "#fff", borderRadius: 14, padding: 16, fontSize: 15, borderWidth: 1.5, borderColor: "#E5E7EB", color: "#1F2937" },
   permText:        { textAlign: "center" as const, margin: 40, fontSize: 15, color: "#374151" },
   permBtn:         { backgroundColor: "#22C55E", borderRadius: 12, padding: 14, marginHorizontal: 40, alignItems: "center" as const },
   permBtnText:     { color: "#fff", fontWeight: "700" as const },
