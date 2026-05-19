@@ -25,6 +25,14 @@
     },
     "web": {
       "favicon": "./assets/icon-logo.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow RecycLAR to access your camera."
+        }
+      ]
+    ]
   }
 }
