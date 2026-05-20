@@ -82,7 +82,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
           <View style={styles.locationTextWrap}>
             <Text style={styles.locationLabel}>Izbrana občina</Text>
             <Text style={styles.locationName}>{selectedCity}</Text>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
+            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
               <Text style={styles.changeLocation}>Spremeni občino ›</Text>
             </TouchableOpacity>
           </View>
