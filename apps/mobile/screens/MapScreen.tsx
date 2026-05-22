@@ -1,292 +1,418 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Dimensions,
+  ActivityIndicator,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker } from "react-native-maps";
+import { collection, query, where, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 import { styles } from "../styles/MapScreen.styles";
+import BottomNavBar from "../components/BottomNavBar";
 
-const DUMMY_LOCATIONS = [
-  {
-    id: "1",
-    title: "EKO otok Tabor",
-    lat: 46.558,
-    lng: 15.646,
-    type: "eco",
-    address: "Ulica heroja Šlandra",
-    items: "Papir, steklo, embalaža",
-    distance: "350 m",
-  },
-  {
-    id: "2",
-    title: "Zbirno mesto Center",
-    lat: 46.552,
-    lng: 15.642,
-    type: "glass",
-    address: "Partizanska cesta",
-    items: "Steklo",
-    distance: "520 m",
-  },
-  {
-    id: "3",
-    title: "Zabojnik za papir",
-    lat: 46.56,
-    lng: 15.65,
-    type: "paper",
-    address: "Titova cesta",
-    items: "Papir",
-    distance: "700 m",
-  },
-  {
-    id: "4",
-    title: "EKO točka Lent",
-    lat: 46.557,
-    lng: 15.64,
-    type: "plastic",
-    address: "Dravska ulica",
-    items: "Plastika, embalaža",
-    distance: "850 m",
-  },
-  {
-    id: "5",
-    title: "Bio zabojnik Tabor",
-    lat: 46.554,
-    lng: 15.651,
-    type: "bio",
-    address: "Pobreška cesta",
-    items: "Bio odpadki",
-    distance: "1.1 km",
-  },
-];
+const { width, height } = Dimensions.get("window");
 
-const getMarkerStyle = (type: string) => {
-  switch (type) {
-    case "paper":
-      return { backgroundColor: "#2B7DE9" };
-    case "plastic":
-      return { backgroundColor: "#F3B400" };
-    case "glass":
-      return { backgroundColor: "#36A936" };
-    case "bio":
-      return { backgroundColor: "#8A5A32" };
-    case "eco":
-    default:
-      return { backgroundColor: "#6B35C9" };
-  }
-};
-
-const getMarkerIcon = (type: string) => {
-  switch (type) {
-    case "paper":
-      return "▤";
-    case "plastic":
-      return "▣";
-    case "glass":
-      return "♙";
-    case "bio":
-      return "♧";
-    case "eco":
-    default:
-      return "⌂";
-  }
-};
-
-const MapScreen = ({ navigation }: any) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredLocations, setFilteredLocations] = useState(DUMMY_LOCATIONS);
-  const [selectedPlace, setSelectedPlace] = useState(DUMMY_LOCATIONS[0]);
-
-  const handleSearch = (text: string) => {
-    setSearchQuery(text);
-
-    const filtered = DUMMY_LOCATIONS.filter(
-      (loc) =>
-        loc.title.toLowerCase().includes(text.toLowerCase()) ||
-        loc.address.toLowerCase().includes(text.toLowerCase()) ||
-        loc.items.toLowerCase().includes(text.toLowerCase())
-    );
-
-    setFilteredLocations(filtered);
-  };
-
-  const initialRegion = {
+const CITY_COORDINATES: Record<string, any> = {
+  Maribor: {
     latitude: 46.5547,
     longitude: 15.6459,
-    latitudeDelta: 0.035,
-    longitudeDelta: 0.035,
-  };
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.brandRow}>
-          <Image
-            source={require("../assets/icon-logo.png")}
-            style={styles.brandIcon}
-            resizeMode="contain"
-          />
-
-          <Text style={styles.brandText}>
-            <Text style={styles.brandGreen}>Recyc</Text>
-            <Text style={styles.brandPurple}>LAR</Text>
-          </Text>
-        </View>
-
-        <TouchableOpacity style={styles.notificationBtn} activeOpacity={0.8}>
-          <Text style={styles.notificationText}>⌕</Text>
-          <View style={styles.notificationDot} />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.titleSection}>
-        <View style={styles.titleTextWrap}>
-          <Text style={styles.mainTitle}>Zemljevid</Text>
-          <Text style={styles.subTitle}>
-            Poišči najbližje zbiralnike{"\n"}in EKO otoke v svoji okolici.
-          </Text>
-        </View>
-
-        <Image
-          source={require("../assets/lari-hello.png")}
-          style={styles.mascotSmall}
-          resizeMode="contain"
-        />
-      </View>
-
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>⌕</Text>
-
-          <TextInput
-            placeholder="Išči naslov, kraj ali lokacijo"
-            placeholderTextColor="#8A8A96"
-            style={styles.searchInput}
-            value={searchQuery}
-            onChangeText={handleSearch}
-          />
-
-          <TouchableOpacity style={styles.filterBtn} activeOpacity={0.8}>
-            <Text style={styles.filterText}>☷</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.mapWrapper}>
-        <MapView style={styles.map} initialRegion={initialRegion}>
-          {filteredLocations.map((loc) => (
-            <Marker
-              key={loc.id}
-              coordinate={{ latitude: loc.lat, longitude: loc.lng }}
-              onPress={() => setSelectedPlace(loc)}
-            >
-              <View style={[styles.customMarker, getMarkerStyle(loc.type)]}>
-                <Text style={styles.markerIcon}>{getMarkerIcon(loc.type)}</Text>
-              </View>
-            </Marker>
-          ))}
-        </MapView>
-
-        <View style={styles.floatingMapButtons}>
-          <TouchableOpacity style={styles.mapCircleBtn}>
-            <Text style={styles.mapCircleIcon}>⌖</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.mapCircleBtn}>
-            <Text style={styles.mapCircleIcon}>◎</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.categoriesOverlay}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <FilterChip label="Papir" icon="▤" color="#2B7DE9" />
-            <FilterChip label="Plastika" icon="▣" color="#F3B400" />
-            <FilterChip label="Steklo" icon="♙" color="#36A936" />
-            <FilterChip label="Bio" icon="♧" color="#8A5A32" />
-            <FilterChip label="EKO otoki" icon="⌂" color="#6B35C9" active />
-          </ScrollView>
-        </View>
-      </View>
-
-      <View style={styles.infoCard}>
-        <View style={styles.locationImgWrap}>
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=300",
-            }}
-            style={styles.locationImg}
-          />
-
-          <View style={styles.distanceBadge}>
-            <Text style={styles.distanceText}>↘ {selectedPlace.distance}</Text>
-          </View>
-        </View>
-
-        <View style={styles.infoDetails}>
-          <Text style={styles.closestTag}>Najbližje</Text>
-          <Text style={styles.locationTitle}>{selectedPlace.title}</Text>
-
-          <View style={styles.typeDotsRow}>
-            <View style={[styles.typeDot, { backgroundColor: "#2B7DE9" }]} />
-            <View style={[styles.typeDot, { backgroundColor: "#36A936" }]} />
-            <View style={[styles.typeDot, { backgroundColor: "#F3B400" }]} />
-          </View>
-
-          <Text style={styles.locationItems}>{selectedPlace.items}</Text>
-          <Text style={styles.openStatus}>◷ Odprto 24/7</Text>
-        </View>
-
-        <TouchableOpacity style={styles.favoriteBtn} activeOpacity={0.8}>
-          <Text style={styles.favoriteIcon}>♡</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.arrowBtn} activeOpacity={0.9}>
-          <Text style={styles.arrowText}>↗</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.bottomTab}>
-        <TabItem
-          label="Domov"
-          icon="⌂"
-          onPress={() => navigation.navigate("Dashboard")}
-        />
-        <TabItem label="Skeniraj" icon="⌗" />
-        <TabItem label="Zemljevid" icon="⌖" active />
-        <TabItem label="Lestvica" icon="♕" />
-        <TabItem
-        label="Profil"
-        icon="♙"
-        onPress={() => navigation.navigate("Profile")}
-        />
-      </View>
-    </SafeAreaView>
-  );
+    latitudeDelta: 0.03,
+    longitudeDelta: 0.03,
+  },
+  Celje: {
+    latitude: 46.236,
+    longitude: 15.267,
+    latitudeDelta: 0.03,
+    longitudeDelta: 0.03,
+  },
+  Ljubljana: {
+    latitude: 46.0569,
+    longitude: 14.5058,
+    latitudeDelta: 0.04,
+    longitudeDelta: 0.04,
+  },
+  Kranj: {
+    latitude: 46.2389,
+    longitude: 14.3556,
+    latitudeDelta: 0.03,
+    longitudeDelta: 0.03,
+  },
+  Koper: {
+    latitude: 45.5469,
+    longitude: 13.7294,
+    latitudeDelta: 0.03,
+    longitudeDelta: 0.03,
+  },
 };
 
-const FilterChip = ({ label, icon, color, active }: any) => (
+export default function MapScreen({ route, navigation }: any) {
+  // Називот на општината го претвораме во мали букви (пр. "Celje" -> "celje") за да одговара на municipalityId во базата
+  const selectedMunicipality = route.params?.municipality || "Maribor";
+  const municipalityIdLower = selectedMunicipality.toLowerCase();
+
+  const mapRef = useRef<MapView | null>(null);
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchingAddress, setSearchingAddress] = useState(false);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [locations, setLocations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [currentRegion, setCurrentRegion] = useState(
+    CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES["Maribor"],
+  );
+
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Анимација на мапата при промена на општина
+  useEffect(() => {
+    const newRegion =
+      CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES["Maribor"];
+    setCurrentRegion(newRegion);
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newRegion, 1000);
+    }
+  }, [selectedMunicipality]);
+
+  // КЛУЧНО ПОПРАВЕН ЕФЕКТ ЗА РЕАЛНИ ПОДАТОЦИ ОД FIRESTORE
+  useEffect(() => {
+    async function fetchLocations() {
+      setLoading(true);
+      try {
+        // Се поврзуваме со главната колекција 'recyclingLocations' како на сликата
+        const colRef = collection(db, "recyclingLocations");
+
+        // Правиме квери каде што municipalityId е еднакво на избраната општина (на пр. "celje")
+        const q = query(
+          colRef,
+          where("municipalityId", "==", municipalityIdLower),
+        );
+        const snapshot = await getDocs(q);
+
+        const fetched: any[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+
+          // Ги мапираме реалните полиња од твојата слика за да одговараат на структурата на мапата
+          fetched.push({
+            id: doc.id,
+            title: data.name || "EKO Otok",
+            lat: data.latitude,
+            lng: data.longitude,
+            address: data.address || "",
+            // Твојот тип во базата е "eco_island". Ова овозможува да работи филтерот "eco"
+            type: data.type === "eco_island" ? "eco" : data.type,
+            // Кантите ги спојуваме во една низа за опис (пр: "red, white, yellow")
+            items: data.bins ? data.bins.join(", ") : "Всички видови",
+            ...data,
+          });
+        });
+
+        setLocations(fetched);
+      } catch (error) {
+        console.log("Greska pri vlecenje na lokaciite:", error);
+        setLocations([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchLocations();
+  }, [selectedMunicipality]);
+
+  // OpenStreetMap Nominatim Геокодирање за пребарување улици
+  const triggerAddressSearch = async (text: string) => {
+    if (text.trim().length < 3) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setSearchingAddress(true);
+      const queryUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        text + ", " + selectedMunicipality + ", Slovenia",
+      )}&limit=5&addressdetails=1`;
+
+      const response = await fetch(queryUrl, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          "User-Agent": "RecycLarSloveniaWasteManagementAppV1",
+        },
+      });
+
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const data = await response.json();
+        setSearchResults(data);
+      }
+    } catch (err) {
+      console.log("Napaka pri iskanju naslova:", err);
+    } finally {
+      setSearchingAddress(false);
+    }
+  };
+
+  const handleSearchTextChange = (text: string) => {
+    setSearchQuery(text);
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (text.trim().length === 0) {
+      setSearchResults([]);
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      triggerAddressSearch(text);
+    }, 600);
+  };
+
+  const handleSelectPrediction = (item: any) => {
+    const lat = parseFloat(item.lat);
+    const lon = parseFloat(item.lon);
+
+    const newRegion = {
+      latitude: lat,
+      longitude: lon,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
+    };
+
+    setCurrentRegion(newRegion);
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newRegion, 1200);
+    }
+
+    setSearchQuery(item.display_name.split(",")[0]);
+    setSearchResults([]);
+    Keyboard.dismiss();
+  };
+
+  // Логика за филтрирање на локациите
+  const filteredLocations = locations.filter((loc) => {
+    return activeFilter === "all" || loc.type === activeFilter;
+  });
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.brandRow}>
+          <Text style={[styles.brandText, styles.brandGreen]}>Recyc</Text>
+          <Text style={[styles.brandText, styles.brandPurple]}>Lar</Text>
+        </View>
+        <View
+          style={{
+            backgroundColor: "#EFE8FF",
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 12,
+          }}
+        >
+          <Text style={{ color: "#6B35C9", fontWeight: "700", fontSize: 14 }}>
+            📍 {selectedMunicipality}
+          </Text>
+        </View>
+      </View>
+
+      {/* Search Input Bar */}
+      <View style={{ paddingHorizontal: 22, marginBottom: 10, zIndex: 10 }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <TextInput
+            style={{
+              flex: 1,
+              height: 46,
+              backgroundColor: "#F8F8FB",
+              borderRadius: 12,
+              paddingHorizontal: 16,
+              borderWidth: 1,
+              borderColor: "#ECECF2",
+              fontSize: 14,
+              color: "#252733",
+            }}
+            placeholder="Poišči ulico v tem mestu..."
+            placeholderTextColor="#7A7A86"
+            value={searchQuery}
+            onChangeText={handleSearchTextChange}
+          />
+          {searchingAddress && (
+            <ActivityIndicator
+              size="small"
+              color="#6B35C9"
+              style={{ position: "absolute", right: 16 }}
+            />
+          )}
+        </View>
+
+        {/* Dropdown Suggestions List */}
+        {searchResults.length > 0 && (
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "#ECECF2",
+              marginTop: 4,
+              maxHeight: 220,
+              shadowColor: "#000",
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+              position: "absolute",
+              top: 48,
+              left: 22,
+              right: 22,
+              zIndex: 999,
+            }}
+          >
+            <ScrollView keyboardShouldPersistTaps="handled">
+              {searchResults.map((item, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={{
+                    padding: 12,
+                    borderBottomWidth: idx === searchResults.length - 1 ? 0 : 1,
+                    borderBottomColor: "#F4F4F6",
+                  }}
+                  onPress={() => handleSelectPrediction(item)}
+                >
+                  <Text
+                    style={{ fontSize: 13, color: "#252733" }}
+                    numberOfLines={1}
+                  >
+                    📍 {item.display_name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+      </View>
+
+      {/* Filter Chips */}
+      <View style={{ height: 40, marginBottom: 10 }}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 22, gap: 8 }}
+        >
+          <FilterChip
+            label="Vse"
+            type="all"
+            active={activeFilter === "all"}
+            onPress={setActiveFilter}
+            color="#6B35C9"
+          />
+          <FilterChip
+            label="EKO otok"
+            type="eco"
+            active={activeFilter === "eco"}
+            onPress={setActiveFilter}
+            color="#35A936"
+          />
+          <FilterChip
+            label="Papir"
+            type="paper"
+            active={activeFilter === "paper"}
+            onPress={setActiveFilter}
+            color="#2B7DE9"
+          />
+          <FilterChip
+            label="Steklo"
+            type="glass"
+            active={activeFilter === "glass"}
+            onPress={setActiveFilter}
+            color="#F2B400"
+          />
+          <FilterChip
+            label="Plastika"
+            type="plastic"
+            active={activeFilter === "plastic"}
+            onPress={setActiveFilter}
+            color="#EF4444"
+          />
+        </ScrollView>
+      </View>
+
+      {/* Map Content */}
+      <View
+        style={{
+          width: width,
+          height: height - 280,
+          backgroundColor: "#EFEFF4",
+        }}
+      >
+        {loading ? (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <ActivityIndicator size="large" color="#6B35C9" />
+          </View>
+        ) : (
+          <MapView
+            ref={mapRef}
+            style={{ width: "100%", height: "100%" }}
+            initialRegion={currentRegion}
+          >
+            {filteredLocations.map((loc) => {
+              // Се осигуруваме дека координатите се валидни броеви пред рендерирање на маркерот
+              if (loc.lat && loc.lng) {
+                return (
+                  <Marker
+                    key={loc.id}
+                    coordinate={{
+                      latitude: Number(loc.lat),
+                      longitude: Number(loc.lng),
+                    }}
+                    title={loc.title}
+                    description={`Naslov: ${loc.address} | Zabojniki: ${loc.items}`}
+                  />
+                );
+              }
+              return null;
+            })}
+          </MapView>
+        )}
+      </View>
+
+      <BottomNavBar navigation={navigation} activeRoute={"Map" as any} />
+    </SafeAreaView>
+  );
+}
+
+const FilterChip = ({ label, type, active, onPress, color }: any) => (
   <TouchableOpacity
-    style={[styles.chip, active && styles.chipActive]}
-    activeOpacity={0.8}
+    onPress={() => onPress(type)}
+    style={{
+      paddingHorizontal: 16,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: active ? color : "#F8F8FB",
+      borderWidth: 1,
+      borderColor: active ? color : "#ECECF2",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
   >
-    <Text style={[styles.chipIcon, { color }]}>{icon}</Text>
-    <Text style={[styles.chipText, active && styles.chipTextActive]}>
+    <Text
+      style={{
+        color: active ? "#FFFFFF" : "#7A7A86",
+        fontWeight: "600",
+        fontSize: 13,
+      }}
+    >
       {label}
     </Text>
   </TouchableOpacity>
 );
-
-const TabItem = ({ label, icon, active, onPress }: any) => (
-  <TouchableOpacity style={styles.tabItem} onPress={onPress} activeOpacity={0.8}>
-    <Text style={[styles.tabIcon, active && styles.tabIconActive]}>{icon}</Text>
-    <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
-
-export default MapScreen;
