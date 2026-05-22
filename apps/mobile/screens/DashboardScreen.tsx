@@ -184,7 +184,11 @@ const DashboardScreen = ({ navigation, route }: any) => {
         </TouchableOpacity>
       </ScrollView>
 
-      <BottomNavBar navigation={navigation} activeRoute="Dashboard" />
+      <BottomNavBar
+        navigation={navigation}
+        activeRoute="Dashboard"
+        municipality={selectedCity}
+      />
     </SafeAreaView>
   );
 };

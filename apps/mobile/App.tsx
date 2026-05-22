@@ -15,7 +15,7 @@ import LeaderboardScreen from "./screens/LeaderBoardScreen";
 export type RootStackParamList = {
   Home: undefined;
   Dashboard: { selectedCity?: string } | undefined;
-  Map: undefined;
+  Map: { municipality?: string } | undefined;
   Login: undefined;
   Register: undefined;
   Profile: undefined;
