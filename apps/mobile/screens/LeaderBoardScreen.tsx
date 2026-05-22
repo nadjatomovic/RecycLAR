@@ -9,394 +9,295 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import { auth, db } from "../firebase/firebase";
 
-// Static fallback data for Monday demo if Firebase is empty
-const STATIC_CLASSES = [
-  { name: "7.B", points: 1240 },
-  { name: "6.A", points: 980 },
-  { name: "8.C", points: 760 },
-  { name: "5.A", points: 640 },
-  { name: "7.A", points: 520 },
-  { name: "6.B", points: 430 },
-  { name: "8.A", points: 310 },
-  { name: "5.B", points: 210 },
+// Резервни податоци доколку базата е сè уште празна на почетокот
+const STATIC_FALLBACK = [
+  { name: "Anže Novak", points: 250, razred: "7.B" },
+  { name: "Ema Horvat", points: 180, razred: "6.A" },
+  { name: "Luka Krajnc", points: 120, razred: "8.C" },
 ];
-
-const STATIC_STUDENTS = [
-  { name: "Nadja", group: "7.B", points: 1240 },
-  { name: "Luka", group: "6.A", points: 980 },
-  { name: "Ana", group: "8.C", points: 760 },
-  { name: "Maja", group: "5.A", points: 640 },
-  { name: "Rok", group: "7.A", points: 520 },
-  { name: "Eva", group: "6.B", points: 430 },
-  { name: "Tim", group: "8.A", points: 310 },
-  { name: "Sara", group: "5.B", points: 210 },
-];
-
-type Tab = "classes" | "students";
 
 export default function LeaderboardScreen({ navigation }: any) {
-  const [activeTab, setActiveTab] = useState<Tab>("classes");
-  const [classes, setClasses] = useState(STATIC_CLASSES);
-  const [students, setStudents] = useState(STATIC_STUDENTS);
+  const currentUser = auth.currentUser;
+
+  // 🔒 ZAŠČITA: Če uporabnik ni prijavljen, se prikaže zaklenjen zaslon na slovenskih
+  if (!currentUser) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 30,
+          }}
+        >
+          <Text style={{ fontSize: 48, marginBottom: 16 }}>🏆</Text>
+          <Text
+            style={{
+              fontSize: 22,
+              fontWeight: "700",
+              color: "#1F2937",
+              textAlign: "center",
+              marginBottom: 10,
+            }}
+          >
+            Poglej lestvico
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: "#6B7280",
+              textAlign: "center",
+              lineHeight: 22,
+              marginBottom: 26,
+            }}
+          >
+            Želiš videti, kateri učenci in razredi so reciklirali največ in
+            zbrali največ točk? Prijavi se in pomagaj svojemu timu do zmage!
+          </Text>
+
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#22C55E",
+              paddingVertical: 14,
+              paddingHorizontal: 28,
+              borderRadius: 14,
+              width: "100%",
+              alignItems: "center",
+              shadowColor: "#22C55E",
+              shadowOpacity: 0.2,
+              shadowRadius: 10,
+              elevation: 4,
+            }}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 }}>
+              Prijavi se v svoj profil
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
+      </SafeAreaView>
+    );
+  }
+
+  // 🔓 Za prijavljene uporabnike - Preklapljanje med realnimi Učenci in Razredi
+  const [leaderboardType, setLeaderboardType] = useState<"ucenci" | "razredi">(
+    "ucenci",
+  );
+  const [dataList, setDataList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadFromFirebase();
-  }, []);
+    async function loadLeaderboard() {
+      setLoading(true);
+      try {
+        if (leaderboardType === "ucenci") {
+          // 1. ПОВРЗУВАЊЕ СО РЕАЛНИТЕ УЧЕНИЦИ (Колекција 'users')
+          const q = query(
+            collection(db, "users"),
+            orderBy("totalPoints", "desc"),
+            limit(20),
+          );
+          const snap = await getDocs(q);
+          const fetchedUsers: any[] = [];
 
-  const loadFromFirebase = async () => {
-    setLoading(true);
-    try {
-      // Load groups from Firebase
-      const groupsQuery = query(
-        collection(db, "groups"),
-        orderBy("totalPoints", "desc"),
-        limit(20),
-      );
-      const groupsSnap = await getDocs(groupsQuery);
-      if (!groupsSnap.empty) {
-        const groupsData = groupsSnap.docs.map((doc) => ({
-          name: doc.data().name,
-          points: doc.data().totalPoints ?? 0,
-        }));
-        setClasses(groupsData);
-      }
+          snap.forEach((doc) => {
+            const uData = doc.data();
+            // Филтрирај ги само оние кои имаат барем некој поен за поубав приказ
+            fetchedUsers.push({
+              name:
+                uData.displayName ||
+                uData.name ||
+                uData.email?.split("@")[0] ||
+                "Anonimni učenec",
+              points: uData.totalPoints || 0,
+              razred: uData.razred || uData.class || "",
+            });
+          });
 
-      // Load users from Firebase
-      const usersQuery = query(
-        collection(db, "users"),
-        orderBy("points", "desc"),
-        limit(20),
-      );
-      const usersSnap = await getDocs(usersQuery);
-      if (!usersSnap.empty) {
-        const usersData = usersSnap.docs.map((doc) => ({
-          name: doc.data().name ?? "Uporabnik",
-          group: doc.data().group ?? "",
-          points: doc.data().points ?? 0,
-        }));
-        setStudents(usersData);
+          if (fetchedUsers.length > 0) {
+            setDataList(fetchedUsers);
+          } else {
+            setDataList(STATIC_FALLBACK); // Резерва ако нема ниеден корисник со поени
+          }
+        } else {
+          // 2. ПОВРЗУВАЊЕ СО РАЗРЕДИТЕ / ГРУПИТЕ (Колекција 'groups')
+          const q = query(
+            collection(db, "groups"),
+            orderBy("totalPoints", "desc"),
+            limit(10),
+          );
+          const snap = await getDocs(q);
+          const fetchedGroups: any[] = [];
+
+          snap.forEach((doc) => {
+            const gData = doc.data();
+            fetchedGroups.push({
+              name: gData.name || "Neznan razred",
+              points: gData.totalPoints || 0,
+            });
+          });
+
+          if (fetchedGroups.length > 0) {
+            setDataList(fetchedGroups);
+          } else {
+            setDataList([
+              { name: "7.B", points: 1240 },
+              { name: "6.A", points: 980 },
+              { name: "8.C", points: 760 },
+            ]);
+          }
+        }
+      } catch (err) {
+        console.log("Napaka pri nalaganju lestvice:", err);
+        setDataList(STATIC_FALLBACK);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      // Firebase failed — static data is already set
-      console.log("Using static leaderboard data");
-    } finally {
-      setLoading(false);
     }
-  };
 
-  const data = activeTab === "classes" ? classes : students;
-  const top3 = data.slice(0, 3);
-  const rest = data.slice(3);
-
-  const medalColor = (i: number) =>
-    i === 0 ? "#F59E0B" : i === 1 ? "#9CA3AF" : "#CD7F32";
+    loadLeaderboard();
+  }, [leaderboardType]);
 
   return (
-    <SafeAreaView style={s.container}>
-      {/* Header */}
-      <View style={s.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={s.backBtn}>
-          <Text style={s.backText}>‹</Text>
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>
-          <Text style={s.headerGreen}>Recyc</Text>
-          <Text style={s.headerPurple}>LAR</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
+      <View style={{ padding: 20, flex: 1 }}>
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: "800",
+            color: "#1F2937",
+            marginBottom: 4,
+          }}
+        >
+          Lestvica 🏆
         </Text>
-        <View style={{ width: 40 }} />
-      </View>
+        <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
+          Najboljši učenci in razredi v aplikaciji RecycLAR.
+        </Text>
 
-      <ScrollView contentContainerStyle={s.scroll}>
-        {/* Title section */}
-        <View style={s.titleSection}>
-          <View>
-            <View style={s.titleRow}>
-              <Text style={s.trophyIcon}>🏆</Text>
-              <Text style={s.title}>Lestvica</Text>
-            </View>
-            <Text style={s.subtitle}>
-              Skupaj recikliramo,{"\n"}skupaj zmagujemo! 🌿
-            </Text>
-          </View>
-        </View>
-
-        {/* Tabs */}
-        <View style={s.tabs}>
+        {/* Склопка за филтрирање на Словенечки */}
+        <View
+          style={{
+            flexDirection: "row",
+            backgroundColor: "#E5E7EB",
+            borderRadius: 10,
+            padding: 4,
+            marginBottom: 20,
+          }}
+        >
           <TouchableOpacity
-            style={[s.tab, activeTab === "classes" && s.tabActive]}
-            onPress={() => setActiveTab("classes")}
+            style={{
+              flex: 1,
+              backgroundColor:
+                leaderboardType === "ucenci" ? "#fff" : "transparent",
+              paddingVertical: 8,
+              borderRadius: 8,
+              alignItems: "center",
+            }}
+            onPress={() => setLeaderboardType("ucenci")}
           >
-            <Text
-              style={[s.tabText, activeTab === "classes" && s.tabTextActive]}
-            >
-              👥 Razredi
-            </Text>
+            <Text style={{ fontWeight: "600", color: "#1F2937" }}>Učenci</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[s.tab, activeTab === "students" && s.tabActive]}
-            onPress={() => setActiveTab("students")}
+            style={{
+              flex: 1,
+              backgroundColor:
+                leaderboardType === "razredi" ? "#fff" : "transparent",
+              paddingVertical: 8,
+              borderRadius: 8,
+              alignItems: "center",
+            }}
+            onPress={() => setLeaderboardType("razredi")}
           >
-            <Text
-              style={[s.tabText, activeTab === "students" && s.tabTextActive]}
-            >
-              👤 Učenci
-            </Text>
+            <Text style={{ fontWeight: "600", color: "#1F2937" }}>Razredi</Text>
           </TouchableOpacity>
         </View>
 
         {loading ? (
-          <ActivityIndicator color="#22C55E" style={{ marginTop: 40 }} />
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <ActivityIndicator size="large" color="#22C55E" />
+          </View>
         ) : (
-          <>
-            {/* Top 3 podium */}
-            <View style={s.podium}>
-              {/* 2nd place */}
-              {top3[1] && (
-                <View style={[s.podiumItem, s.podiumSecond]}>
-                  <Text style={s.podiumMedal}>🥈</Text>
-                  <View style={[s.podiumIcon, { backgroundColor: "#EDE9FE" }]}>
-                    <Text style={s.podiumIconText}>🏫</Text>
-                  </View>
-                  <Text style={s.podiumName}>{top3[1].name}</Text>
-                  <Text style={[s.podiumPoints, { color: "#7C3AED" }]}>
-                    {top3[1].points}
-                  </Text>
-                  <Text style={s.podiumLabel}>točk</Text>
-                  <View
-                    style={[
-                      s.podiumBar,
-                      { height: 80, backgroundColor: "#7C3AED" },
-                    ]}
-                  />
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 80 }}
+          >
+            {dataList.map((item, idx) => (
+              <View
+                key={idx}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#fff",
+                  padding: 16,
+                  borderRadius: 14,
+                  marginBottom: 10,
+                  elevation: 1,
+                  shadowColor: "#000",
+                  shadowOpacity: 0.05,
+                  shadowRadius: 5,
+                }}
+              >
+                {/* Ранг Позиција со медали за Топ 3 */}
+                <View style={{ width: 35 }}>
+                  {idx === 0 ? (
+                    <Text style={{ fontSize: 16 }}>🥇</Text>
+                  ) : idx === 1 ? (
+                    <Text style={{ fontSize: 16 }}>🥈</Text>
+                  ) : idx === 2 ? (
+                    <Text style={{ fontSize: 16 }}>🥉</Text>
+                  ) : (
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "700",
+                        color: "#6B7280",
+                      }}
+                    >
+                      {idx + 1}.
+                    </Text>
+                  )}
                 </View>
-              )}
 
-              {/* 1st place */}
-              {top3[0] && (
-                <View style={[s.podiumItem, s.podiumFirst]}>
-                  <Text style={s.podiumTrophy}>🏆</Text>
-                  <Text style={s.podiumMedal}>🥇</Text>
-                  <View style={[s.podiumIcon, { backgroundColor: "#F0FDF4" }]}>
-                    <Text style={s.podiumIconText}>🏫</Text>
-                  </View>
+                {/* Име и Разред */}
+                <View style={{ flex: 1 }}>
                   <Text
-                    style={[
-                      s.podiumName,
-                      { color: "#22C55E", fontWeight: "700" as const },
-                    ]}
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "600",
+                      color: "#1F2937",
+                    }}
                   >
-                    {top3[0].name}
+                    {item.name}
                   </Text>
-                  <Text
-                    style={[s.podiumPoints, { color: "#22C55E", fontSize: 20 }]}
-                  >
-                    {top3[0].points}
-                  </Text>
-                  <Text style={s.podiumLabel}>točk</Text>
-                  <View
-                    style={[
-                      s.podiumBar,
-                      { height: 100, backgroundColor: "#22C55E" },
-                    ]}
-                  />
+                  {item.razred ? (
+                    <Text
+                      style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}
+                    >
+                      Razred: {item.razred}
+                    </Text>
+                  ) : null}
                 </View>
-              )}
 
-              {/* 3rd place */}
-              {top3[2] && (
-                <View style={[s.podiumItem, s.podiumThird]}>
-                  <Text style={s.podiumMedal}>🥉</Text>
-                  <View style={[s.podiumIcon, { backgroundColor: "#FEF3C7" }]}>
-                    <Text style={s.podiumIconText}>🏫</Text>
-                  </View>
-                  <Text style={s.podiumName}>{top3[2].name}</Text>
-                  <Text style={[s.podiumPoints, { color: "#D97706" }]}>
-                    {top3[2].points}
-                  </Text>
-                  <Text style={s.podiumLabel}>točk</Text>
-                  <View
-                    style={[
-                      s.podiumBar,
-                      { height: 60, backgroundColor: "#F59E0B" },
-                    ]}
-                  />
-                </View>
-              )}
-            </View>
-
-            {/* Rest of rankings */}
-            <View style={s.rankList}>
-              {rest.map((item: any, index: number) => (
-                <View key={index} style={s.rankRow}>
-                  <Text style={s.rankNum}>{index + 4}.</Text>
-                  <View style={s.rankIcon}>
-                    <Text style={s.rankIconText}>🏫</Text>
-                  </View>
-                  <Text style={s.rankName}>{item.name}</Text>
-                  {item.group && <Text style={s.rankGroup}>{item.group}</Text>}
-                  <Text style={s.rankPoints}>{item.points} točk ›</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Bottom tip */}
-            <View style={s.tipBox}>
-              <Text style={s.tipIcon}>🌿</Text>
-              <View style={{ flex: 1 }}>
-                <Text style={s.tipTitle}>
-                  Vsaka pravilno reciklirana točka šteje!
-                </Text>
-                <Text style={s.tipText}>
-                  Nadaljuj tako, Lari je ponosen nate! 💚
+                {/* Точни реални поени */}
+                <Text
+                  style={{ fontSize: 15, fontWeight: "700", color: "#22C55E" }}
+                >
+                  {item.points} točk
                 </Text>
               </View>
-            </View>
-          </>
+            ))}
+          </ScrollView>
         )}
-      </ScrollView>
-
+      </View>
       <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
     </SafeAreaView>
   );
 }
-
-const s = {
-  container: { flex: 1, backgroundColor: "#F8FAF5" },
-  header: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "space-between" as const,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 8,
-  },
-  backBtn: { width: 40, height: 40, justifyContent: "center" as const },
-  backText: { fontSize: 28, color: "#1F2937" },
-  headerTitle: { fontSize: 20, fontWeight: "700" as const },
-  headerGreen: { color: "#22C55E" },
-  headerPurple: { color: "#7C3AED" },
-  scroll: { padding: 20, paddingBottom: 40 },
-  titleSection: {
-    flexDirection: "row" as const,
-    justifyContent: "space-between" as const,
-    alignItems: "flex-start" as const,
-    marginBottom: 20,
-  },
-  titleRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    gap: 8,
-  },
-  trophyIcon: { fontSize: 24 },
-  title: { fontSize: 26, fontWeight: "700" as const, color: "#1F2937" },
-  subtitle: { fontSize: 14, color: "#6B7280", marginTop: 4, lineHeight: 20 },
-  tabs: {
-    flexDirection: "row" as const,
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 4,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: "center" as const,
-    borderRadius: 10,
-  },
-  tabActive: { backgroundColor: "#EDE9FE" },
-  tabText: { fontSize: 14, color: "#6B7280", fontWeight: "500" as const },
-  tabTextActive: { color: "#7C3AED", fontWeight: "700" as const },
-  podium: {
-    flexDirection: "row" as const,
-    justifyContent: "center" as const,
-    alignItems: "flex-end" as const,
-    marginBottom: 20,
-    gap: 8,
-  },
-  podiumItem: { alignItems: "center" as const, flex: 1 },
-  podiumFirst: { marginBottom: 0 },
-  podiumSecond: { marginBottom: 0 },
-  podiumThird: { marginBottom: 0 },
-  podiumTrophy: { fontSize: 20, marginBottom: 2 },
-  podiumMedal: { fontSize: 18, marginBottom: 4 },
-  podiumIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    marginBottom: 6,
-  },
-  podiumIconText: { fontSize: 22 },
-  podiumName: {
-    fontSize: 13,
-    fontWeight: "600" as const,
-    color: "#1F2937",
-    marginBottom: 2,
-  },
-  podiumPoints: { fontSize: 16, fontWeight: "700" as const },
-  podiumLabel: { fontSize: 10, color: "#6B7280", marginBottom: 6 },
-  podiumBar: {
-    width: "100%" as const,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-  },
-  rankList: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 8,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 1,
-  },
-  rankRow: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
-  },
-  rankNum: {
-    width: 24,
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "600" as const,
-  },
-  rankIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F0FDF4",
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    marginRight: 10,
-  },
-  rankIconText: { fontSize: 16 },
-  rankName: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#1F2937",
-  },
-  rankGroup: { fontSize: 12, color: "#6B7280", marginRight: 8 },
-  rankPoints: { fontSize: 13, fontWeight: "700" as const, color: "#7C3AED" },
-  tipBox: {
-    flexDirection: "row" as const,
-    backgroundColor: "#F0FDF4",
-    borderRadius: 14,
-    padding: 14,
-    gap: 10,
-    alignItems: "center" as const,
-  },
-  tipIcon: { fontSize: 20 },
-  tipTitle: { fontSize: 13, fontWeight: "600" as const, color: "#1F2937" },
-  tipText: { fontSize: 12, color: "#6B7280" },
-};
