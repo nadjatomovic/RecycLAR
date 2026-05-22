@@ -11,56 +11,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker } from "react-native-maps";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { styles } from "../styles/MapScreen.styles";
 import BottomNavBar from "../components/BottomNavBar";
 
 const { width, height } = Dimensions.get("window");
-
-// Статични податоци за резерва (fallback)
-const FALLBACK_LOCATIONS: Record<string, any[]> = {
-  Maribor: [
-    {
-      id: "mb-1",
-      title: "EKO otok Tabor",
-      lat: 46.548,
-      lng: 15.646,
-      type: "eco",
-      address: "Ulica heroja Šlandra",
-      items: "Papir, steklo, embalaža",
-    },
-    {
-      id: "mb-2",
-      title: "Zbirno mesto Center",
-      lat: 46.559,
-      lng: 15.642,
-      type: "glass",
-      address: "Partizanska cesta",
-      items: "Steklo",
-    },
-    {
-      id: "mb-3",
-      title: "Zabojnik za papir",
-      lat: 46.552,
-      lng: 15.65,
-      type: "paper",
-      address: "Titova cesta",
-      items: "Papir",
-    },
-  ],
-  Ljubljana: [
-    {
-      id: "lj-1",
-      title: "EKO otok Tivoli",
-      lat: 46.055,
-      lng: 14.496,
-      type: "eco",
-      address: "Celovška cesta",
-      items: "Vse vrste odpadkov",
-    },
-  ],
-};
 
 const CITY_COORDINATES: Record<string, any> = {
   Maribor: {
@@ -96,7 +52,10 @@ const CITY_COORDINATES: Record<string, any> = {
 };
 
 export default function MapScreen({ route, navigation }: any) {
+  // Називот на општината го претвораме во мали букви (пр. "Celje" -> "celje") за да одговара на municipalityId во базата
   const selectedMunicipality = route.params?.municipality || "Maribor";
+  const municipalityIdLower = selectedMunicipality.toLowerCase();
+
   const mapRef = useRef<MapView | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -110,9 +69,9 @@ export default function MapScreen({ route, navigation }: any) {
     CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES["Maribor"],
   );
 
-  // Тајмер за Debounce пребарувањето
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Анимација на мапата при промена на општина
   useEffect(() => {
     const newRegion =
       CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES["Maribor"];
@@ -122,30 +81,44 @@ export default function MapScreen({ route, navigation }: any) {
     }
   }, [selectedMunicipality]);
 
+  // КЛУЧНО ПОПРАВЕН ЕФЕКТ ЗА РЕАЛНИ ПОДАТОЦИ ОД FIRESTORE
   useEffect(() => {
     async function fetchLocations() {
       setLoading(true);
       try {
-        const colRef = collection(
-          db,
-          "municipalities",
-          selectedMunicipality,
-          "wasteLocations",
-        );
-        const snapshot = await getDocs(colRef);
+        // Се поврзуваме со главната колекција 'recyclingLocations' како на сликата
+        const colRef = collection(db, "recyclingLocations");
 
-        if (!snapshot.empty) {
-          const fetched: any[] = [];
-          snapshot.forEach((doc) => {
-            fetched.push({ id: doc.id, ...doc.data() });
+        // Правиме квери каде што municipalityId е еднакво на избраната општина (на пр. "celje")
+        const q = query(
+          colRef,
+          where("municipalityId", "==", municipalityIdLower),
+        );
+        const snapshot = await getDocs(q);
+
+        const fetched: any[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+
+          // Ги мапираме реалните полиња од твојата слика за да одговараат на структурата на мапата
+          fetched.push({
+            id: doc.id,
+            title: data.name || "EKO Otok",
+            lat: data.latitude,
+            lng: data.longitude,
+            address: data.address || "",
+            // Твојот тип во базата е "eco_island". Ова овозможува да работи филтерот "eco"
+            type: data.type === "eco_island" ? "eco" : data.type,
+            // Кантите ги спојуваме во една низа за опис (пр: "red, white, yellow")
+            items: data.bins ? data.bins.join(", ") : "Всички видови",
+            ...data,
           });
-          setLocations(fetched);
-        } else {
-          setLocations(FALLBACK_LOCATIONS[selectedMunicipality] || []);
-        }
+        });
+
+        setLocations(fetched);
       } catch (error) {
-        console.log("Error fetching locations, using fallback:", error);
-        setLocations(FALLBACK_LOCATIONS[selectedMunicipality] || []);
+        console.log("Greska pri vlecenje na lokaciite:", error);
+        setLocations([]);
       } finally {
         setLoading(false);
       }
@@ -154,7 +127,7 @@ export default function MapScreen({ route, navigation }: any) {
     fetchLocations();
   }, [selectedMunicipality]);
 
-  // Извршување на реалниот повик до серверот (Се активира само кога корисникот ќе застане со пишување)
+  // OpenStreetMap Nominatim Геокодирање за пребарување улици
   const triggerAddressSearch = async (text: string) => {
     if (text.trim().length < 3) {
       setSearchResults([]);
@@ -172,20 +145,14 @@ export default function MapScreen({ route, navigation }: any) {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          // Важно: Клучен уникатен User-Agent за да не не блокираат како спам бот
           "User-Agent": "RecycLarSloveniaWasteManagementAppV1",
         },
       });
 
-      // Безбедносна проверка дали одговорот е навистина JSON а не HTML грешка
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.indexOf("application/json") !== -1) {
         const data = await response.json();
         setSearchResults(data);
-      } else {
-        console.log(
-          "Серверот врати невалиден формат (Веројатно привремен лимит).",
-        );
       }
     } catch (err) {
       console.log("Napaka pri iskanju naslova:", err);
@@ -194,11 +161,9 @@ export default function MapScreen({ route, navigation }: any) {
     }
   };
 
-  // Функција што реагира додека корисникот внесува букви (Вграден заштитен тајмер)
   const handleSearchTextChange = (text: string) => {
     setSearchQuery(text);
 
-    // Ако има претходно поставен тајмер, откажи го (корисникот уште пишува)
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
@@ -208,7 +173,6 @@ export default function MapScreen({ route, navigation }: any) {
       return;
     }
 
-    // Постави нов тајмер - почекај 600 милисекунди мирно пишување пред да пратиш API повик
     searchTimeoutRef.current = setTimeout(() => {
       triggerAddressSearch(text);
     }, 600);
@@ -221,7 +185,7 @@ export default function MapScreen({ route, navigation }: any) {
     const newRegion = {
       latitude: lat,
       longitude: lon,
-      latitudeDelta: 0.005, // Повеќе приближено за убаво да се видат контејнерите на таа улица
+      latitudeDelta: 0.005,
       longitudeDelta: 0.005,
     };
 
@@ -235,6 +199,7 @@ export default function MapScreen({ route, navigation }: any) {
     Keyboard.dismiss();
   };
 
+  // Логика за филтрирање на локациите
   const filteredLocations = locations.filter((loc) => {
     return activeFilter === "all" || loc.type === activeFilter;
   });
@@ -400,19 +365,28 @@ export default function MapScreen({ route, navigation }: any) {
             style={{ width: "100%", height: "100%" }}
             initialRegion={currentRegion}
           >
-            {filteredLocations.map((loc) => (
-              <Marker
-                key={loc.id}
-                coordinate={{ latitude: loc.lat, longitude: loc.lng }}
-                title={loc.title}
-                description={`${loc.address} - ${loc.items}`}
-              />
-            ))}
+            {filteredLocations.map((loc) => {
+              // Се осигуруваме дека координатите се валидни броеви пред рендерирање на маркерот
+              if (loc.lat && loc.lng) {
+                return (
+                  <Marker
+                    key={loc.id}
+                    coordinate={{
+                      latitude: Number(loc.lat),
+                      longitude: Number(loc.lng),
+                    }}
+                    title={loc.title}
+                    description={`Naslov: ${loc.address} | Zabojniki: ${loc.items}`}
+                  />
+                );
+              }
+              return null;
+            })}
           </MapView>
         )}
       </View>
 
-      <BottomNavBar navigation={navigation} activeRoute="Map" />
+      <BottomNavBar navigation={navigation} activeRoute={"Map" as any} />
     </SafeAreaView>
   );
 }
