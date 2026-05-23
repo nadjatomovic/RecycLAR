@@ -1,0 +1,19 @@
+{
+  "classes": [
+    "biodegradable",
+    "cardboard",
+    "glass",
+    "metal",
+    "paper",
+    "plastic",
+    "trash"
+  ],
+  "bin_mapping": {
+    "cardboard": "blue",
+    "glass": "green",
+    "metal": "yellow",
+    "paper": "blue",
+    "plastic": "yellow",
+    "trash": "mixed"
+  }
+}
