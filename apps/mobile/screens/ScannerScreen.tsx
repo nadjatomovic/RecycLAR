@@ -11,11 +11,22 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { CameraView as BarcodeCameraView } from "expo-camera";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase/firebase";
+import * as FileSystem from "expo-file-system/legacy";
+import * as ExpoAsset from "expo-asset";
+import * as ImageManipulator from "expo-image-manipulator";
+import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { db, auth } from "../firebase/firebase";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// ─── TFLite (safe import) ─────────────────────────────────────────────────────
+let useTensorflowModel: any = null;
+try {
+  const tflite = require("react-native-fast-tflite");
+  useTensorflowModel = tflite.useTensorflowModel;
+} catch (e) {
+  console.log("TFLite not available");
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 type BinData = {
   name: string;
   color: string;
@@ -23,6 +34,7 @@ type BinData = {
   tip: string;
   allowed: string[];
   notAllowed: string[];
+  type?: string;
 };
 type BinsMap = Record<string, BinData>;
 type ScanMode = "camera" | "barcode";
@@ -35,16 +47,60 @@ const BIN_COLORS: Record<string, string> = {
   brown: "#8A5A32",
   mixed: "#1F2937",
   red: "#EF4444",
+  white: "#9CA3AF",
+  special: "#7C3AED",
 };
 
-// ─── Map item name → bin ──────────────────────────────────────────────────────
-const mapItemToBin = (item: string): string => {
+// ─── TFLite class names (must match class_mapping.json order) ─────────────────
+const CLASS_NAMES = [
+  "biodegradable",
+  "cardboard",
+  "glass",
+  "metal",
+  "paper",
+  "plastic",
+  "trash",
+];
+
+// ─── TFLite class → bin type ──────────────────────────────────────────────────
+const CLASS_TO_BIN_TYPE: Record<string, string> = {
+  biodegradable: "bio",
+  cardboard: "paper",
+  glass: "glass",
+  metal: "packaging",
+  paper: "paper",
+  plastic: "packaging",
+  trash: "mixed",
+};
+
+// ─── Slovenian display names ──────────────────────────────────────────────────
+const CLASS_NAMES_SL: Record<string, string> = {
+  biodegradable: "Bio odpadek",
+  cardboard: "Karton",
+  glass: "Steklo",
+  metal: "Kovina",
+  paper: "Papir",
+  plastic: "Plastika",
+  trash: "Mešani odpadki",
+};
+
+// ─── Fallback: map item text → bin type ───────────────────────────────────────
+const mapTextToBinType = (item: string): string => {
   const lower = item.toLowerCase();
-  if (lower.includes("paper") || lower.includes("papir") || lower.includes("cardboard") || lower.includes("karton") || lower.includes("newspaper") || lower.includes("časopis")) return "blue";
-  if (lower.includes("plastic") || lower.includes("plastik") || lower.includes("bottle") || lower.includes("can") || lower.includes("metal") || lower.includes("embalaža") || lower.includes("packaging") || lower.includes("pločevin")) return "yellow";
-  if (lower.includes("glass") || lower.includes("steklo") || lower.includes("steklenica")) return "green";
-  if (lower.includes("food") || lower.includes("bio") || lower.includes("organic") || lower.includes("fruit") || lower.includes("vegetable") || lower.includes("hrana") || lower.includes("banana")) return "brown";
+  if (lower.includes("paper") || lower.includes("papir") || lower.includes("cardboard") || lower.includes("karton")) return "paper";
+  if (lower.includes("plastic") || lower.includes("plastik") || lower.includes("embalaža") || lower.includes("metal") || lower.includes("kovina") || lower.includes("pločevin")) return "packaging";
+  if (lower.includes("glass") || lower.includes("steklo")) return "glass";
+  if (lower.includes("food") || lower.includes("bio") || lower.includes("organic") || lower.includes("hrana")) return "bio";
   return "mixed";
+};
+
+// ─── Find bin by type ─────────────────────────────────────────────────────────
+const findBinByType = (bins: BinsMap, binType: string): { binId: string; bin: BinData } => {
+  for (const [binId, bin] of Object.entries(bins)) {
+    if (bin.type === binType) return { binId, bin };
+  }
+  const mixed = bins["mixed"] ?? Object.values(bins)[0];
+  return { binId: "mixed", bin: mixed };
 };
 
 // ─── Get Lari tip from Gemini ─────────────────────────────────────────────────
@@ -58,7 +114,7 @@ const getLariTip = async (itemName: string, binName: string): Promise<string | n
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `Napiši SAMO en praktičen nasvet v slovenščini kako pravilno pripraviti "${itemName}" pred odlaganjem v "${binName}". Na primer: "Stisni plastenko in odstrani pokrovček." ali "Izperi kozarec pred odlaganjem." Odgovori SAMO z nasvetom, brez uvoda, brez razlage, brez vprašanj.`
+              text: `Napiši SAMO en kratek praktičen nasvet v slovenščini kako pravilno pripraviti "${itemName}" pred odlaganjem v "${binName}". Odgovori SAMO z nasvetom, brez uvoda, brez razlage.`
             }],
           }],
         }),
@@ -72,74 +128,248 @@ const getLariTip = async (itemName: string, binName: string): Promise<string | n
   }
 };
 
-// ─── Component ───────────────────────────────────────────────────────────────
+// ─── Preprocess image for MobileNetV2 224x224 ────────────────────────────────
+const preprocessImage = async (imageUri: string): Promise<Float32Array | null> => {
+  try {
+    const resized = await ImageManipulator.manipulateAsync(
+      imageUri,
+      [{ resize: { width: 224, height: 224 } }],
+      { format: ImageManipulator.SaveFormat.JPEG, base64: true, compress: 1.0 }
+    );
+    if (!resized.base64) return null;
+
+    const binaryString = atob(resized.base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+
+    // Najdi začetek JPEG podatkov (po FFD8 header)
+    // JPEG pixel data začne po SOS markerju (FF DA)
+    let dataStart = 0;
+    for (let i = 0; i < bytes.length - 1; i++) {
+      if (bytes[i] === 0xFF && bytes[i + 1] === 0xDA) {
+        dataStart = i + 12; // preskoci SOS header
+        break;
+      }
+    }
+
+    console.log("JPEG dataStart:", dataStart, "total bytes:", bytes.length);
+
+    const float32Data = new Float32Array(224 * 224 * 3);
+    let pixelIndex = 0;
+
+    for (let i = 0; i < 224 * 224; i++) {
+      const pos = dataStart + i * 3;
+      if (pos + 2 < bytes.length) {
+        // MobileNetV2 normalizacija: [-1, 1]
+        float32Data[pixelIndex++] = (bytes[pos] - 127.5) / 127.5;
+        float32Data[pixelIndex++] = (bytes[pos + 1] - 127.5) / 127.5;
+        float32Data[pixelIndex++] = (bytes[pos + 2] - 127.5) / 127.5;
+      }
+    }
+
+    return float32Data;
+  } catch (e) {
+    console.error("Preprocess error:", e);
+    return null;
+  }
+};
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function ScannerScreen({ navigation }: any) {
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingBins, setLoadingBins] = useState(true);
-  const [result, setResult] = useState<{ item: string; bin: BinData; binId: string } | null>(null);
+  const [result, setResult] = useState<{
+    item: string;
+    bin: BinData;
+    binId: string;
+    confidence?: number;
+  } | null>(null);
   const [bins, setBins] = useState<BinsMap>({});
+  const [municipalityId, setMunicipalityId] = useState("maribor");
+  const [municipalityName, setMunicipalityName] = useState("Maribor");
   const [scanMode, setScanMode] = useState<ScanMode>("camera");
   const [barcodeScanning, setBarcodeScanning] = useState(false);
+  const [modelReady, setModelReady] = useState(false);
+  const [tfliteUri, setTfliteUri] = useState<string | undefined>(undefined);
+  const [tfliteModel, setTfliteModel] = useState<any>(null);
   const cameraRef = useRef<any>(null);
 
-  useEffect(() => {
-    loadBinsFromFirebase();
-  }, []);
 
-  const loadBinsFromFirebase = async () => {
+  useEffect(() => {
+    prepareModel();
+    loadUserAndBins();
+  }, []);   
+
+  // ─── TFLite hook — always called, undefined until model is ready ───────────
+
+  // ─── Prepare TFLite model ───────────────────────────────────────────────────
+const prepareModel = async () => {
+  try {
+    const { loadTensorflowModel } = require("react-native-fast-tflite");
+    const dest = FileSystem.cacheDirectory + "recyclar_model.tflite";
+
+    const info = await FileSystem.getInfoAsync(dest);
+    if (info.exists) {
+      await FileSystem.deleteAsync(dest);
+    }
+
+    const asset = ExpoAsset.Asset.fromModule(
+      require("../assets/model/recyclar_model.tflite")
+    );
+    await asset.downloadAsync();
+    await FileSystem.copyAsync({ from: asset.localUri!, to: dest });
+
+    // ← drugi parameter "delegates" je obvezen v v3!
+    const loaded = await loadTensorflowModel({ url: dest }, []);
+    setTfliteModel(loaded);
+    setModelReady(true);
+    console.log("✅ TFLite model loaded!");
+  } catch (e) {
+    console.log("Model prep failed:", e);
+    setModelReady(false);
+  }
+};
+  // ─── Load user municipality + bins ─────────────────────────────────────────
+  const loadUserAndBins = async () => {
     setLoadingBins(true);
     try {
-      const binsSnap = await getDocs(collection(db, "municipalities", "maribor", "bins"));
+      const userId = auth.currentUser?.uid;
+      let munId = "maribor";
+      if (userId) {
+        const userDoc = await getDoc(doc(db, "users", userId));
+        if (userDoc.exists()) {
+          munId = userDoc.data().municipalityId ?? "maribor";
+          setMunicipalityId(munId);
+          setMunicipalityName(munId.charAt(0).toUpperCase() + munId.slice(1));
+        }
+      }
+
+      const binsSnap = await getDocs(collection(db, "municipalities", munId, "bins"));
       const binsData: BinsMap = {};
-      binsSnap.forEach((doc) => { binsData[doc.id] = doc.data() as BinData; });
-      setBins(binsData);
-    } catch {
-      setBins({
-        blue:   { name: "Modri zabojnik",   color: "blue",   description: "Zabojnik za papir.",       tip: "Papir naj bo čist in suh.",            allowed: ["Čist papir", "Karton"],  notAllowed: ["Masten papir"] },
-        yellow: { name: "Rumeni zabojnik",  color: "yellow", description: "Zabojnik za embalažo.",    tip: "Stisni plastenko pred odlaganjem.",     allowed: ["Plastika", "Kovine"],    notAllowed: ["Umazana embalaža"] },
-        green:  { name: "Zeleni zabojnik",  color: "green",  description: "Zabojnik za steklo.",      tip: "Izprazni steklenico pred odlaganjem.", allowed: ["Steklo"],                notAllowed: ["Keramika"] },
-        brown:  { name: "Rjavi zabojnik",   color: "brown",  description: "Zabojnik za bio odpadke.", tip: "Samo organski odpadki.",               allowed: ["Hrana", "Bio"],          notAllowed: ["Plastične vrečke"] },
-        mixed:  { name: "Mešani odpadki",   color: "mixed",  description: "Za kar ne gre drugam.",    tip: "Sem gre kar se ne da razvrstiti.",     allowed: ["Mešani odpadki"],        notAllowed: [] },
+      binsSnap.forEach((docSnap) => {
+        binsData[docSnap.id] = docSnap.data() as BinData;
       });
+
+      if (Object.keys(binsData).length > 0) {
+        setBins(binsData);
+        console.log(`✅ Loaded ${Object.keys(binsData).length} bins for ${munId}`);
+      } else {
+        setFallbackBins();
+      }
+    } catch (e) {
+      console.error("Error loading bins:", e);
+      setFallbackBins();
     } finally {
       setLoadingBins(false);
     }
   };
 
-  const showResult = async (itemName: string) => {
-    const binId = mapItemToBin(itemName);
-    const bin = bins[binId] ?? bins["mixed"];
-    setResult({ item: itemName, bin, binId });
-    const geminiTip = await getLariTip(itemName, bin.name);
-    if (geminiTip) {
-      setResult({ item: itemName, bin: { ...bin, tip: geminiTip }, binId });
+  const setFallbackBins = () => {
+    setBins({
+      blue:   { name: "Modri zabojnik",  color: "blue",   type: "paper",     description: "Zabojnik za papir.",       tip: "Papir naj bo čist in suh.",         allowed: ["Papir", "Karton"],    notAllowed: ["Masten papir"] },
+      yellow: { name: "Rumeni zabojnik", color: "yellow", type: "packaging", description: "Zabojnik za embalažo.",    tip: "Stisni plastenko pred odlaganjem.", allowed: ["Plastika", "Kovine"], notAllowed: ["Umazana embalaža"] },
+      green:  { name: "Zeleni zabojnik", color: "green",  type: "glass",     description: "Zabojnik za steklo.",      tip: "Izprazni steklenico.",              allowed: ["Steklo"],             notAllowed: ["Keramika"] },
+      brown:  { name: "Rjavi zabojnik",  color: "brown",  type: "bio",       description: "Zabojnik za bio odpadke.", tip: "Samo organski odpadki.",            allowed: ["Hrana", "Bio"],       notAllowed: ["Plastika"] },
+      mixed:  { name: "Mešani odpadki",  color: "mixed",  type: "mixed",     description: "Za kar ne gre drugam.",    tip: "Sem gre kar se ne da razvrstiti.",  allowed: ["Mešani"],             notAllowed: [] },
+    });
+  };
+
+  // ─── Run TFLite model ───────────────────────────────────────────────────────
+  const runTFLiteModel = async (imageUri: string) => {
+  if (!tfliteModel) return null;
+  try {
+    const inputData = await preprocessImage(imageUri);
+    if (!inputData) return null;
+    
+    // v3 API zahteva ArrayBuffer
+    const output = await tfliteModel.run([inputData.buffer]);
+    if (!output?.[0]) return null;
+    
+    // output je tudi ArrayBuffer — pretvorimo nazaj
+    const predictions = new Float32Array(output[0]);
+    
+    let maxIndex = 0;
+    let maxValue = predictions[0];
+    for (let i = 1; i < predictions.length; i++) {
+      if (predictions[i] > maxValue) {
+        maxValue = predictions[i];
+        maxIndex = i;
+      }
+    }
+
+    const className = CLASS_NAMES[maxIndex] ?? "trash";
+    const confidence = Math.round(maxValue * 100);
+    console.log(`TFLite: ${className} (${confidence}%)`);
+    return { className, confidence };
+  } catch (e) {
+    console.error("TFLite error:", e);
+    return null;
+  }
+};
+
+  // ─── Show result ────────────────────────────────────────────────────────────
+  const showResult = async (
+    tfliteClass?: string,
+    confidence?: number,
+    fallbackText?: string
+  ) => {
+    const binType = tfliteClass
+      ? CLASS_TO_BIN_TYPE[tfliteClass] ?? "mixed"
+      : mapTextToBinType(fallbackText ?? "");
+
+    const { binId, bin } = findBinByType(bins, binType);
+    const displayName = tfliteClass
+      ? CLASS_NAMES_SL[tfliteClass] ?? fallbackText ?? "Odpadek"
+      : fallbackText ?? "Odpadek";
+
+    setResult({ item: displayName, bin, binId, confidence });
+
+    const tip = await getLariTip(displayName, bin.name);
+    if (tip) {
+      setResult({ item: displayName, bin: { ...bin, tip }, binId, confidence });
     }
   };
 
+  // ─── Take picture ───────────────────────────────────────────────────────────
   const takePicture = async () => {
     if (!cameraRef.current) return;
     setLoading(true);
     setResult(null);
     try {
-      const pic = await cameraRef.current.takePictureAsync({ base64: false });
+      const pic = await cameraRef.current.takePictureAsync({ base64: false, quality: 0.8 });
       setPhoto(pic.uri);
+
+      if (modelReady && tfliteModel) {
+        const tfliteResult = await runTFLiteModel(pic.uri);
+        if (tfliteResult && tfliteResult.confidence >= 40) {
+          await showResult(tfliteResult.className, tfliteResult.confidence);
+          setLoading(false);
+          return;
+        }
+      }
+
+      setLoading(false);
       Alert.alert(
         "Odpadek posnet! 📷",
-        "Kako želiš identificirati odpadek?",
+        modelReady
+          ? "Model ni bil prepričan. Poskusi s črtno kodo za boljši rezultat."
+          : "Poskusi s črtno kodo za identifikacijo.",
         [
-          { text: "🔲 Skeniraj črtno kodo", onPress: () => { setPhoto(null); setScanMode("barcode"); setBarcodeScanning(true); } },
+          { text: "🔲 Črtna koda", onPress: () => { setPhoto(null); setScanMode("barcode"); setBarcodeScanning(true); } },
           { text: "Prekliči", onPress: () => setPhoto(null), style: "cancel" },
         ]
       );
     } catch {
-      Alert.alert("Napaka", "Fotografiranje ni uspelo.");
-    } finally {
       setLoading(false);
+      Alert.alert("Napaka", "Fotografiranje ni uspelo.");
     }
   };
 
+  // ─── Barcode scan ───────────────────────────────────────────────────────────
   const handleBarcodeScan = async ({ data: barcode }: { data: string }) => {
     if (!barcodeScanning) return;
     setBarcodeScanning(false);
@@ -151,22 +381,20 @@ export default function ScannerScreen({ navigation }: any) {
       );
       const data = await res.json();
       if (data.status === 1 && data.product) {
-        const product = data.product;
-        const itemName = product.product_name || product.product_name_sl || barcode;
-        const packaging = product.packaging || product.packaging_text || "";
-        const searchText = `${itemName} ${packaging}`;
+        const itemName = data.product.product_name || barcode;
+        const packaging = data.product.packaging || "";
         setLoading(false);
         setScanMode("camera");
-        await showResult(searchText);
+        await showResult(undefined, undefined, `${itemName} ${packaging}`);
       } else {
         setLoading(false);
         setScanMode("camera");
-        Alert.alert("Produkt ni najden", "Ta produkt ni v bazi. Poskusi s črtno kodo drugega produkta.");
+        Alert.alert("Produkt ni najden", "Ta produkt ni v bazi.");
       }
     } catch {
       setLoading(false);
       setScanMode("camera");
-      Alert.alert("Napaka", "Ni se uspelo povezati z bazo produktov. Preveri internet.");
+      Alert.alert("Napaka", "Ni se uspelo povezati z bazo produktov.");
     }
   };
 
@@ -189,7 +417,7 @@ export default function ScannerScreen({ navigation }: any) {
     );
   }
 
-  // ─── Barcode mode ──────────────────────────────────────────────────────────
+  // ─── Barcode mode ───────────────────────────────────────────────────────────
   if (scanMode === "barcode") {
     return (
       <SafeAreaView style={s.container}>
@@ -204,7 +432,7 @@ export default function ScannerScreen({ navigation }: any) {
           <View style={{ width: 40 }} />
         </View>
         <View style={s.cameraBox}>
-          <BarcodeCameraView
+          <CameraView
             style={s.camera}
             facing="back"
             onBarcodeScanned={barcodeScanning ? handleBarcodeScan : undefined}
@@ -231,7 +459,7 @@ export default function ScannerScreen({ navigation }: any) {
     );
   }
 
-  // ─── Main camera mode ──────────────────────────────────────────────────────
+  // ─── Main camera mode ───────────────────────────────────────────────────────
   return (
     <SafeAreaView style={s.container}>
       <View style={s.header}>
@@ -246,12 +474,21 @@ export default function ScannerScreen({ navigation }: any) {
       <View style={s.titleRow}>
         <Text style={s.title}>Skener ✦</Text>
         <Text style={s.subtitle}>Slikaj odpadek ali skeniraj črtno kodo.</Text>
-        {loadingBins && (
-          <View style={s.loadingBinsRow}>
-            <ActivityIndicator size="small" color="#22C55E" />
-            <Text style={s.loadingBinsText}>Nalagam pravila za Maribor...</Text>
-          </View>
-        )}
+        <View style={s.statusRow}>
+          {loadingBins ? (
+            <>
+              <ActivityIndicator size="small" color="#22C55E" />
+              <Text style={s.statusText}>Nalagam pravila za {municipalityName}...</Text>
+            </>
+          ) : (
+            <>
+              <Text style={s.statusDot}>{modelReady ? "🟢" : "🟡"}</Text>
+              <Text style={s.statusText}>
+                {modelReady ? `AI model aktiven · ${municipalityName}` : `Nalagam AI model · ${municipalityName}`}
+              </Text>
+            </>
+          )}
+        </View>
       </View>
 
       <View style={s.cameraBox}>
@@ -270,7 +507,9 @@ export default function ScannerScreen({ navigation }: any) {
             {loading && (
               <View style={s.loadingOverlay}>
                 <ActivityIndicator size="large" color="#22C55E" />
-                <Text style={s.loadingText}>Analiziram odpadek...</Text>
+                <Text style={s.loadingText}>
+                  {modelReady ? "AI analizira odpadek..." : "Analiziram..."}
+                </Text>
               </View>
             )}
           </>
@@ -281,12 +520,20 @@ export default function ScannerScreen({ navigation }: any) {
         {result && !loading && (
           <View style={s.resultCard}>
             <Text style={s.resultLabel}>Prepoznano:</Text>
-            <Text style={s.resultItem}>{result.item} 🌿</Text>
+            <View style={s.resultItemRow}>
+              <Text style={s.resultItem}>{result.item} 🌿</Text>
+              {result.confidence && (
+                <View style={s.confidenceBadge}>
+                  <Text style={s.confidenceText}>{result.confidence}%</Text>
+                </View>
+              )}
+            </View>
             <Text style={s.resultLabel}>Odloži v:</Text>
             <Text style={[s.resultBin, { color: BIN_COLORS[result.binId] ?? "#1F2937" }]}>
-              ● {result.bin.name ?? "Neznan zabojnik"}
+              ● {result.bin.name}
             </Text>
-            <Text style={s.resultDesc}>{result.bin.description ?? ""}</Text>
+            <Text style={s.resultDesc}>{result.bin.description}</Text>
+            <Text style={s.municipalityBadge}>📍 {municipalityName}</Text>
           </View>
         )}
 
@@ -294,14 +541,14 @@ export default function ScannerScreen({ navigation }: any) {
           <View style={s.rulesCard}>
             <View style={s.rulesCol}>
               <Text style={s.rulesTitle}>✅ Dovoljeno</Text>
-              {(result.bin.allowed ?? []).slice(0, 4).map((item, i) => (
+              {(result.bin.allowed ?? []).slice(0, 5).map((item, i) => (
                 <Text key={i} style={s.rulesItem}>• {item}</Text>
               ))}
             </View>
             <View style={s.rulesDivider} />
             <View style={s.rulesCol}>
               <Text style={s.rulesTitleRed}>❌ Ni dovoljeno</Text>
-              {(result.bin.notAllowed ?? []).slice(0, 4).map((item, i) => (
+              {(result.bin.notAllowed ?? []).slice(0, 5).map((item, i) => (
                 <Text key={i} style={s.rulesItem}>• {item}</Text>
               ))}
             </View>
@@ -310,7 +557,9 @@ export default function ScannerScreen({ navigation }: any) {
 
         {result && !loading && (
           <View style={s.tipCard}>
-            <Text style={s.tipTitle}>Lari nasvet ✦</Text>
+            <View style={s.tipHeader}>
+              <Text style={s.tipTitle}>Lari nasvet ✦</Text>
+            </View>
             <Text style={s.tipText}>{result.bin.tip}</Text>
           </View>
         )}
@@ -319,10 +568,18 @@ export default function ScannerScreen({ navigation }: any) {
       <View style={s.buttonsRow}>
         {!result ? (
           <>
-            <TouchableOpacity style={s.mainBtn} onPress={takePicture} disabled={loadingBins}>
+            <TouchableOpacity
+              style={[s.mainBtn, loadingBins && s.btnDisabled]}
+              onPress={takePicture}
+              disabled={loadingBins}
+            >
               <Text style={s.mainBtnText}>📷 Slikaj</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={s.secondBtn} onPress={() => { setScanMode("barcode"); setBarcodeScanning(true); }} disabled={loadingBins}>
+            <TouchableOpacity
+              style={[s.secondBtn, loadingBins && s.btnDisabled]}
+              onPress={() => { setScanMode("barcode"); setBarcodeScanning(true); }}
+              disabled={loadingBins}
+            >
               <Text style={s.secondBtnText}>🔲 Črtna koda</Text>
             </TouchableOpacity>
           </>
@@ -338,53 +595,62 @@ export default function ScannerScreen({ navigation }: any) {
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
 const s = {
-  container:       { flex: 1, backgroundColor: "#F8FAF5" },
-  header:          { flexDirection: "row" as const, alignItems: "center" as const, justifyContent: "space-between" as const, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8 },
-  backBtn:         { width: 40, height: 40, justifyContent: "center" as const },
-  backText:        { fontSize: 28, color: "#1F2937" },
-  headerTitle:     { fontSize: 20, fontWeight: "700" as const },
-  headerGreen:     { color: "#22C55E" },
-  headerPurple:    { color: "#7C3AED" },
-  titleRow:        { paddingHorizontal: 20, paddingBottom: 10 },
-  title:           { fontSize: 26, fontWeight: "700" as const, color: "#1F2937", marginBottom: 2 },
-  subtitle:        { fontSize: 14, color: "#6B7280" },
-  loadingBinsRow:  { flexDirection: "row" as const, alignItems: "center" as const, gap: 8, marginTop: 6 },
-  loadingBinsText: { fontSize: 12, color: "#6B7280" },
-  cameraBox:       { height: 320, marginHorizontal: 20, borderRadius: 16, overflow: "hidden" as const, position: "relative" as const, backgroundColor: "#000" },
-  camera:          { flex: 1 },
-  photo:           { width: "100%" as const, height: "100%" as const },
-  cornerTL:        { position: "absolute" as const, top: 16, left: 16, width: 28, height: 28, borderTopWidth: 3, borderLeftWidth: 3, borderColor: "#22C55E", borderTopLeftRadius: 5 },
-  cornerTR:        { position: "absolute" as const, top: 16, right: 16, width: 28, height: 28, borderTopWidth: 3, borderRightWidth: 3, borderColor: "#22C55E", borderTopRightRadius: 5 },
-  cornerBL:        { position: "absolute" as const, bottom: 16, left: 16, width: 28, height: 28, borderBottomWidth: 3, borderLeftWidth: 3, borderColor: "#22C55E", borderBottomLeftRadius: 5 },
-  cornerBR:        { position: "absolute" as const, bottom: 16, right: 16, width: 28, height: 28, borderBottomWidth: 3, borderRightWidth: 3, borderColor: "#22C55E", borderBottomRightRadius: 5 },
-  goodLight:       { position: "absolute" as const, top: 12, alignSelf: "center" as const, backgroundColor: "#22C55E", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
-  goodLightText:   { color: "#fff", fontSize: 12, fontWeight: "600" as const },
-  loadingOverlay:  { position: "absolute" as const, top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center" as const, alignItems: "center" as const },
-  loadingText:     { color: "#fff", marginTop: 8, fontSize: 14 },
-  centerLoader:    { alignItems: "center" as const, padding: 20, gap: 8 },
-  resultsScroll:   { flex: 1 },
-  resultsContent:  { padding: 16, paddingBottom: 8 },
-  resultCard:      { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-  resultLabel:     { fontSize: 12, color: "#6B7280", marginBottom: 2, marginTop: 6 },
-  resultItem:      { fontSize: 18, fontWeight: "700" as const, color: "#22C55E" },
-  resultBin:       { fontSize: 16, fontWeight: "700" as const, marginBottom: 4 },
-  resultDesc:      { fontSize: 12, color: "#6B7280" },
-  rulesCard:       { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, flexDirection: "row" as const, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
-  rulesCol:        { flex: 1 },
-  rulesDivider:    { width: 1, backgroundColor: "#F3F4F6", marginHorizontal: 12 },
-  rulesTitle:      { fontSize: 13, fontWeight: "700" as const, color: "#166534", marginBottom: 8 },
-  rulesTitleRed:   { fontSize: 13, fontWeight: "700" as const, color: "#DC2626", marginBottom: 8 },
-  rulesItem:       { fontSize: 12, color: "#374151", marginBottom: 4 },
-  tipCard:         { backgroundColor: "#F0FDF4", borderRadius: 16, padding: 16, marginBottom: 8 },
-  tipTitle:        { fontSize: 14, fontWeight: "700" as const, color: "#7C3AED", marginBottom: 4 },
-  tipText:         { fontSize: 13, color: "#374151", lineHeight: 20 },
-  buttonsRow:      { flexDirection: "row" as const, gap: 10, paddingHorizontal: 20, paddingVertical: 12 },
-  mainBtn:         { flex: 1, backgroundColor: "#22C55E", borderRadius: 14, padding: 16, alignItems: "center" as const },
-  mainBtnText:     { color: "#fff", fontWeight: "700" as const, fontSize: 15 },
-  secondBtn:       { flex: 1, backgroundColor: "#fff", borderRadius: 14, padding: 16, alignItems: "center" as const, borderWidth: 1.5, borderColor: "#7C3AED" },
-  secondBtnText:   { color: "#7C3AED", fontWeight: "700" as const, fontSize: 15 },
-  permText:        { textAlign: "center" as const, margin: 40, fontSize: 15, color: "#374151" },
-  permBtn:         { backgroundColor: "#22C55E", borderRadius: 12, padding: 14, marginHorizontal: 40, alignItems: "center" as const },
-  permBtnText:     { color: "#fff", fontWeight: "700" as const },
+  container:         { flex: 1, backgroundColor: "#F8FAF5" },
+  header:            { flexDirection: "row" as const, alignItems: "center" as const, justifyContent: "space-between" as const, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 8 },
+  backBtn:           { width: 40, height: 40, justifyContent: "center" as const },
+  backText:          { fontSize: 28, color: "#1F2937" },
+  headerTitle:       { fontSize: 20, fontWeight: "700" as const },
+  headerGreen:       { color: "#22C55E" },
+  headerPurple:      { color: "#7C3AED" },
+  titleRow:          { paddingHorizontal: 20, paddingBottom: 10 },
+  title:             { fontSize: 26, fontWeight: "700" as const, color: "#1F2937", marginBottom: 2 },
+  subtitle:          { fontSize: 14, color: "#6B7280" },
+  statusRow:         { flexDirection: "row" as const, alignItems: "center" as const, gap: 6, marginTop: 6 },
+  statusDot:         { fontSize: 10 },
+  statusText:        { fontSize: 12, color: "#6B7280" },
+  cameraBox:         { height: 300, marginHorizontal: 20, borderRadius: 16, overflow: "hidden" as const, position: "relative" as const, backgroundColor: "#000" },
+  camera:            { flex: 1 },
+  photo:             { width: "100%" as const, height: "100%" as const },
+  cornerTL:          { position: "absolute" as const, top: 16, left: 16, width: 28, height: 28, borderTopWidth: 3, borderLeftWidth: 3, borderColor: "#22C55E", borderTopLeftRadius: 5 },
+  cornerTR:          { position: "absolute" as const, top: 16, right: 16, width: 28, height: 28, borderTopWidth: 3, borderRightWidth: 3, borderColor: "#22C55E", borderTopRightRadius: 5 },
+  cornerBL:          { position: "absolute" as const, bottom: 16, left: 16, width: 28, height: 28, borderBottomWidth: 3, borderLeftWidth: 3, borderColor: "#22C55E", borderBottomLeftRadius: 5 },
+  cornerBR:          { position: "absolute" as const, bottom: 16, right: 16, width: 28, height: 28, borderBottomWidth: 3, borderRightWidth: 3, borderColor: "#22C55E", borderBottomRightRadius: 5 },
+  goodLight:         { position: "absolute" as const, top: 12, alignSelf: "center" as const, backgroundColor: "#22C55E", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 },
+  goodLightText:     { color: "#fff", fontSize: 12, fontWeight: "600" as const },
+  loadingOverlay:    { position: "absolute" as const, top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center" as const, alignItems: "center" as const },
+  loadingText:       { color: "#fff", marginTop: 8, fontSize: 14, fontWeight: "600" as const },
+  centerLoader:      { alignItems: "center" as const, padding: 20, gap: 8 },
+  loadingBinsText:   { fontSize: 12, color: "#6B7280" },
+  resultsScroll:     { flex: 1 },
+  resultsContent:    { padding: 16, paddingBottom: 8 },
+  resultCard:        { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  resultItemRow:     { flexDirection: "row" as const, alignItems: "center" as const, justifyContent: "space-between" as const, marginBottom: 4 },
+  resultLabel:       { fontSize: 12, color: "#6B7280", marginBottom: 2, marginTop: 6 },
+  resultItem:        { fontSize: 18, fontWeight: "700" as const, color: "#22C55E" },
+  confidenceBadge:   { backgroundColor: "#F0FDF4", borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
+  confidenceText:    { fontSize: 13, fontWeight: "700" as const, color: "#22C55E" },
+  resultBin:         { fontSize: 16, fontWeight: "700" as const, marginBottom: 4 },
+  resultDesc:        { fontSize: 12, color: "#6B7280" },
+  municipalityBadge: { fontSize: 11, color: "#7C3AED", marginTop: 6, fontWeight: "600" as const },
+  rulesCard:         { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, flexDirection: "row" as const, shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 },
+  rulesCol:          { flex: 1 },
+  rulesDivider:      { width: 1, backgroundColor: "#F3F4F6", marginHorizontal: 12 },
+  rulesTitle:        { fontSize: 13, fontWeight: "700" as const, color: "#166534", marginBottom: 8 },
+  rulesTitleRed:     { fontSize: 13, fontWeight: "700" as const, color: "#DC2626", marginBottom: 8 },
+  rulesItem:         { fontSize: 12, color: "#374151", marginBottom: 4 },
+  tipCard:           { backgroundColor: "#F0FDF4", borderRadius: 16, padding: 16, marginBottom: 8 },
+  tipHeader:         { flexDirection: "row" as const, alignItems: "center" as const, marginBottom: 4 },
+  tipTitle:          { fontSize: 14, fontWeight: "700" as const, color: "#7C3AED" },
+  tipText:           { fontSize: 13, color: "#374151", lineHeight: 20 },
+  buttonsRow:        { flexDirection: "row" as const, gap: 10, paddingHorizontal: 20, paddingVertical: 12 },
+  mainBtn:           { flex: 1, backgroundColor: "#22C55E", borderRadius: 14, padding: 16, alignItems: "center" as const },
+  mainBtnText:       { color: "#fff", fontWeight: "700" as const, fontSize: 15 },
+  secondBtn:         { flex: 1, backgroundColor: "#fff", borderRadius: 14, padding: 16, alignItems: "center" as const, borderWidth: 1.5, borderColor: "#7C3AED" },
+  secondBtnText:     { color: "#7C3AED", fontWeight: "700" as const, fontSize: 15 },
+  btnDisabled:       { opacity: 0.5 },
+  permText:          { textAlign: "center" as const, margin: 40, fontSize: 15, color: "#374151" },
+  permBtn:           { backgroundColor: "#22C55E", borderRadius: 12, padding: 14, marginHorizontal: 40, alignItems: "center" as const },
+  permBtnText:       { color: "#fff", fontWeight: "700" as const },
 };
