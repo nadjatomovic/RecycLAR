@@ -369,34 +369,66 @@ const prepareModel = async () => {
     }
   };
 
-  // ─── Barcode scan ───────────────────────────────────────────────────────────
-  const handleBarcodeScan = async ({ data: barcode }: { data: string }) => {
-    if (!barcodeScanning) return;
-    setBarcodeScanning(false);
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`,
-        { signal: AbortSignal.timeout(15000) }
-      );
-      const data = await res.json();
-      if (data.status === 1 && data.product) {
-        const itemName = data.product.product_name || barcode;
-        const packaging = data.product.packaging || "";
-        setLoading(false);
-        setScanMode("camera");
-        await showResult(undefined, undefined, `${itemName} ${packaging}`);
-      } else {
-        setLoading(false);
-        setScanMode("camera");
-        Alert.alert("Produkt ni najden", "Ta produkt ni v bazi.");
+const getBinTypeFromGemini = async (
+  itemName: string,
+  packaging: string,
+  categories: string
+): Promise<string> => {
+  try {
+    const isBarcode = /^\d+$/.test(itemName);
+    const prompt = isBarcode
+      ? `Barcode številka: ${itemName}. To je verjetno plastična ali kovinska embalaža živilskega produkta. Kateri zabojnik? Odgovori SAMO z eno besedo: packaging, paper, glass, bio, ali mixed.`
+      : `Produkt: "${itemName}", Embalaža: "${packaging}". Kateri zabojnik po slovenskih pravilih? SAMO ena beseda: packaging, paper, glass, bio, ali mixed.`;
+
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${process.env.EXPO_PUBLIC_GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
       }
-    } catch {
-      setLoading(false);
-      setScanMode("camera");
-      Alert.alert("Napaka", "Ni se uspelo povezati z bazo produktov.");
-    }
-  };
+    );
+    if (!res.ok) return "packaging";
+    const data = await res.json();
+    const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim().toLowerCase() ?? "packaging";
+    if (answer.includes("paper")) return "paper";
+    if (answer.includes("glass")) return "glass";
+    if (answer.includes("bio")) return "bio";
+    if (answer.includes("mixed")) return "mixed";
+    return "packaging"; // default za večino produktov
+  } catch {
+    return "packaging";
+  }
+};
+
+  // ─── Barcode scan ───────────────────────────────────────────────────────────
+const handleBarcodeScan = async ({ data: barcode }: { data: string }) => {
+  if (!barcodeScanning) return;
+  setBarcodeScanning(false);
+  setLoading(true);
+  setScanMode("camera");
+
+  try {
+    // Gemini določi bin direktno iz barcode številke
+    const binType = await getBinTypeFromGemini(barcode, "", "");
+    const { binId, bin } = findBinByType(bins, binType);
+    const displayName = `Produkt ${barcode}`;
+
+    setResult({ item: displayName, bin, binId });
+
+    // Boljši Lari tip
+    const tip = await getLariTip(displayName, bin.name);
+    if (tip) setResult({ item: displayName, bin: { ...bin, tip }, binId });
+
+  } catch (e) {
+    console.log("Barcode error:", e);
+    Alert.alert("Napaka", "Skeniranje ni uspelo.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const resetScan = () => {
     setPhoto(null);
