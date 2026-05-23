@@ -23,7 +23,11 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.recyclar.app"
+      "package": "com.recyclar.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/icon-logo.png"
@@ -41,8 +45,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "recyclar"
+        "projectId": "cbd0db3f-db68-4894-9b1c-999197f5c796"
       }
-    }
+    },
+    "owner": "ljupka"
   }
 }
