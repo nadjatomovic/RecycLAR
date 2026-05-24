@@ -15,24 +15,38 @@ export const styles = StyleSheet.create({
     paddingTop: isSmallPhone ? 4 : 10,
     paddingBottom: 110,
   },
+topBrandRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "center",
+  marginTop: 4,
+  marginBottom: 24,
+  paddingHorizontal: 16,
+  paddingVertical: 6,
+  borderRadius: 24,
+  backgroundColor: "rgba(255,255,255,0.65)",
+},
 
-  topBrandRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    marginBottom: isSmallPhone ? 14 : 20,
-  },
+topBrandIcon: {
+  width: 52,
+  height: 52,
+  marginRight: 10,
+},
 
-  topBrandIcon: {
-    width: 48,
-    height: 48,
-    marginRight: 10,
-  },
+topBrandText: {
+  fontSize: 30,
+  lineHeight: 36,
+  fontWeight: "900",
+  letterSpacing: -0.3,
+},
 
-  topBrandLogo: {
-    width: 145,
-    height: 42,
-  },
+topBrandGreen: {
+  color: COLORS.green,
+},
+
+topBrandPurple: {
+  color: COLORS.purple,
+},
 
   welcomeSection: {
     marginBottom: 18,

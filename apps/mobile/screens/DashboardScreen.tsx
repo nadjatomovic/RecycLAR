@@ -80,19 +80,18 @@ const DashboardScreen = ({ navigation, route }: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        <View style={styles.topBrandRow}>
-          <Image
-            source={require("../assets/icon-logo.png")}
-            style={styles.topBrandIcon}
-            resizeMode="contain"
-          />
+       <View style={styles.topBrandRow}>
+  <Image
+    source={require("../assets/icon-logo.png")}
+    style={styles.topBrandIcon}
+    resizeMode="contain"
+  />
 
-          <Image
-            source={require("../assets/logo.png")}
-            style={styles.topBrandLogo}
-            resizeMode="contain"
-          />
-        </View>
+  <Text style={styles.topBrandText}>
+    <Text style={styles.topBrandGreen}>Recyc</Text>
+    <Text style={styles.topBrandPurple}>LAR</Text>
+  </Text>
+</View>
 
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>Pozdravljeni!</Text>

@@ -51,12 +51,36 @@ const CITY_COORDINATES: Record<string, any> = {
   },
 };
 
+const FILTERS = [
+  { label: "Vse", type: "all", color: "#6B35C9" },
+  { label: "EKO otok", type: "eco", color: "#35A936" },
+  { label: "Zbirni center", type: "collection_center", color: "#F59E0B" },
+  { label: "BIO", type: "bio_bin", color: "#8A5A32" },
+  { label: "Embalaža", type: "packaging_bin", color: "#F2B400" },
+];
+
+const getMarkerColor = (type: string) => {
+  if (type === "collection_center") return "#F59E0B";
+  if (type === "bio_bin") return "#8A5A32";
+  if (type === "packaging_bin") return "#F2B400";
+  if (type === "special_dropoff") return "#6B35C9";
+  return "#35A936";
+};
+
+const getMarkerIcon = (type: string) => {
+  if (type === "collection_center") return "Z";
+  if (type === "bio_bin") return "B";
+  if (type === "packaging_bin") return "E";
+  if (type === "special_dropoff") return "P";
+  return "♻";
+};
+
 export default function MapScreen({ route, navigation }: any) {
-  // Називот на општината го претвораме во мали букви (пр. "Celje" -> "celje") за да одговара на municipalityId во базата
   const selectedMunicipality = route.params?.municipality || "Maribor";
   const municipalityIdLower = selectedMunicipality.toLowerCase();
 
   const mapRef = useRef<MapView | null>(null);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -64,61 +88,63 @@ export default function MapScreen({ route, navigation }: any) {
   const [activeFilter, setActiveFilter] = useState("all");
   const [locations, setLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
 
   const [currentRegion, setCurrentRegion] = useState(
-    CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES["Maribor"],
+    CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES.Maribor
   );
 
-  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Анимација на мапата при промена на општина
   useEffect(() => {
     const newRegion =
-      CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES["Maribor"];
+      CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES.Maribor;
+
     setCurrentRegion(newRegion);
+
     if (mapRef.current) {
       mapRef.current.animateToRegion(newRegion, 1000);
     }
   }, [selectedMunicipality]);
 
-  // КЛУЧНО ПОПРАВЕН ЕФЕКТ ЗА РЕАЛНИ ПОДАТОЦИ ОД FIRESTORE
   useEffect(() => {
     async function fetchLocations() {
       setLoading(true);
+
       try {
-        // Се поврзуваме со главната колекција 'recyclingLocations' како на сликата
         const colRef = collection(db, "recyclingLocations");
 
-        // Правиме квери каде што municipalityId е еднакво на избраната општина (на пр. "celje")
-        const q = query(
+        const locationsQuery = query(
           colRef,
-          where("municipalityId", "==", municipalityIdLower),
+          where("municipalityId", "==", municipalityIdLower)
         );
-        const snapshot = await getDocs(q);
+
+        const snapshot = await getDocs(locationsQuery);
 
         const fetched: any[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
 
-          // Ги мапираме реалните полиња од твојата слика за да одговараат на структурата на мапата
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+
           fetched.push({
-            id: doc.id,
-            title: data.name || "EKO Otok",
+            id: docSnap.id,
+            title: data.name || "EKO otok",
             lat: data.latitude,
             lng: data.longitude,
             address: data.address || "",
-            // Твојот тип во базата е "eco_island". Ова овозможува да работи филтерот "eco"
             type: data.type === "eco_island" ? "eco" : data.type,
-            // Кантите ги спојуваме во една низа за опис (пр: "red, white, yellow")
-            items: data.bins ? data.bins.join(", ") : "Всички видови",
+            items: data.bins ? data.bins.join(", ") : "Vsi tipi zabojnikov",
+            bins: data.bins || [],
+            provider: data.provider || "",
+            active: data.active ?? true,
             ...data,
           });
         });
 
         setLocations(fetched);
+        setSelectedLocation(fetched[0] ?? null);
       } catch (error) {
-        console.log("Greska pri vlecenje na lokaciite:", error);
+        console.log("Napaka pri nalaganju lokacij:", error);
         setLocations([]);
+        setSelectedLocation(null);
       } finally {
         setLoading(false);
       }
@@ -127,7 +153,6 @@ export default function MapScreen({ route, navigation }: any) {
     fetchLocations();
   }, [selectedMunicipality]);
 
-  // OpenStreetMap Nominatim Геокодирање за пребарување улици
   const triggerAddressSearch = async (text: string) => {
     if (text.trim().length < 3) {
       setSearchResults([]);
@@ -136,8 +161,9 @@ export default function MapScreen({ route, navigation }: any) {
 
     try {
       setSearchingAddress(true);
+
       const queryUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        text + ", " + selectedMunicipality + ", Slovenia",
+        `${text}, ${selectedMunicipality}, Slovenia`
       )}&limit=5&addressdetails=1`;
 
       const response = await fetch(queryUrl, {
@@ -150,7 +176,8 @@ export default function MapScreen({ route, navigation }: any) {
       });
 
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
+
+      if (contentType && contentType.includes("application/json")) {
         const data = await response.json();
         setSearchResults(data);
       }
@@ -190,6 +217,7 @@ export default function MapScreen({ route, navigation }: any) {
     };
 
     setCurrentRegion(newRegion);
+
     if (mapRef.current) {
       mapRef.current.animateToRegion(newRegion, 1200);
     }
@@ -199,98 +227,82 @@ export default function MapScreen({ route, navigation }: any) {
     Keyboard.dismiss();
   };
 
-  // Логика за филтрирање на локациите
   const filteredLocations = locations.filter((loc) => {
     return activeFilter === "all" || loc.type === activeFilter;
   });
 
+  const focusLocation = (location: any) => {
+    if (!location?.lat || !location?.lng) return;
+
+    const newRegion = {
+      latitude: Number(location.lat),
+      longitude: Number(location.lng),
+      latitudeDelta: 0.008,
+      longitudeDelta: 0.008,
+    };
+
+    setSelectedLocation(location);
+    setCurrentRegion(newRegion);
+
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newRegion, 800);
+    }
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <Text style={[styles.brandText, styles.brandGreen]}>Recyc</Text>
-          <Text style={[styles.brandText, styles.brandPurple]}>Lar</Text>
+          <Text style={[styles.brandText, styles.brandPurple]}>LAR</Text>
         </View>
-        <View
-          style={{
-            backgroundColor: "#EFE8FF",
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 12,
-          }}
-        >
-          <Text style={{ color: "#6B35C9", fontWeight: "700", fontSize: 14 }}>
-            📍 {selectedMunicipality}
+
+        <View style={styles.cityPill}>
+          <Text style={styles.cityPillText}>📍 {selectedMunicipality}</Text>
+        </View>
+      </View>
+
+      <View style={styles.titleSection}>
+        <View style={styles.titleTextWrap}>
+          <Text style={styles.mainTitle}>Zemljevid</Text>
+          <Text style={styles.subTitle}>
+            Poišči najbližji EKO otok ali zbirni center.
           </Text>
         </View>
       </View>
 
-      {/* Search Input Bar */}
-      <View style={{ paddingHorizontal: 22, marginBottom: 10, zIndex: 10 }}>
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Text style={styles.searchIcon}>⌕</Text>
+
           <TextInput
-            style={{
-              flex: 1,
-              height: 46,
-              backgroundColor: "#F8F8FB",
-              borderRadius: 12,
-              paddingHorizontal: 16,
-              borderWidth: 1,
-              borderColor: "#ECECF2",
-              fontSize: 14,
-              color: "#252733",
-            }}
+            style={styles.searchInput}
             placeholder="Poišči ulico v tem mestu..."
             placeholderTextColor="#7A7A86"
             value={searchQuery}
             onChangeText={handleSearchTextChange}
           />
+
           {searchingAddress && (
-            <ActivityIndicator
-              size="small"
-              color="#6B35C9"
-              style={{ position: "absolute", right: 16 }}
-            />
+            <ActivityIndicator size="small" color="#6B35C9" />
           )}
         </View>
 
-        {/* Dropdown Suggestions List */}
         {searchResults.length > 0 && (
-          <View
-            style={{
-              backgroundColor: "#FFFFFF",
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "#ECECF2",
-              marginTop: 4,
-              maxHeight: 220,
-              shadowColor: "#000",
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
-              position: "absolute",
-              top: 48,
-              left: 22,
-              right: 22,
-              zIndex: 999,
-            }}
-          >
+          <View style={styles.suggestionsBox}>
             <ScrollView keyboardShouldPersistTaps="handled">
-              {searchResults.map((item, idx) => (
+              {searchResults.map((item, index) => (
                 <TouchableOpacity
-                  key={idx}
-                  style={{
-                    padding: 12,
-                    borderBottomWidth: idx === searchResults.length - 1 ? 0 : 1,
-                    borderBottomColor: "#F4F4F6",
-                  }}
+                  key={`${item.place_id}-${index}`}
+                  style={[
+                    styles.suggestionItem,
+                    index === searchResults.length - 1 &&
+                      styles.suggestionItemLast,
+                  ]}
                   onPress={() => handleSelectPrediction(item)}
+                  activeOpacity={0.85}
                 >
-                  <Text
-                    style={{ fontSize: 13, color: "#252733" }}
-                    numberOfLines={1}
-                  >
+                  <Text style={styles.suggestionText} numberOfLines={1}>
                     📍 {item.display_name}
                   </Text>
                 </TouchableOpacity>
@@ -300,89 +312,108 @@ export default function MapScreen({ route, navigation }: any) {
         )}
       </View>
 
-      {/* Filter Chips */}
-      <View style={{ height: 40, marginBottom: 10 }}>
+      <View style={styles.filtersWrap}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 22, gap: 8 }}
+          contentContainerStyle={styles.filtersContent}
         >
-          <FilterChip
-            label="Vse"
-            type="all"
-            active={activeFilter === "all"}
-            onPress={setActiveFilter}
-            color="#6B35C9"
-          />
-          <FilterChip
-            label="EKO otok"
-            type="eco"
-            active={activeFilter === "eco"}
-            onPress={setActiveFilter}
-            color="#35A936"
-          />
-          <FilterChip
-            label="Papir"
-            type="paper"
-            active={activeFilter === "paper"}
-            onPress={setActiveFilter}
-            color="#2B7DE9"
-          />
-          <FilterChip
-            label="Steklo"
-            type="glass"
-            active={activeFilter === "glass"}
-            onPress={setActiveFilter}
-            color="#F2B400"
-          />
-          <FilterChip
-            label="Plastika"
-            type="plastic"
-            active={activeFilter === "plastic"}
-            onPress={setActiveFilter}
-            color="#EF4444"
-          />
+          {FILTERS.map((filter) => (
+            <FilterChip
+              key={filter.type}
+              label={filter.label}
+              type={filter.type}
+              active={activeFilter === filter.type}
+              onPress={setActiveFilter}
+              color={filter.color}
+            />
+          ))}
         </ScrollView>
       </View>
 
-      {/* Map Content */}
-      <View
-        style={{
-          width: width,
-          height: height - 280,
-          backgroundColor: "#EFEFF4",
-        }}
-      >
+      <View style={styles.mapWrapper}>
         {loading ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
+          <View style={styles.mapLoader}>
             <ActivityIndicator size="large" color="#6B35C9" />
+            <Text style={styles.mapLoaderText}>Nalagam lokacije...</Text>
           </View>
         ) : (
           <MapView
             ref={mapRef}
-            style={{ width: "100%", height: "100%" }}
+            style={styles.map}
             initialRegion={currentRegion}
+            region={currentRegion}
+            onPress={() => setSearchResults([])}
           >
             {filteredLocations.map((loc) => {
-              // Се осигуруваме дека координатите се валидни броеви пред рендерирање на маркерот
-              if (loc.lat && loc.lng) {
-                return (
-                  <Marker
-                    key={loc.id}
-                    coordinate={{
-                      latitude: Number(loc.lat),
-                      longitude: Number(loc.lng),
-                    }}
-                    title={loc.title}
-                    description={`Naslov: ${loc.address} | Zabojniki: ${loc.items}`}
-                  />
-                );
-              }
-              return null;
+              if (!loc.lat || !loc.lng) return null;
+
+              return (
+                <Marker
+                  key={loc.id}
+                  coordinate={{
+                    latitude: Number(loc.lat),
+                    longitude: Number(loc.lng),
+                  }}
+                  title={loc.title}
+                  description={`Naslov: ${loc.address} | Zabojniki: ${loc.items}`}
+                  onPress={() => setSelectedLocation(loc)}
+                >
+                  <View
+                    style={[
+                      styles.customMarker,
+                      { backgroundColor: getMarkerColor(loc.type) },
+                    ]}
+                  >
+                    <Text style={styles.markerIcon}>
+                      {getMarkerIcon(loc.type)}
+                    </Text>
+                  </View>
+                </Marker>
+              );
             })}
           </MapView>
+        )}
+
+        {!loading && filteredLocations.length === 0 && (
+          <View style={styles.emptyMapCard}>
+            <Text style={styles.emptyMapIcon}>🌱</Text>
+            <Text style={styles.emptyMapTitle}>Ni lokacij</Text>
+            <Text style={styles.emptyMapText}>
+              Za ta filter trenutno ni prikazanih lokacij.
+            </Text>
+          </View>
+        )}
+
+        {selectedLocation && (
+          <View style={styles.infoCard}>
+            <View style={styles.infoIconBox}>
+              <Text style={styles.infoIconText}>
+                {getMarkerIcon(selectedLocation.type)}
+              </Text>
+            </View>
+
+            <View style={styles.infoDetails}>
+              <Text style={styles.closestTag}>Izbrana lokacija</Text>
+              <Text style={styles.locationTitle} numberOfLines={1}>
+                {selectedLocation.title}
+              </Text>
+              <Text style={styles.locationItems} numberOfLines={1}>
+                {selectedLocation.address || "Naslov ni vpisan"}
+              </Text>
+              <Text style={styles.openStatus}>
+                Zabojniki: {selectedLocation.items}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.arrowBtn}
+              activeOpacity={0.85}
+              onPress={() => focusLocation(selectedLocation)}
+            >
+              <Text style={styles.arrowText}>⌖</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -394,24 +425,16 @@ export default function MapScreen({ route, navigation }: any) {
 const FilterChip = ({ label, type, active, onPress, color }: any) => (
   <TouchableOpacity
     onPress={() => onPress(type)}
-    style={{
-      paddingHorizontal: 16,
-      height: 34,
-      borderRadius: 17,
-      backgroundColor: active ? color : "#F8F8FB",
-      borderWidth: 1,
-      borderColor: active ? color : "#ECECF2",
-      justifyContent: "center",
-      alignItems: "center",
-    }}
+    style={[
+      styles.chip,
+      active && {
+        backgroundColor: color,
+        borderColor: color,
+      },
+    ]}
+    activeOpacity={0.85}
   >
-    <Text
-      style={{
-        color: active ? "#FFFFFF" : "#7A7A86",
-        fontWeight: "600",
-        fontSize: 13,
-      }}
-    >
+    <Text style={[styles.chipText, active && styles.chipTextActive]}>
       {label}
     </Text>
   </TouchableOpacity>
