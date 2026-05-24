@@ -10,70 +10,136 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
+import { styles } from "../styles/LeaderBoardScreen.styles";
 
-// Резервни податоци доколку базата е сè уште празна на почетокот
-const STATIC_FALLBACK = [
+type LeaderboardType = "ucenci" | "razredi";
+
+type LeaderboardItem = {
+  name: string;
+  points: number;
+  razred?: string;
+};
+
+const STATIC_STUDENTS: LeaderboardItem[] = [
   { name: "Anže Novak", points: 250, razred: "7.B" },
   { name: "Ema Horvat", points: 180, razred: "6.A" },
   { name: "Luka Krajnc", points: 120, razred: "8.C" },
 ];
 
+const STATIC_GROUPS: LeaderboardItem[] = [
+  { name: "7.B", points: 1240 },
+  { name: "6.A", points: 980 },
+  { name: "8.C", points: 760 },
+];
+
+const getRankContent = (index: number) => {
+  if (index === 0) return "🥇";
+  if (index === 1) return "🥈";
+  if (index === 2) return "🥉";
+  return `${index + 1}.`;
+};
+
+const getRankBoxStyle = (index: number) => {
+  if (index === 0) return styles.rankBoxTop1;
+  if (index === 1) return styles.rankBoxTop2;
+  if (index === 2) return styles.rankBoxTop3;
+  return null;
+};
+
 export default function LeaderboardScreen({ navigation }: any) {
   const currentUser = auth.currentUser;
 
-  // 🔒 ZAŠČITA: Če uporabnik ni prijavljen, se prikaže zaklenjen zaslon na slovenskih
+  const [leaderboardType, setLeaderboardType] =
+    useState<LeaderboardType>("ucenci");
+  const [dataList, setDataList] = useState<LeaderboardItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadLeaderboard();
+    }
+  }, [leaderboardType, currentUser]);
+
+  const loadLeaderboard = async () => {
+    setLoading(true);
+
+    try {
+      if (leaderboardType === "ucenci") {
+        const usersQuery = query(
+          collection(db, "users"),
+          orderBy("totalPoints", "desc"),
+          limit(20)
+        );
+
+        const snapshot = await getDocs(usersQuery);
+        const fetchedUsers: LeaderboardItem[] = [];
+
+        snapshot.forEach((document) => {
+          const userData = document.data();
+
+          fetchedUsers.push({
+            name:
+              userData.displayName ||
+              userData.name ||
+              userData.email?.split("@")[0] ||
+              "Anonimni učenec",
+            points: userData.totalPoints || 0,
+            razred: userData.razred || userData.class || userData.groupId || "",
+          });
+        });
+
+        setDataList(fetchedUsers.length > 0 ? fetchedUsers : STATIC_STUDENTS);
+      } else {
+        const groupsQuery = query(
+          collection(db, "groups"),
+          orderBy("totalPoints", "desc"),
+          limit(10)
+        );
+
+        const snapshot = await getDocs(groupsQuery);
+        const fetchedGroups: LeaderboardItem[] = [];
+
+        snapshot.forEach((document) => {
+          const groupData = document.data();
+
+          fetchedGroups.push({
+            name: groupData.name || "Neznan razred",
+            points: groupData.totalPoints || 0,
+          });
+        });
+
+        setDataList(fetchedGroups.length > 0 ? fetchedGroups : STATIC_GROUPS);
+      }
+    } catch (err) {
+      console.log("Napaka pri nalaganju lestvice:", err);
+
+      setDataList(
+        leaderboardType === "ucenci" ? STATIC_STUDENTS : STATIC_GROUPS
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!currentUser) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            paddingHorizontal: 30,
-          }}
-        >
-          <Text style={{ fontSize: 48, marginBottom: 16 }}>🏆</Text>
-          <Text
-            style={{
-              fontSize: 22,
-              fontWeight: "700",
-              color: "#1F2937",
-              textAlign: "center",
-              marginBottom: 10,
-            }}
-          >
-            Poglej lestvico
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: "#6B7280",
-              textAlign: "center",
-              lineHeight: 22,
-              marginBottom: 26,
-            }}
-          >
-            Želiš videti, kateri učenci in razredi so reciklirali največ in
-            zbrali največ točk? Prijavi se in pomagaj svojemu timu do zmage!
+      <SafeAreaView style={styles.whiteContainer}>
+        <View style={styles.lockedContent}>
+          <Text style={styles.lockedIcon}>🏆</Text>
+
+          <Text style={styles.lockedTitle}>Poglej lestvico</Text>
+
+          <Text style={styles.lockedText}>
+            Želiš videti, kateri učenci in razredi so reciklirali največ?
+            Prijavi se in pomagaj svojemu timu do zmage.
           </Text>
 
           <TouchableOpacity
-            style={{
-              backgroundColor: "#22C55E",
-              paddingVertical: 14,
-              paddingHorizontal: 28,
-              borderRadius: 14,
-              width: "100%",
-              alignItems: "center",
-              shadowColor: "#22C55E",
-              shadowOpacity: 0.2,
-              shadowRadius: 10,
-              elevation: 4,
-            }}
+            style={styles.loginButton}
             onPress={() => navigation.navigate("Login")}
+            activeOpacity={0.9}
           >
-            <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 15 }}>
+            <Text style={styles.loginButtonText}>
               Prijavi se v svoj profil
             </Text>
           </TouchableOpacity>
@@ -84,219 +150,136 @@ export default function LeaderboardScreen({ navigation }: any) {
     );
   }
 
-  // 🔓 Za prijavljene uporabnike - Preklapljanje med realnimi Učenci in Razredi
-  const [leaderboardType, setLeaderboardType] = useState<"ucenci" | "razredi">(
-    "ucenci",
-  );
-  const [dataList, setDataList] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    async function loadLeaderboard() {
-      setLoading(true);
-      try {
-        if (leaderboardType === "ucenci") {
-          // 1. ПОВРЗУВАЊЕ СО РЕАЛНИТЕ УЧЕНИЦИ (Колекција 'users')
-          const q = query(
-            collection(db, "users"),
-            orderBy("totalPoints", "desc"),
-            limit(20),
-          );
-          const snap = await getDocs(q);
-          const fetchedUsers: any[] = [];
-
-          snap.forEach((doc) => {
-            const uData = doc.data();
-            // Филтрирај ги само оние кои имаат барем некој поен за поубав приказ
-            fetchedUsers.push({
-              name:
-                uData.displayName ||
-                uData.name ||
-                uData.email?.split("@")[0] ||
-                "Anonimni učenec",
-              points: uData.totalPoints || 0,
-              razred: uData.razred || uData.class || "",
-            });
-          });
-
-          if (fetchedUsers.length > 0) {
-            setDataList(fetchedUsers);
-          } else {
-            setDataList(STATIC_FALLBACK); // Резерва ако нема ниеден корисник со поени
-          }
-        } else {
-          // 2. ПОВРЗУВАЊЕ СО РАЗРЕДИТЕ / ГРУПИТЕ (Колекција 'groups')
-          const q = query(
-            collection(db, "groups"),
-            orderBy("totalPoints", "desc"),
-            limit(10),
-          );
-          const snap = await getDocs(q);
-          const fetchedGroups: any[] = [];
-
-          snap.forEach((doc) => {
-            const gData = doc.data();
-            fetchedGroups.push({
-              name: gData.name || "Neznan razred",
-              points: gData.totalPoints || 0,
-            });
-          });
-
-          if (fetchedGroups.length > 0) {
-            setDataList(fetchedGroups);
-          } else {
-            setDataList([
-              { name: "7.B", points: 1240 },
-              { name: "6.A", points: 980 },
-              { name: "8.C", points: 760 },
-            ]);
-          }
-        }
-      } catch (err) {
-        console.log("Napaka pri nalaganju lestvice:", err);
-        setDataList(STATIC_FALLBACK);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadLeaderboard();
-  }, [leaderboardType]);
+  const topItem = dataList[0];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
-      <View style={{ padding: 20, flex: 1 }}>
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: "800",
-            color: "#1F2937",
-            marginBottom: 4,
-          }}
-        >
-          Lestvica 🏆
-        </Text>
-        <Text style={{ fontSize: 14, color: "#6B7280", marginBottom: 20 }}>
-          Najboljši učenci in razredi v aplikaciji RecycLAR.
-        </Text>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <View>
+              <Text style={styles.title}>Lestvica</Text>
+              <Text style={styles.subtitle}>
+                Najboljši učenci in razredi v aplikaciji RecycLAR.
+              </Text>
+            </View>
 
-        {/* Склопка за филтрирање на Словенечки */}
-        <View
-          style={{
-            flexDirection: "row",
-            backgroundColor: "#E5E7EB",
-            borderRadius: 10,
-            padding: 4,
-            marginBottom: 20,
-          }}
-        >
+            <View style={styles.trophyCircle}>
+              <Text style={styles.trophyText}>🏆</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.switchWrap}>
           <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor:
-                leaderboardType === "ucenci" ? "#fff" : "transparent",
-              paddingVertical: 8,
-              borderRadius: 8,
-              alignItems: "center",
-            }}
+            style={[
+              styles.switchButton,
+              leaderboardType === "ucenci" && styles.switchButtonActive,
+            ]}
             onPress={() => setLeaderboardType("ucenci")}
+            activeOpacity={0.85}
           >
-            <Text style={{ fontWeight: "600", color: "#1F2937" }}>Učenci</Text>
+            <Text
+              style={[
+                styles.switchText,
+                leaderboardType === "ucenci" && styles.switchTextActive,
+              ]}
+            >
+              Učenci
+            </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={{
-              flex: 1,
-              backgroundColor:
-                leaderboardType === "razredi" ? "#fff" : "transparent",
-              paddingVertical: 8,
-              borderRadius: 8,
-              alignItems: "center",
-            }}
+            style={[
+              styles.switchButton,
+              leaderboardType === "razredi" && styles.switchButtonActive,
+            ]}
             onPress={() => setLeaderboardType("razredi")}
+            activeOpacity={0.85}
           >
-            <Text style={{ fontWeight: "600", color: "#1F2937" }}>Razredi</Text>
+            <Text
+              style={[
+                styles.switchText,
+                leaderboardType === "razredi" && styles.switchTextActive,
+              ]}
+            >
+              Razredi
+            </Text>
           </TouchableOpacity>
         </View>
 
         {loading ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <ActivityIndicator size="large" color="#22C55E" />
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color="#35A936" />
+            <Text style={styles.loadingText}>Nalagam lestvico...</Text>
           </View>
         ) : (
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 80 }}
+            contentContainerStyle={styles.listContent}
           >
-            {dataList.map((item, idx) => (
-              <View
-                key={idx}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: "#fff",
-                  padding: 16,
-                  borderRadius: 14,
-                  marginBottom: 10,
-                  elevation: 1,
-                  shadowColor: "#000",
-                  shadowOpacity: 0.05,
-                  shadowRadius: 5,
-                }}
-              >
-                {/* Ранг Позиција со медали за Топ 3 */}
-                <View style={{ width: 35 }}>
-                  {idx === 0 ? (
-                    <Text style={{ fontSize: 16 }}>🥇</Text>
-                  ) : idx === 1 ? (
-                    <Text style={{ fontSize: 16 }}>🥈</Text>
-                  ) : idx === 2 ? (
-                    <Text style={{ fontSize: 16 }}>🥉</Text>
-                  ) : (
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: "700",
-                        color: "#6B7280",
-                      }}
-                    >
-                      {idx + 1}.
-                    </Text>
-                  )}
-                </View>
-
-                {/* Име и Разред */}
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      color: "#1F2937",
-                    }}
-                  >
-                    {item.name}
-                  </Text>
-                  {item.razred ? (
-                    <Text
-                      style={{ fontSize: 12, color: "#9CA3AF", marginTop: 2 }}
-                    >
-                      Razred: {item.razred}
-                    </Text>
-                  ) : null}
-                </View>
-
-                {/* Точни реални поени */}
-                <Text
-                  style={{ fontSize: 15, fontWeight: "700", color: "#22C55E" }}
-                >
-                  {item.points} točk
+            {topItem && (
+              <View style={styles.topCard}>
+                <Text style={styles.topCardLabel}>
+                  Trenutno vodi
+                </Text>
+                <Text style={styles.topCardName}>{topItem.name}</Text>
+                <Text style={styles.topCardPoints}>
+                  ⭐ {topItem.points} točk
                 </Text>
               </View>
-            ))}
+            )}
+
+            {dataList.length === 0 ? (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyIcon}>🌱</Text>
+                <Text style={styles.emptyTitle}>Lestvica je prazna</Text>
+                <Text style={styles.emptyText}>
+                  Ko uporabniki začnejo zbirati točke, se bodo rezultati
+                  prikazali tukaj.
+                </Text>
+              </View>
+            ) : (
+              dataList.map((item, index) => (
+                <View key={`${item.name}-${index}`} style={styles.rowCard}>
+                  <View style={[styles.rankBox, getRankBoxStyle(index)]}>
+                    <Text
+                      style={
+                        index < 3 ? styles.rankMedal : styles.rankNumber
+                      }
+                    >
+                      {getRankContent(index)}
+                    </Text>
+                  </View>
+
+                  <View style={styles.itemInfo}>
+                    <Text style={styles.itemName} numberOfLines={1}>
+                      {item.name}
+                    </Text>
+
+                    {leaderboardType === "ucenci" && item.razred ? (
+                      <Text style={styles.itemClass}>
+                        Razred: {item.razred}
+                      </Text>
+                    ) : (
+                      <Text style={styles.itemClass}>
+                        {leaderboardType === "razredi"
+                          ? "Skupinski rezultat"
+                          : "Učenec"}
+                      </Text>
+                    )}
+                  </View>
+
+                  <View style={styles.pointsPill}>
+                    <Text style={styles.pointsText}>{item.points} t</Text>
+                  </View>
+                </View>
+              ))
+            )}
           </ScrollView>
         )}
       </View>
+
       <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
     </SafeAreaView>
   );

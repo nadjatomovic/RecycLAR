@@ -16,40 +16,55 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/RegisterScreen.styles";
 
+const municipalities = ["Maribor", "Ljubljana", "Kranj", "Koper", "Celje"];
+
 const schoolRoles = [
-  { id: "student", label: "Učenec" },
-  { id: "teacher", label: "Učitelj" },
+  { id: "student", label: "Učenec", icon: "🎒" },
+  { id: "teacher", label: "Učitelj", icon: "👩‍🏫" },
 ];
+
+const municipalityToId: Record<string, string> = {
+  Maribor: "maribor",
+  Ljubljana: "ljubljana",
+  Kranj: "kranj",
+  Koper: "koper",
+  Celje: "celje",
+};
 
 export default function RegisterScreen({ navigation }: any) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [municipality, setMunicipality] = useState("Maribor");
   const [password, setPassword] = useState("");
+
   const [isSchoolAccount, setIsSchoolAccount] = useState(false);
   const [selectedSchoolRole, setSelectedSchoolRole] = useState<
     "student" | "teacher"
   >("student");
+
   const [groupCode, setGroupCode] = useState("");
   const [schoolName, setSchoolName] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleRegister = async () => {
-    // Validation
-    if (!fullName || !email || !password) {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
       setError("Prosimo, izpolni vsa obvezna polja.");
       return;
     }
-    if (!isSchoolAccount) {
-      setError("Prosimo, izberi vlogo (Učenec ali Učitelj).");
+
+    if (password.length < 6) {
+      setError("Geslo mora imeti vsaj 6 znakov.");
       return;
     }
-    if (selectedSchoolRole === "student" && !groupCode) {
+
+    if (isSchoolAccount && selectedSchoolRole === "student" && !groupCode.trim()) {
       setError("Prosimo, vnesi kodo skupine.");
       return;
     }
-    if (selectedSchoolRole === "teacher" && !schoolName) {
+
+    if (isSchoolAccount && selectedSchoolRole === "teacher" && !schoolName.trim()) {
       setError("Prosimo, vnesi ime šole.");
       return;
     }
@@ -58,35 +73,45 @@ export default function RegisterScreen({ navigation }: any) {
     setError("");
 
     try {
-      // Step 1 — Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
-        password,
+        email.trim(),
+        password
       );
-      const user = userCredential.user;
 
-      // Step 2 — Save user data to Firestore users collection
-      // This matches your existing database structure exactly!
+      const user = userCredential.user;
+      const municipalityId = municipalityToId[municipality] ?? "maribor";
+
       await setDoc(doc(db, "users", user.uid), {
-        name: fullName,
-        email: email,
-        municipalityId: municipality,
+        name: fullName.trim(),
+        email: email.trim().toLowerCase(),
+        municipalityId,
+        municipalityName: municipality,
+
         role: isSchoolAccount ? selectedSchoolRole : "user",
+        accountType: isSchoolAccount ? "school" : "regular",
+
         groupId:
-          isSchoolAccount && selectedSchoolRole === "student" ? groupCode : "",
+          isSchoolAccount && selectedSchoolRole === "student"
+            ? groupCode.trim().toUpperCase()
+            : "",
+
         schoolId:
-          isSchoolAccount && selectedSchoolRole === "teacher" ? schoolName : "",
+          isSchoolAccount && selectedSchoolRole === "teacher"
+            ? schoolName.trim()
+            : "",
+
         totalPoints: 0,
         weeklyPoints: 0,
         scanCount: 0,
         quizCompleted: 0,
         streakDays: 0,
+        earnedBadges: [],
+
         createdAt: serverTimestamp(),
         lastActiveAt: serverTimestamp(),
       });
 
-      // Step 3 — Navigate to Login to confirm sign in
       navigation.navigate("Login");
     } catch (err: any) {
       switch (err.code) {
@@ -116,6 +141,7 @@ export default function RegisterScreen({ navigation }: any) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
         >
           <TouchableOpacity
             style={styles.backButton}
@@ -131,17 +157,18 @@ export default function RegisterScreen({ navigation }: any) {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-            <Text style={styles.brandText}>
-              <Text style={styles.brandGreen}>Recyc</Text>
-              <Text style={styles.brandPurple}>LAR</Text>
-            </Text>
+
+            <Image
+              source={require("../assets/logo.png")}
+              style={styles.logoText}
+              resizeMode="contain"
+            />
           </View>
 
           <View style={styles.headerSection}>
             <Text style={styles.title}>Ustvari račun</Text>
             <Text style={styles.subtitle}>
-              Ustvari račun za spremljanje aktivnosti. Če si del šole, lahko
-              spodaj vključiš šolski način.
+              Ustvari račun za spremljanje aktivnosti, točk in kvizov.
             </Text>
           </View>
 
@@ -153,8 +180,8 @@ export default function RegisterScreen({ navigation }: any) {
                 placeholder="npr. Nika Zupančič"
                 placeholderTextColor="#A0A0AA"
                 value={fullName}
-                onChangeText={(t) => {
-                  setFullName(t);
+                onChangeText={(text) => {
+                  setFullName(text);
                   setError("");
                 }}
               />
@@ -167,24 +194,44 @@ export default function RegisterScreen({ navigation }: any) {
                 placeholder="npr. nika@gmail.com"
                 placeholderTextColor="#A0A0AA"
                 value={email}
-                onChangeText={(t) => {
-                  setEmail(t);
+                onChangeText={(text) => {
+                  setEmail(text);
                   setError("");
                 }}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Občina</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Maribor"
-                placeholderTextColor="#A0A0AA"
-                value={municipality}
-                onChangeText={setMunicipality}
-              />
+
+              <View style={styles.municipalityGrid}>
+                {municipalities.map((city) => (
+                  <TouchableOpacity
+                    key={city}
+                    style={[
+                      styles.municipalityChip,
+                      municipality === city && styles.municipalityChipActive,
+                    ]}
+                    activeOpacity={0.85}
+                    onPress={() => {
+                      setMunicipality(city);
+                      setError("");
+                    }}
+                  >
+                    <Text
+                      style={[
+                        styles.municipalityChipText,
+                        municipality === city && styles.municipalityChipTextActive,
+                      ]}
+                    >
+                      {city}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
 
             <View style={styles.inputGroup}>
@@ -194,127 +241,54 @@ export default function RegisterScreen({ navigation }: any) {
                 placeholder="vsaj 6 znakov"
                 placeholderTextColor="#A0A0AA"
                 value={password}
-                onChangeText={(t) => {
-                  setPassword(t);
+                onChangeText={(text) => {
+                  setPassword(text);
                   setError("");
                 }}
                 secureTextEntry
               />
             </View>
 
-            {/* Error message */}
-            {error ? (
-              <View style={errorStyle.box}>
-                <Text style={errorStyle.text}>⚠ {error}</Text>
+            <TouchableOpacity
+              style={[
+                styles.schoolToggle,
+                isSchoolAccount && styles.schoolToggleActive,
+              ]}
+              activeOpacity={0.85}
+              onPress={() => {
+                setIsSchoolAccount(!isSchoolAccount);
+                setError("");
+              }}
+            >
+              <View style={styles.schoolToggleTextWrap}>
+                <Text
+                  style={[
+                    styles.schoolToggleTitle,
+                    isSchoolAccount && styles.schoolToggleTitleActive,
+                  ]}
+                >
+                  Šolski račun
+                </Text>
+                <Text style={styles.schoolToggleSubtitle}>
+                  Vključi, če si učenec ali učitelj in uporabljaš aplikacijo v
+                  šoli.
+                </Text>
               </View>
-            ) : null}
 
-            {/* Required role selection */}
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                Vloga <Text style={{ color: "#DC2626" }}>*</Text>
-              </Text>
               <Text
-                style={{ fontSize: 12, color: "#7A7A86", marginBottom: 10 }}
+                style={[
+                  styles.schoolToggleIcon,
+                  isSchoolAccount && styles.schoolToggleIconActive,
+                ]}
               >
-                Izberi svojo vlogo v aplikaciji
+                {isSchoolAccount ? "✓" : "+"}
               </Text>
-              <View style={styles.roleRow}>
-                <TouchableOpacity
-                  style={[
-                    styles.roleCard,
-                    selectedSchoolRole === "student" &&
-                      isSchoolAccount &&
-                      styles.roleCardActive,
-                  ]}
-                  onPress={() => {
-                    setSelectedSchoolRole("student");
-                    setIsSchoolAccount(true);
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <Text style={{ fontSize: 22, marginBottom: 4 }}>🎒</Text>
-                  <Text
-                    style={[
-                      styles.roleText,
-                      selectedSchoolRole === "student" &&
-                        isSchoolAccount &&
-                        styles.roleTextActive,
-                    ]}
-                  >
-                    Učenec
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.roleCard,
-                    selectedSchoolRole === "teacher" &&
-                      isSchoolAccount &&
-                      styles.roleCardActive,
-                  ]}
-                  onPress={() => {
-                    setSelectedSchoolRole("teacher");
-                    setIsSchoolAccount(true);
-                  }}
-                  activeOpacity={0.85}
-                >
-                  <Text style={{ fontSize: 22, marginBottom: 4 }}>👩‍🏫</Text>
-                  <Text
-                    style={[
-                      styles.roleText,
-                      selectedSchoolRole === "teacher" &&
-                        isSchoolAccount &&
-                        styles.roleTextActive,
-                    ]}
-                  >
-                    Učitelj
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Show fields based on role */}
-            {isSchoolAccount && selectedSchoolRole === "student" && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                  Koda skupine <Text style={{ color: "#DC2626" }}>*</Text>
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="npr. 7B-RECYCLE"
-                  placeholderTextColor="#A0A0AA"
-                  value={groupCode}
-                  onChangeText={setGroupCode}
-                  autoCapitalize="characters"
-                />
-                <Text style={styles.helperText}>
-                  Kodo dobiš od učitelja ali mentorja skupine.
-                </Text>
-              </View>
-            )}
-
-            {isSchoolAccount && selectedSchoolRole === "teacher" && (
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>
-                  Ime šole <Text style={{ color: "#DC2626" }}>*</Text>
-                </Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="npr. OŠ Franceta Prešerna"
-                  placeholderTextColor="#A0A0AA"
-                  value={schoolName}
-                  onChangeText={setSchoolName}
-                />
-                <Text style={styles.helperText}>
-                  Po registraciji lahko učitelj ustvari razred ali skupino.
-                </Text>
-              </View>
-            )}
+            </TouchableOpacity>
 
             {isSchoolAccount && (
               <View style={styles.schoolBox}>
                 <Text style={styles.schoolBoxTitle}>Izberi vlogo</Text>
+
                 <View style={styles.roleRow}>
                   {schoolRoles.map((role) => (
                     <TouchableOpacity
@@ -323,11 +297,13 @@ export default function RegisterScreen({ navigation }: any) {
                         styles.roleCard,
                         selectedSchoolRole === role.id && styles.roleCardActive,
                       ]}
-                      onPress={() =>
-                        setSelectedSchoolRole(role.id as "student" | "teacher")
-                      }
+                      onPress={() => {
+                        setSelectedSchoolRole(role.id as "student" | "teacher");
+                        setError("");
+                      }}
                       activeOpacity={0.85}
                     >
+                      <Text style={styles.roleIcon}>{role.icon}</Text>
                       <Text
                         style={[
                           styles.roleText,
@@ -342,14 +318,17 @@ export default function RegisterScreen({ navigation }: any) {
                 </View>
 
                 {selectedSchoolRole === "student" && (
-                  <View style={styles.inputGroup}>
+                  <View style={styles.inputGroupLast}>
                     <Text style={styles.label}>Koda skupine</Text>
                     <TextInput
                       style={styles.input}
                       placeholder="npr. 7B-RECYCLE"
                       placeholderTextColor="#A0A0AA"
                       value={groupCode}
-                      onChangeText={setGroupCode}
+                      onChangeText={(text) => {
+                        setGroupCode(text);
+                        setError("");
+                      }}
                       autoCapitalize="characters"
                     />
                     <Text style={styles.helperText}>
@@ -359,14 +338,17 @@ export default function RegisterScreen({ navigation }: any) {
                 )}
 
                 {selectedSchoolRole === "teacher" && (
-                  <View style={styles.inputGroup}>
+                  <View style={styles.inputGroupLast}>
                     <Text style={styles.label}>Ime šole</Text>
                     <TextInput
                       style={styles.input}
                       placeholder="npr. OŠ Franceta Prešerna"
                       placeholderTextColor="#A0A0AA"
                       value={schoolName}
-                      onChangeText={setSchoolName}
+                      onChangeText={(text) => {
+                        setSchoolName(text);
+                        setError("");
+                      }}
                     />
                     <Text style={styles.helperText}>
                       Po registraciji lahko učitelj ustvari razred ali skupino.
@@ -376,14 +358,20 @@ export default function RegisterScreen({ navigation }: any) {
               </View>
             )}
 
+            {error ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>⚠ {error}</Text>
+              </View>
+            ) : null}
+
             <TouchableOpacity
-              style={[styles.primaryButton, loading && { opacity: 0.7 }]}
+              style={[styles.primaryButton, loading && styles.disabledButton]}
               onPress={handleRegister}
               activeOpacity={0.9}
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <>
                   <Text style={styles.primaryButtonText}>Ustvari račun</Text>
@@ -409,13 +397,3 @@ export default function RegisterScreen({ navigation }: any) {
     </SafeAreaView>
   );
 }
-
-const errorStyle = {
-  box: {
-    backgroundColor: "#FEE2E2",
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
-  },
-  text: { color: "#DC2626", fontSize: 13 },
-};

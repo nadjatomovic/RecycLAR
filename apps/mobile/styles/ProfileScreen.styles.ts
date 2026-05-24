@@ -1,29 +1,53 @@
 import { StyleSheet, Dimensions } from "react-native";
+import { COLORS, RADIUS, SPACING } from "../utils/theme";
 
-const { width } = Dimensions.get("window");
-
-const colors = {
-  green: "#35A936",
-  purple: "#6B35C9",
-  purpleLight: "#EFE8FF",
-  greenLight: "#EAF7E7",
-  text: "#252733",
-  muted: "#7A7A86",
-  border: "#ECECF2",
-  white: "#FFFFFF",
-  bg: "#F8FAF5",
-};
+const { width, height } = Dimensions.get("window");
+const isSmallPhone = height < 720;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: "#F8FAF5",
   },
 
   scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 6,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: isSmallPhone ? 6 : 10,
     paddingBottom: 112,
+  },
+
+  loadingBox: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  loadingText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: COLORS.muted,
+    fontWeight: "700",
+  },
+
+  emptyText: {
+    fontSize: 15,
+    color: COLORS.muted,
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
+  loginBtn: {
+    marginTop: 20,
+    backgroundColor: COLORS.green,
+    borderRadius: RADIUS.pill,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+  },
+
+  loginBtnText: {
+    color: COLORS.white,
+    fontWeight: "900",
+    fontSize: 15,
   },
 
   header: {
@@ -39,43 +63,34 @@ export const styles = StyleSheet.create({
   },
 
   brandIcon: {
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
     marginRight: 10,
   },
 
-  brandText: {
-    fontSize: 28,
-    fontWeight: "900",
-    letterSpacing: 0.2,
-  },
-
-  brandGreen: {
-    color: colors.green,
-  },
-
-  brandPurple: {
-    color: colors.purple,
+  brandLogo: {
+    width: 150,
+    height: 44,
   },
 
   notificationBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.white,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    position: "relative",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
-    position: "relative",
   },
 
   notificationText: {
-    fontSize: 23,
-    color: "#4D4D59",
+    fontSize: 21,
   },
 
   notificationDot: {
@@ -85,47 +100,49 @@ export const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.purple,
+    backgroundColor: COLORS.purple,
   },
 
   screenTitle: {
-    fontSize: 40,
-    lineHeight: 46,
+    fontSize: isSmallPhone ? 36 : 40,
+    lineHeight: isSmallPhone ? 42 : 46,
     fontWeight: "900",
-    color: colors.text,
+    color: COLORS.text,
     marginBottom: 18,
+    letterSpacing: -0.9,
   },
 
   profileCard: {
     borderRadius: 30,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     padding: 18,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
+    marginBottom: 18,
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
     elevation: 5,
-    marginBottom: 18,
   },
 
   avatarWrap: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    backgroundColor: colors.purpleLight,
+    width: isSmallPhone ? 96 : 108,
+    height: isSmallPhone ? 96 : 108,
+    borderRadius: isSmallPhone ? 48 : 54,
+    backgroundColor: COLORS.purpleSoft,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 18,
+    marginRight: 16,
     position: "relative",
   },
 
   avatar: {
-    width: 98,
-    height: 98,
+    width: isSmallPhone ? 86 : 96,
+    height: isSmallPhone ? 86 : 96,
   },
 
   cameraBadge: {
@@ -135,16 +152,16 @@ export const styles = StyleSheet.create({
     width: 38,
     height: 38,
     borderRadius: 19,
-    backgroundColor: colors.purple,
+    backgroundColor: COLORS.purple,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: colors.white,
+    borderColor: COLORS.white,
   },
 
   cameraBadgeText: {
-    color: colors.white,
-    fontSize: 18,
+    color: COLORS.white,
+    fontSize: 17,
     fontWeight: "900",
   },
 
@@ -155,19 +172,21 @@ export const styles = StyleSheet.create({
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 22,
+    marginBottom: 18,
   },
 
   name: {
-    fontSize: 31,
+    flex: 1,
+    fontSize: isSmallPhone ? 26 : 30,
     fontWeight: "900",
-    color: colors.text,
-    marginRight: 10,
+    color: COLORS.text,
+    marginRight: 8,
+    letterSpacing: -0.5,
   },
 
   editIcon: {
-    fontSize: 22,
-    color: colors.purple,
+    fontSize: 24,
+    color: COLORS.purple,
     fontWeight: "900",
   },
 
@@ -182,29 +201,52 @@ export const styles = StyleSheet.create({
     flex: 1,
   },
 
-  metaIcon: {
-    fontSize: 30,
-    color: colors.purple,
-    marginRight: 8,
+  metaEmoji: {
+    fontSize: 18,
+    marginRight: 6,
   },
 
   metaLabel: {
-    fontSize: 13,
-    color: colors.muted,
+    fontSize: 12,
+    color: COLORS.muted,
     marginBottom: 2,
+    fontWeight: "600",
   },
 
   metaValue: {
-    fontSize: 17,
-    color: colors.purple,
+    fontSize: 15,
+    color: COLORS.purple,
     fontWeight: "900",
   },
 
   metaDivider: {
     width: 1,
     height: 42,
-    backgroundColor: colors.border,
-    marginHorizontal: 10,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 9,
+  },
+
+  teacherMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+
+  teacherMetaEmoji: {
+    fontSize: 15,
+    marginRight: 7,
+  },
+
+  teacherMetaText: {
+    fontSize: 13,
+    color: COLORS.text,
+    flex: 1,
+    fontWeight: "600",
+  },
+
+  teacherMetaHighlight: {
+    color: COLORS.purple,
+    fontWeight: "900",
   },
 
   statsRow: {
@@ -215,15 +257,16 @@ export const styles = StyleSheet.create({
 
   statCard: {
     width: (width - 62) / 4,
-    minHeight: 126,
+    minHeight: isSmallPhone ? 112 : 122,
     borderRadius: 22,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    shadowColor: "#000",
+    paddingVertical: 10,
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -231,9 +274,9 @@ export const styles = StyleSheet.create({
   },
 
   statIconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "#F3F1FB",
     alignItems: "center",
     justifyContent: "center",
@@ -241,32 +284,32 @@ export const styles = StyleSheet.create({
   },
 
   statIcon: {
-    fontSize: 26,
-    fontWeight: "900",
+    fontSize: 22,
   },
 
   statLabel: {
-    fontSize: 12,
-    color: colors.text,
+    fontSize: 11,
+    color: COLORS.text,
     textAlign: "center",
-    marginBottom: 7,
-    fontWeight: "600",
+    marginBottom: 6,
+    fontWeight: "700",
   },
 
   statValue: {
-    fontSize: 25,
+    fontSize: 22,
     fontWeight: "900",
     textAlign: "center",
   },
 
   sectionCard: {
     borderRadius: 28,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     padding: 18,
     marginBottom: 18,
-    shadowColor: "#000",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.07,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
@@ -283,13 +326,13 @@ export const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "900",
-    color: colors.text,
+    color: COLORS.text,
   },
 
   viewAll: {
     fontSize: 14,
-    color: colors.purple,
-    fontWeight: "800",
+    color: COLORS.purple,
+    fontWeight: "900",
   },
 
   achievementsRow: {
@@ -300,6 +343,10 @@ export const styles = StyleSheet.create({
   achievementItem: {
     width: "31%",
     alignItems: "center",
+  },
+
+  lockedAchievement: {
+    opacity: 0.55,
   },
 
   achievementBadge: {
@@ -320,10 +367,32 @@ export const styles = StyleSheet.create({
     height: 62,
   },
 
+  lockedImage: {
+    opacity: 0.4,
+  },
+
+  lockOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  lockIcon: {
+    fontSize: 20,
+  },
+
+  teacherAchievementEmoji: {
+    fontSize: 36,
+  },
+
   ribbon: {
     position: "absolute",
     bottom: -18,
-    backgroundColor: colors.purple,
+    backgroundColor: COLORS.purple,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 10,
@@ -332,7 +401,7 @@ export const styles = StyleSheet.create({
   },
 
   ribbonText: {
-    color: colors.white,
+    color: COLORS.white,
     fontSize: 9,
     fontWeight: "900",
   },
@@ -340,7 +409,7 @@ export const styles = StyleSheet.create({
   achievementTitle: {
     fontSize: 13,
     fontWeight: "900",
-    color: colors.text,
+    color: COLORS.text,
     textAlign: "center",
     marginBottom: 4,
   },
@@ -348,29 +417,27 @@ export const styles = StyleSheet.create({
   achievementDescription: {
     fontSize: 11,
     lineHeight: 15,
-    color: colors.muted,
+    color: COLORS.muted,
     textAlign: "center",
   },
 
   activityRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 11,
   },
 
   activityIconWrap: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#F4FBF3",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 14,
+    marginRight: 13,
   },
 
-  activityIcon: {
-    width: 36,
-    height: 36,
+  activityIconEmoji: {
+    fontSize: 20,
   },
 
   activityTextWrap: {
@@ -378,15 +445,16 @@ export const styles = StyleSheet.create({
   },
 
   activityTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "900",
-    color: colors.text,
+    color: COLORS.text,
     marginBottom: 3,
   },
 
   activityDescription: {
-    fontSize: 13,
-    color: colors.muted,
+    fontSize: 12,
+    color: COLORS.muted,
+    fontWeight: "600",
   },
 
   activityRight: {
@@ -395,66 +463,87 @@ export const styles = StyleSheet.create({
   },
 
   activityPoints: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "900",
-    color: colors.green,
-    marginBottom: 4,
+    marginBottom: 3,
   },
 
   activityTime: {
     fontSize: 11,
-    color: colors.muted,
+    color: COLORS.muted,
+    fontWeight: "600",
   },
 
   divider: {
     height: 1,
-    backgroundColor: colors.border,
-    marginLeft: 66,
+    backgroundColor: COLORS.border,
+    marginLeft: 61,
   },
 
-  bottomTab: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 86,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: "#EFEFF4",
+  classRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "center",
-    paddingBottom: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F3F4F6",
   },
 
-  tabItem: {
-    flex: 1,
-    alignItems: "center",
+  classCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
 
-  tabIcon: {
-    fontSize: 25,
-    color: colors.purple,
-    marginBottom: 2,
-  },
-
-  tabIconActive: {
-    color: colors.green,
-  },
-
-  tabLabel: {
-    fontSize: 12,
-    color: colors.muted,
-  },
-
-  tabLabelActive: {
-    color: colors.green,
+  classCircleText: {
+    fontSize: 14,
     fontWeight: "900",
+  },
+
+  classInfo: {
+    flex: 1,
+  },
+
+  className: {
+    fontSize: 15,
+    fontWeight: "900",
+    color: COLORS.text,
+  },
+
+  classPoints: {
+    fontSize: 12,
+    color: COLORS.muted,
+    marginTop: 2,
+    fontWeight: "600",
+  },
+
+  classMedal: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+
+  classArrow: {
+    fontSize: 22,
+    color: COLORS.lightText,
+    fontWeight: "900",
+  },
+
+  signOutBtn: {
+    marginTop: 2,
+    marginBottom: 24,
+    borderWidth: 1.5,
+    borderColor: "#EF4444",
+    borderRadius: RADIUS.pill,
+    paddingVertical: 14,
+    alignItems: "center",
+    backgroundColor: COLORS.white,
+  },
+
+  signOutText: {
+    color: "#EF4444",
+    fontWeight: "900",
+    fontSize: 15,
   },
 });
