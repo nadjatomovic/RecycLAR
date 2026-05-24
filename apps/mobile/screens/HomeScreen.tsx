@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Modal,
+  Pressable,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/HomeScreen.styles";
@@ -15,6 +16,10 @@ const municipalities = ["Maribor", "Celje", "Ljubljana", "Kranj", "Koper"];
 export default function HomeScreen({ navigation }: any) {
   const [selectedCity, setSelectedCity] = useState("Maribor");
   const [modalVisible, setModalVisible] = useState(false);
+
+  const handleStart = () => {
+    navigation.navigate("Dashboard", { selectedCity });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -38,11 +43,11 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={styles.tagline}>Skeniraj. Loči. Uči se.</Text>
 
           <Text style={styles.description}>
-            Pametno recikliranje za{"\n"}domove, šole in občine.
+            Pametno recikliranje za domove, šole in občine.
           </Text>
         </View>
 
-        <View style={styles.heroSection}>
+        <View style={styles.heroCard}>
           <Image
             source={require("../assets/hero-image.png")}
             style={styles.heroImage}
@@ -64,10 +69,10 @@ export default function HomeScreen({ navigation }: any) {
               />
             </View>
 
-            <Text style={styles.dropdownLabel}>
-              Občina:{" "}
-              <Text style={styles.selectedCityText}>{selectedCity}</Text>
-            </Text>
+            <View>
+              <Text style={styles.dropdownSmallLabel}>Izbrana občina</Text>
+              <Text style={styles.dropdownLabel}>{selectedCity}</Text>
+            </View>
           </View>
 
           <Text style={styles.chevron}>⌄</Text>
@@ -76,12 +81,9 @@ export default function HomeScreen({ navigation }: any) {
         <TouchableOpacity
           style={styles.mainButton}
           activeOpacity={0.9}
-          onPress={() =>
-            navigation.navigate("Dashboard", { selectedCity: selectedCity })
-          }
+          onPress={handleStart}
         >
-          <Text style={styles.mainButtonLeaf}>⌁</Text>
-
+          <Text style={styles.mainButtonIcon}>🌿</Text>
           <Text style={styles.mainButtonText}>Začni</Text>
 
           <View style={styles.arrowCircle}>
@@ -90,16 +92,16 @@ export default function HomeScreen({ navigation }: any) {
         </TouchableOpacity>
 
         <TouchableOpacity
-        style={styles.loginButton}
-        activeOpacity={0.85}
-        onPress={() => navigation.navigate("Login")}
+          style={styles.loginButton}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Login")}
         >
-          <Text style={styles.loginIcon}>♙</Text>
+          <Text style={styles.loginIcon}>👤</Text>
           <Text style={styles.loginButtonText}>Prijava</Text>
         </TouchableOpacity>
 
         <View style={styles.bottomInfo}>
-          <Text style={styles.bottomInfoIcon}>♡</Text>
+          <Text style={styles.bottomInfoIcon}>✓</Text>
           <Text style={styles.bottomInfoText}>
             Lokalna pravila. Pametni nasveti. Boljši svet.
           </Text>
@@ -107,13 +109,17 @@ export default function HomeScreen({ navigation }: any) {
       </ScrollView>
 
       <Modal visible={modalVisible} transparent animationType="fade">
-        <TouchableOpacity
+        <Pressable
           style={styles.modalOverlay}
-          activeOpacity={1}
           onPress={() => setModalVisible(false)}
         >
-          <View style={styles.modalContent}>
+          <Pressable style={styles.modalContent}>
+            <View style={styles.modalHandle} />
+
             <Text style={styles.modalTitle}>Izberi občino</Text>
+            <Text style={styles.modalSubtitle}>
+              Pravila ločevanja se prilagodijo izbrani občini.
+            </Text>
 
             {municipalities.map((city) => (
               <TouchableOpacity
@@ -122,6 +128,7 @@ export default function HomeScreen({ navigation }: any) {
                   styles.cityOption,
                   selectedCity === city && styles.cityOptionActive,
                 ]}
+                activeOpacity={0.85}
                 onPress={() => {
                   setSelectedCity(city);
                   setModalVisible(false);
@@ -135,10 +142,14 @@ export default function HomeScreen({ navigation }: any) {
                 >
                   {city}
                 </Text>
+
+                {selectedCity === city && (
+                  <Text style={styles.cityCheck}>✓</Text>
+                )}
               </TouchableOpacity>
             ))}
-          </View>
-        </TouchableOpacity>
+          </Pressable>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );

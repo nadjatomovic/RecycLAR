@@ -1,92 +1,89 @@
 import { StyleSheet, Dimensions } from "react-native";
+import { COLORS, FONT, RADIUS, SPACING } from "../utils/theme";
 
 const { width, height } = Dimensions.get("window");
 
-const colors = {
-  green: "#34A936",
-  greenDark: "#238A2E",
-  purple: "#6B35C9",
-  purpleLight: "#EFE8FF",
-  text: "#242631",
-  muted: "#777782",
-  border: "#EDEDF3",
-  white: "#FFFFFF",
-  bg: "#FFFFFF",
-};
+const isSmallPhone = height < 720;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: COLORS.background,
   },
 
   scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 4,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: isSmallPhone ? 4 : 10,
     paddingBottom: 28,
     minHeight: height,
   },
 
   header: {
     alignItems: "center",
-    marginTop: 0,
   },
 
   mainIcon: {
-    width: 136,
-    height: 136,
-    marginBottom: -4,
+    width: isSmallPhone ? 104 : 122,
+    height: isSmallPhone ? 104 : 122,
+    marginBottom: -8,
   },
 
   logoText: {
-    width: 250,
-    height: 74,
-    marginTop: -14,
+    width: isSmallPhone ? 185 : 215,
+    height: isSmallPhone ? 52 : 60,
+    marginTop: -8,
   },
 
   tagline: {
-    marginTop: 0,
-    fontSize: 28,
-    lineHeight: 35,
+    marginTop: 2,
+    fontSize: isSmallPhone ? 27 : 30,
+    lineHeight: isSmallPhone ? 33 : 37,
     fontWeight: "900",
-    color: colors.purple,
+    color: COLORS.purple,
     textAlign: "center",
+    letterSpacing: -0.4,
   },
 
   description: {
     marginTop: 8,
-    fontSize: 17,
-    lineHeight: 24,
-    color: colors.muted,
+    maxWidth: 300,
+    fontSize: FONT.body,
+    lineHeight: 23,
+    color: COLORS.muted,
     textAlign: "center",
+    fontWeight: "500",
   },
 
-  heroSection: {
-    marginTop: 18,
+  heroCard: {
+    marginTop: isSmallPhone ? 12 : 18,
     width: "100%",
-    height: width * 0.68,
+    height: isSmallPhone ? width * 0.56 : width * 0.64,
+    borderRadius: RADIUS.lg,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+    backgroundColor: "#FBFCF7",
   },
 
   heroImage: {
-    width: width * 0.98,
-    height: width * 0.72,
+    width: width * 0.96,
+    height: isSmallPhone ? width * 0.58 : width * 0.68,
   },
 
   dropdownContainer: {
-    marginTop: 10,
-    height: 74,
-    borderRadius: 37,
-    paddingLeft: 16,
-    paddingRight: 22,
-    backgroundColor: colors.white,
+    marginTop: 16,
+    minHeight: 72,
+    borderRadius: RADIUS.pill,
+    paddingLeft: 14,
+    paddingRight: 20,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    shadowColor: "#000",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
@@ -96,13 +93,14 @@ export const styles = StyleSheet.create({
   dropdownLeft: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
   },
 
   locationIconCircle: {
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: colors.purpleLight,
+    backgroundColor: COLORS.purpleSoft,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 14,
@@ -113,98 +111,94 @@ export const styles = StyleSheet.create({
     height: 30,
   },
 
-  dropdownLabel: {
-    fontSize: 20,
-    color: colors.text,
-    fontWeight: "500",
+  dropdownSmallLabel: {
+    fontSize: 13,
+    color: COLORS.lightText,
+    fontWeight: "600",
+    marginBottom: 1,
   },
 
-  selectedCityText: {
-    color: colors.purple,
+  dropdownLabel: {
+    fontSize: 21,
+    color: COLORS.purple,
     fontWeight: "900",
   },
 
   chevron: {
-    fontSize: 27,
+    fontSize: 28,
     color: "#A8A8B2",
     marginBottom: 8,
+    marginLeft: 8,
   },
 
   mainButton: {
     marginTop: 18,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: colors.green,
+    height: 64,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.green,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: colors.green,
+    flexDirection: "row",
+
+    shadowColor: COLORS.green,
     shadowOpacity: 0.28,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 9 },
     elevation: 6,
   },
 
-  mainButtonLeftIcon: {
+  mainButtonIcon: {
     position: "absolute",
-    left: 25,
-    width: 28,
-    height: 28,
-    tintColor: colors.white,
-  },
-
-  mainButtonLeaf: {
-    position: "absolute",
-    left: 28,
-    color: colors.white,
-    fontSize: 28,
-    fontWeight: "800",
+    left: 26,
+    fontSize: 24,
   },
 
   mainButtonText: {
-    color: colors.white,
-    fontSize: 25,
+    color: COLORS.white,
+    fontSize: FONT.button,
     fontWeight: "900",
+    letterSpacing: 0.2,
   },
 
   arrowCircle: {
     position: "absolute",
-    right: 14,
+    right: 10,
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
   },
 
   arrowText: {
-    color: colors.green,
+    color: COLORS.green,
     fontSize: 38,
     lineHeight: 38,
     marginTop: -3,
+    fontWeight: "700",
   },
 
   loginButton: {
-    marginTop: 16,
-    height: 64,
-    borderRadius: 32,
+    marginTop: 14,
+    height: 60,
+    borderRadius: RADIUS.pill,
     borderWidth: 2,
     borderColor: "#DCCBF6",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: COLORS.white,
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
   },
 
   loginIcon: {
-    color: colors.purple,
-    fontSize: 25,
-    marginRight: 12,
+    fontSize: 22,
+    marginRight: 10,
   },
 
   loginButtonText: {
-    color: colors.purple,
-    fontSize: 22,
+    color: COLORS.purple,
+    fontSize: 20,
     fontWeight: "800",
   },
 
@@ -216,14 +210,17 @@ export const styles = StyleSheet.create({
   },
 
   bottomInfoIcon: {
-    color: colors.green,
-    fontSize: 17,
+    color: COLORS.green,
+    fontSize: 15,
     marginRight: 7,
+    fontWeight: "900",
   },
 
   bottomInfoText: {
-    fontSize: 13,
-    color: colors.muted,
+    fontSize: FONT.small,
+    color: COLORS.muted,
+    fontWeight: "500",
+    textAlign: "center",
   },
 
   modalOverlay: {
@@ -233,39 +230,69 @@ export const styles = StyleSheet.create({
   },
 
   modalContent: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    padding: 24,
-    paddingBottom: 36,
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 34,
+  },
+
+  modalHandle: {
+    width: 44,
+    height: 5,
+    borderRadius: 10,
+    backgroundColor: "#DDDDE6",
+    alignSelf: "center",
+    marginBottom: 18,
   },
 
   modalTitle: {
-    fontSize: 24,
+    fontSize: 25,
     fontWeight: "900",
-    color: colors.text,
-    marginBottom: 16,
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+
+  modalSubtitle: {
+    fontSize: 14,
+    color: COLORS.muted,
+    marginBottom: 18,
+    lineHeight: 20,
   },
 
   cityOption: {
-    paddingVertical: 16,
+    minHeight: 56,
+    paddingVertical: 14,
     paddingHorizontal: 18,
     borderRadius: 18,
-    marginBottom: 8,
+    marginBottom: 9,
     backgroundColor: "#F7F7FA",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
   cityOptionActive: {
-    backgroundColor: colors.purpleLight,
+    backgroundColor: COLORS.purpleSoft,
+    borderWidth: 1,
+    borderColor: "#D9C8FF",
   },
 
   cityText: {
-    fontSize: 18,
-    color: colors.text,
+    fontSize: 17,
+    color: COLORS.text,
+    fontWeight: "700",
   },
 
   cityTextActive: {
-    color: colors.purple,
+    color: COLORS.purple,
+    fontWeight: "900",
+  },
+
+  cityCheck: {
+    color: COLORS.purple,
+    fontSize: 18,
     fontWeight: "900",
   },
 });

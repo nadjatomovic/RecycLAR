@@ -2,147 +2,294 @@ import React from "react";
 import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/Bindetailscreen.styles";
+import { getBinAsset } from "../utils/binAssets";
+import BottomNavBar from "../components/BottomNavBar";
 
 const BIN_DATA: Record<string, any> = {
   yellow: {
-    label: "Rumeni zabojnik",
-    color: "#F5A623",
-    bgColor: "#FFF8ED",
-    borderColor: "#FFD580",
-    img: require("../assets/bin-yellow.png"),
+    label: "Zabojnik za embalažo",
+    shortLabel: "Embalaža",
+    color: "#F5B400",
+    bgColor: "#FFF8E6",
+    borderColor: "#F6D77A",
+    image: "zutaKanta",
     allowed: [
-      { label: "Plastenke", emoji: "🍶" },
-      { label: "Pločevinke", emoji: "🥫" },
-      { label: "Tetrapak", emoji: "🧃" },
-      { label: "Plastična embalaža", emoji: "📦" },
-      { label: "Čista embalaža", emoji: "✨" },
+      "Plastenke",
+      "Pločevinke",
+      "Tetrapak",
+      "Plastična embalaža",
+      "Kovinska embalaža",
     ],
     notAllowed: [
-      { label: "Ostanki hrane", emoji: "🍎" },
-      { label: "Steklo", emoji: "🍾" },
-      { label: "Papirnati robčki", emoji: "🧻" },
-      { label: "Nevarni odpadki", emoji: "☢️" },
-      { label: "Umazana embalaža", emoji: "🗑️" },
+      "Ostanki hrane",
+      "Steklo",
+      "Papirnati robčki",
+      "Nevarni odpadki",
+      "Umazana embalaža",
     ],
     quickExamples: [
-      { label: "Jogurtov lonček", bin: "Rumeni", allowed: true },
-      { label: "Pločevinka", bin: "Rumeni", allowed: true },
-      { label: "Mastna embalaža", bin: "Ni dovoljeno", allowed: false },
+      { label: "Jogurtov lonček", value: "Dovoljeno", allowed: true },
+      { label: "Pločevinka", value: "Dovoljeno", allowed: true },
+      { label: "Mastna embalaža", value: "Ni dovoljeno", allowed: false },
     ],
-    lariTip: "Embalažo prej izprazni in po potrebi stisni!",
+    lariTip: "Embalažo prej izprazni in po potrebi stisni.",
   },
+
   blue: {
-    label: "Modri zabojnik",
+    label: "Zabojnik za papir",
+    shortLabel: "Papir",
     color: "#2F80ED",
     bgColor: "#EBF4FF",
     borderColor: "#90C4F9",
-    img: require("../assets/bin-blue.png"),
+    image: "modraKanta",
     allowed: [
-      { label: "Časopisi", emoji: "📰" },
-      { label: "Karton", emoji: "📦" },
-      { label: "Pisarniški papir", emoji: "📄" },
-      { label: "Katalogi", emoji: "📚" },
-      { label: "Papirnate vrečke", emoji: "🛍️" },
+      "Časopisi",
+      "Revije",
+      "Zvezki",
+      "Karton",
+      "Pisarniški papir",
+      "Letaki",
     ],
     notAllowed: [
-      { label: "Mokri papir", emoji: "💧" },
-      { label: "Plastika", emoji: "🧴" },
-      { label: "Steklo", emoji: "🍾" },
-      { label: "Papirnati robčki", emoji: "🧻" },
-      { label: "Folija", emoji: "🎁" },
+      "Masten papir",
+      "Mokri papir",
+      "Papirnati robčki",
+      "Tetrapak",
+      "Plastificiran papir",
     ],
     quickExamples: [
-      { label: "Kartonska škatla", bin: "Modri", allowed: true },
-      { label: "Časopis", bin: "Modri", allowed: true },
-      { label: "Papirnati robček", bin: "Ni dovoljeno", allowed: false },
+      { label: "Kartonska škatla", value: "Dovoljeno", allowed: true },
+      { label: "Časopis", value: "Dovoljeno", allowed: true },
+      { label: "Papirnati robček", value: "Ni dovoljeno", allowed: false },
     ],
-    lariTip: "Kartonske škatle prej zloži, da zavzamejo manj prostora!",
+    lariTip: "Papir in karton naj bosta čista in suha. Večje škatle zloži.",
   },
+
+  red: {
+    label: "Zabojnik za papir",
+    shortLabel: "Papir",
+    color: "#E54848",
+    bgColor: "#FFF1F1",
+    borderColor: "#F3B4B4",
+    image: "rdecaKanta",
+    allowed: [
+      "Časopisi",
+      "Revije",
+      "Zvezki",
+      "Karton",
+      "Pisarniški papir",
+      "Letaki",
+    ],
+    notAllowed: [
+      "Masten papir",
+      "Mokri papir",
+      "Papirnati robčki",
+      "Tetrapak",
+      "Plastificiran papir",
+    ],
+    quickExamples: [
+      { label: "Zvezek", value: "Dovoljeno", allowed: true },
+      { label: "Karton", value: "Dovoljeno", allowed: true },
+      { label: "Moker papir", value: "Ni dovoljeno", allowed: false },
+    ],
+    lariTip: "Papir naj bo čist in suh. Kartonske škatle pred odlaganjem zloži.",
+  },
+
   green: {
-    label: "Zeleni zabojnik",
-    color: "#27AE60",
+    label: "Zabojnik za steklo",
+    shortLabel: "Steklo",
+    color: "#2FA84F",
     bgColor: "#EDFAF3",
-    borderColor: "#82D9A8",
-    img: require("../assets/bin-green.png"),
+    borderColor: "#92D9A8",
+    image: "zelenaKanta",
     allowed: [
-      { label: "Steklene steklenice", emoji: "🍾" },
-      { label: "Kozarci", emoji: "🫙" },
-      { label: "Steklena embalaža", emoji: "🍶" },
+      "Steklenice",
+      "Stekleni kozarci",
+      "Steklena embalaža",
+      "Kozarci za vlaganje",
     ],
     notAllowed: [
-      { label: "Porcelan", emoji: "🍽️" },
-      { label: "Žarnice", emoji: "💡" },
-      { label: "Ogledala", emoji: "🪞" },
-      { label: "Plastika", emoji: "🧴" },
-      { label: "Pokrovi", emoji: "🔩" },
+      "Pokrovčki",
+      "Keramika",
+      "Porcelan",
+      "Ogledala",
+      "Žarnice",
+      "Okensko steklo",
     ],
     quickExamples: [
-      { label: "Steklenica vina", bin: "Zeleni", allowed: true },
-      { label: "Kozarec za džem", bin: "Zeleni", allowed: true },
-      { label: "Žarnica", bin: "Ni dovoljeno", allowed: false },
+      { label: "Steklenica", value: "Dovoljeno", allowed: true },
+      { label: "Kozarec za vlaganje", value: "Dovoljeno", allowed: true },
+      { label: "Žarnica", value: "Ni dovoljeno", allowed: false },
     ],
-    lariTip: "Steklenic ni treba prati, dovolj je da so prazne!",
+    lariTip: "Stekleno embalažo izprazni. Pokrovčke odstrani in jih odloži med embalažo.",
   },
+
+  white: {
+    label: "Zabojnik za steklo",
+    shortLabel: "Steklo",
+    color: "#7A7A86",
+    bgColor: "#F8F8FB",
+    borderColor: "#DADAE3",
+    image: "belaKanta",
+    allowed: [
+      "Steklenice",
+      "Stekleni kozarci",
+      "Steklena embalaža živil in pijač",
+      "Kozarci za vlaganje",
+    ],
+    notAllowed: [
+      "Pokrovčki",
+      "Keramika",
+      "Porcelan",
+      "Ogledala",
+      "Žarnice",
+      "Ravno steklo",
+    ],
+    quickExamples: [
+      { label: "Steklenica soka", value: "Dovoljeno", allowed: true },
+      { label: "Kozarec za vlaganje", value: "Dovoljeno", allowed: true },
+      { label: "Ogledalo", value: "Ni dovoljeno", allowed: false },
+    ],
+    lariTip: "Stekleno embalažo izprazni. Pokrovčke odstrani ter jih odloži med embalažo.",
+  },
+
   brown: {
-    label: "Rjavi zabojnik",
+    label: "Zabojnik za BIO odpadke",
+    shortLabel: "BIO",
     color: "#8B572A",
     bgColor: "#F9F0E8",
     borderColor: "#C8996A",
-    img: require("../assets/bin-brown.png"),
+    image: "rjavaKanta",
     allowed: [
-      { label: "Ostanki hrane", emoji: "🍎" },
-      { label: "Olupki", emoji: "🍌" },
-      { label: "Kavna usedlina", emoji: "☕" },
-      { label: "Čajne vrečke", emoji: "🍵" },
-      { label: "Ostanki zelenjave", emoji: "🥦" },
+      "Olupki sadja",
+      "Ostanki zelenjave",
+      "Kavna usedlina",
+      "Čajne vrečke",
+      "Vrtni odpadki",
     ],
     notAllowed: [
-      { label: "Plastika", emoji: "🧴" },
-      { label: "Meso in kosti", emoji: "🍖" },
-      { label: "Oljna hrana", emoji: "🍟" },
-      { label: "Pepel", emoji: "🪨" },
-      { label: "Plastične vrečke", emoji: "🛍️" },
+      "Plastika",
+      "Plastične vrečke",
+      "Pepel",
+      "Steklo",
+      "Kovine",
     ],
     quickExamples: [
-      { label: "Olupki sadja", bin: "Rjavi", allowed: true },
-      { label: "Kavna usedlina", bin: "Rjavi", allowed: true },
-      { label: "Kosti", bin: "Ni dovoljeno", allowed: false },
+      { label: "Bananin olupek", value: "Dovoljeno", allowed: true },
+      { label: "Kavna usedlina", value: "Dovoljeno", allowed: true },
+      { label: "Plastična vrečka", value: "Ni dovoljeno", allowed: false },
     ],
-    lariTip: "Biološke odpadke zavij v časopis, ne v plastično vrečko!",
+    lariTip: "BIO odpadkov ne odlagaj v plastičnih vrečkah.",
   },
+
   mixed: {
-    label: "Mešani zabojnik",
+    label: "Mešani komunalni odpadki",
+    shortLabel: "Mešani",
     color: "#555555",
     bgColor: "#F4F4F4",
-    borderColor: "#AAAAAA",
-    img: require("../assets/bin-black.png"),
+    borderColor: "#B8B8B8",
+    image: "crnaKanta",
     allowed: [
-      { label: "Usnje", emoji: "👜" },
-      { label: "Guma", emoji: "🔧" },
-      { label: "Plenice", emoji: "👶" },
-      { label: "Keramika", emoji: "🏺" },
-      { label: "Pepel (ohlajen)", emoji: "🪨" },
+      "Plenice",
+      "Keramika",
+      "Ohlajen pepel",
+      "Umazani odpadki",
+      "Manjši nereciklabilni odpadki",
     ],
     notAllowed: [
-      { label: "Elektronika", emoji: "📱" },
-      { label: "Nevarni odpadki", emoji: "☢️" },
-      { label: "Zdravila", emoji: "💊" },
-      { label: "Akumulatorji", emoji: "🔋" },
-      { label: "Barvila", emoji: "🎨" },
+      "Elektronika",
+      "Baterije",
+      "Zdravila",
+      "Nevarni odpadki",
+      "Uporabna embalaža",
     ],
     quickExamples: [
-      { label: "Stara plenica", bin: "Mešani", allowed: true },
-      { label: "Keramična skodelica", bin: "Mešani", allowed: true },
-      { label: "Stara baterija", bin: "Ni dovoljeno", allowed: false },
+      { label: "Stara plenica", value: "Dovoljeno", allowed: true },
+      { label: "Keramična skodelica", value: "Dovoljeno", allowed: true },
+      { label: "Baterija", value: "Ni dovoljeno", allowed: false },
     ],
-    lariTip: "Mešani zabojnik je zadnja možnost — najprej preveri ostale!",
+    lariTip: "Mešani zabojnik je zadnja možnost — najprej preveri ostale zabojnike.",
+  },
+
+  special: {
+    label: "Posebni odpadki",
+    shortLabel: "Posebno",
+    color: "#6B35C9",
+    bgColor: "#F3EEFF",
+    borderColor: "#D8C6FF",
+    image: "specialDropoff",
+    allowed: [
+      "Baterije",
+      "Elektronski odpadki",
+      "Zdravila",
+      "Barve in laki",
+      "Olja",
+    ],
+    notAllowed: [
+      "Običajna embalaža",
+      "Čist papir",
+      "BIO odpadki",
+      "Steklena embalaža",
+    ],
+    quickExamples: [
+      { label: "Baterija", value: "Zbirni center", allowed: true },
+      { label: "Telefon", value: "Zbirni center", allowed: true },
+      { label: "Plastenka", value: "Ni tukaj", allowed: false },
+    ],
+    lariTip: "Posebne in nevarne odpadke oddaj v zbirnem centru ali na posebnem zbirnem mestu.",
+  },
+};
+
+const imageByMunicipalityAndBin: Record<string, Record<string, string>> = {
+  Maribor: {
+    yellow: "zutaKanta",
+    red: "rdecaKanta",
+    white: "belaKanta",
+    brown: "rjavaKanta",
+    mixed: "crnaKanta",
+    special: "specialDropoff",
+  },
+  Ljubljana: {
+    yellow: "zutaKanta",
+    blue: "modraKanta",
+    green: "zelenaKanta",
+    brown: "rjavaKanta",
+    mixed: "sivaKanta",
+    special: "specialDropoff",
+  },
+  Kranj: {
+    yellow: "kantaZRumenimPokrovom",
+    blue: "modraKanta",
+    green: "zelenaKanta",
+    brown: "rjavaKanta",
+    mixed: "sivaKanta",
+    special: "specialDropoff",
+  },
+  Koper: {
+    yellow: "zutaKanta",
+    red: "rdecaKanta",
+    green: "zelenaKanta",
+    brown: "rjavaKanta",
+    mixed: "crnaKanta",
+    special: "specialDropoff",
+  },
+  Celje: {
+    yellow: "zutaKanta",
+    red: "rdecaKanta",
+    white: "belaKanta",
+    brown: "rjavaKanta",
+    mixed: "zelenaKanta",
+    special: "specialDropoff",
   },
 };
 
 export default function BinDetailScreen({ route, navigation }: any) {
   const binId = route?.params?.binId ?? "yellow";
   const municipality = route?.params?.municipality ?? "Maribor";
-  const bin = BIN_DATA[binId];
+
+  const bin = BIN_DATA[binId] ?? BIN_DATA.yellow;
+  const imageKey =
+    imageByMunicipalityAndBin[municipality]?.[binId] ?? bin.image;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -150,7 +297,6 @@ export default function BinDetailScreen({ route, navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backBtn}
@@ -166,70 +312,85 @@ export default function BinDetailScreen({ route, navigation }: any) {
               style={styles.brandIcon}
               resizeMode="contain"
             />
-            <Text style={styles.brandText}>
-              <Text style={styles.brandGreen}>Recyc</Text>
-              <Text style={styles.brandPurple}>LAR</Text>
-            </Text>
+            <Image
+              source={require("../assets/logo.png")}
+              style={styles.brandLogo}
+              resizeMode="contain"
+            />
           </View>
 
-          <View style={{ width: 42 }} />
+          <View style={styles.headerSpacer} />
         </View>
 
-        {/* Bin title card */}
         <View
           style={[
-            styles.binTitleCard,
-            { borderColor: bin.borderColor, backgroundColor: bin.bgColor },
+            styles.binHeroCard,
+            {
+              borderColor: bin.borderColor,
+              backgroundColor: bin.bgColor,
+            },
           ]}
         >
-          <Image
-            source={bin.img}
-            style={styles.binTitleImg}
-            resizeMode="contain"
-          />
-          <View>
+          <View style={styles.binHeroText}>
+            <Text style={styles.overline}>Pravila ločevanja</Text>
+
             <Text style={[styles.binTitleText, { color: bin.color }]}>
               {bin.label}
             </Text>
+
             <Text style={styles.binMunicipality}>
-              Pravila za občino{" "}
+              Občina{" "}
               <Text style={styles.binMunicipalityName}>{municipality}</Text>
             </Text>
           </View>
+
+          <Image
+            source={getBinAsset(imageKey)}
+            style={styles.binTitleImg}
+            resizeMode="contain"
+          />
         </View>
 
-        {/* Allowed / Not allowed */}
         <View style={styles.rulesRow}>
           <View style={[styles.rulesCard, styles.allowedCard]}>
             <View style={styles.rulesCardHeader}>
-              <View style={styles.allowedDot} />
+              <View style={styles.allowedIconCircle}>
+                <Text style={styles.allowedIcon}>✓</Text>
+              </View>
               <Text style={styles.allowedTitle}>Dovoljeno</Text>
             </View>
-            {bin.allowed.map((item: any) => (
-              <View key={item.label} style={styles.ruleItem}>
-                <Text style={styles.ruleEmoji}>{item.emoji}</Text>
-                <Text style={styles.ruleLabel}>{item.label}</Text>
+
+            {bin.allowed.map((item: string) => (
+              <View key={item} style={styles.ruleItem}>
+                <Text style={styles.ruleBullet}>•</Text>
+                <Text style={styles.ruleLabel}>{item}</Text>
               </View>
             ))}
           </View>
 
           <View style={[styles.rulesCard, styles.notAllowedCard]}>
             <View style={styles.rulesCardHeader}>
-              <View style={styles.notAllowedDot} />
+              <View style={styles.notAllowedIconCircle}>
+                <Text style={styles.notAllowedIcon}>×</Text>
+              </View>
               <Text style={styles.notAllowedTitle}>Ni dovoljeno</Text>
             </View>
-            {bin.notAllowed.map((item: any) => (
-              <View key={item.label} style={styles.ruleItem}>
-                <Text style={styles.ruleEmoji}>{item.emoji}</Text>
-                <Text style={styles.ruleLabel}>{item.label}</Text>
+
+            {bin.notAllowed.map((item: string) => (
+              <View key={item} style={styles.ruleItem}>
+                <Text style={styles.ruleBullet}>•</Text>
+                <Text style={styles.ruleLabel}>{item}</Text>
               </View>
             ))}
           </View>
         </View>
 
-        {/* Hitri primeri */}
         <View style={styles.examplesSection}>
-          <Text style={styles.examplesSectionTitle}>⚡ Hitri primeri</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Hitri primeri</Text>
+            <Text style={styles.sectionSubtitle}>Preveri v sekundi</Text>
+          </View>
+
           <View style={styles.examplesRow}>
             {bin.quickExamples.map((ex: any) => (
               <View key={ex.label} style={styles.exampleCard}>
@@ -240,30 +401,31 @@ export default function BinDetailScreen({ route, navigation }: any) {
                     { color: ex.allowed ? bin.color : "#E53935" },
                   ]}
                 >
-                  → {ex.bin}
+                  {ex.allowed ? "✓ " : "× "}
+                  {ex.value}
                 </Text>
               </View>
             ))}
           </View>
         </View>
 
-        {/* Lari tip */}
         <View style={styles.lariRow}>
           <Image
             source={require("../assets/lari-hello.png")}
             style={styles.lariImg}
             resizeMode="contain"
           />
+
           <View style={styles.lariBubble}>
+            <Text style={styles.lariLabel}>Larijev nasvet</Text>
             <Text style={styles.lariTipText}>{bin.lariTip}</Text>
           </View>
         </View>
 
-        {/* Login hint */}
         <TouchableOpacity
           style={styles.loginHint}
           onPress={() => navigation.navigate("Login")}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
           <Text style={styles.loginHintText}>
             🎓 Želiš preveriti svoje znanje?{" "}
@@ -272,33 +434,11 @@ export default function BinDetailScreen({ route, navigation }: any) {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Bottom tab */}
-      <View style={styles.bottomTab}>
-        <TabItem
-          label="Domov"
-          icon="⌂"
-          onPress={() => navigation.navigate("Dashboard")}
-        />
-        <TabItem label="Skeniraj" icon="⌗" />
-        <TabItem
-          label="Občina"
-          icon="⌖"
-          onPress={() => navigation.navigate("Map")}
-        />
-      </View>
+      <BottomNavBar
+        navigation={navigation}
+        activeRoute="Dashboard"
+        municipality={municipality}
+      />
     </SafeAreaView>
   );
 }
-
-const TabItem = ({ label, icon, active, onPress }: any) => (
-  <TouchableOpacity
-    style={styles.tabItem}
-    onPress={onPress}
-    activeOpacity={0.8}
-  >
-    <Text style={[styles.tabIcon, active && styles.tabIconActive]}>{icon}</Text>
-    <Text style={[styles.tabLabel, active && styles.tabLabelActive]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-);
