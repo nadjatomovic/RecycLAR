@@ -41,7 +41,8 @@
       ],
       "expo-dev-client",
       "react-native-fast-tflite",
-      "expo-asset"
+      "expo-asset",
+      "expo-font"
     ],
     "extra": {
       "eas": {

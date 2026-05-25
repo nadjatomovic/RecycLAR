@@ -1,42 +1,27 @@
 import { StyleSheet, Dimensions } from "react-native";
+import { COLORS, RADIUS, SPACING } from "../utils/theme";
 
 const { height } = Dimensions.get("window");
-
-const colors = {
-  green: "#35A936",
-  purple: "#6B35C9",
-  purpleLight: "#EFE8FF",
-  text: "#252733",
-  muted: "#7A7A86",
-  border: "#ECECF2",
-  white: "#FFFFFF",
-  bg: "#FFFFFF",
-};
+const isSmallPhone = height < 720;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: COLORS.background,
   },
 
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 22,
-    paddingTop: 6,
-    marginBottom: 10,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: isSmallPhone ? 4 : 8,
+    marginBottom: 8,
   },
 
   brandRow: {
     flexDirection: "row",
     alignItems: "center",
-  },
-
-  brandIcon: {
-    width: 44,
-    height: 44,
-    marginRight: 10,
   },
 
   brandText: {
@@ -46,49 +31,32 @@ export const styles = StyleSheet.create({
   },
 
   brandGreen: {
-    color: colors.green,
+    color: COLORS.green,
   },
 
   brandPurple: {
-    color: colors.purple,
+    color: COLORS.purple,
   },
 
-  notificationBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-    position: "relative",
+  cityPill: {
+    backgroundColor: COLORS.purpleSoft,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: RADIUS.pill,
   },
 
-  notificationText: {
-    fontSize: 23,
-    color: "#4D4D59",
-  },
-
-  notificationDot: {
-    position: "absolute",
-    top: 9,
-    right: 9,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.purple,
+  cityPillText: {
+    color: COLORS.purple,
+    fontWeight: "900",
+    fontSize: 14,
   },
 
   titleSection: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    paddingHorizontal: 22,
-    marginBottom: 14,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: 12,
   },
 
   titleTextWrap: {
@@ -96,41 +64,38 @@ export const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: 42,
-    lineHeight: 48,
+    fontSize: isSmallPhone ? 34 : 38,
+    lineHeight: isSmallPhone ? 39 : 44,
     fontWeight: "900",
-    color: colors.text,
-    marginBottom: 8,
+    color: COLORS.text,
+    marginBottom: 4,
+    letterSpacing: -0.8,
   },
 
   subTitle: {
-    fontSize: 18,
-    lineHeight: 25,
-    color: colors.muted,
-  },
-
-  mascotSmall: {
-    width: 112,
-    height: 112,
-    marginTop: -8,
-    marginRight: 4,
+    fontSize: 15,
+    lineHeight: 22,
+    color: COLORS.muted,
+    fontWeight: "500",
   },
 
   searchContainer: {
-    paddingHorizontal: 22,
-    marginBottom: 14,
+    paddingHorizontal: SPACING.lg,
+    marginBottom: 12,
+    zIndex: 20,
   },
 
   searchBar: {
     flexDirection: "row",
-    backgroundColor: colors.white,
-    borderRadius: 25,
-    paddingHorizontal: 18,
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.pill,
+    paddingHorizontal: 16,
     alignItems: "center",
-    height: 58,
+    minHeight: 54,
     borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: "#000",
+    borderColor: COLORS.border,
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 6 },
@@ -138,41 +103,110 @@ export const styles = StyleSheet.create({
   },
 
   searchIcon: {
-    fontSize: 24,
-    marginRight: 12,
-    color: "#6E6E78",
+    fontSize: 22,
+    marginRight: 10,
+    color: COLORS.muted,
+    fontWeight: "900",
   },
 
   searchInput: {
     flex: 1,
-    fontSize: 16,
-    color: colors.text,
+    fontSize: 15,
+    color: COLORS.text,
+    fontWeight: "600",
   },
 
-  filterBtn: {
-    width: 34,
-    height: 34,
-    alignItems: "center",
+  suggestionsBox: {
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    marginTop: 6,
+    maxHeight: 220,
+    overflow: "hidden",
+
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
+  },
+
+  suggestionItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 13,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F4F4F6",
+  },
+
+  suggestionItemLast: {
+    borderBottomWidth: 0,
+  },
+
+  suggestionText: {
+    fontSize: 13,
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+
+  filtersWrap: {
+    height: 42,
+    marginBottom: 10,
+  },
+
+  filtersContent: {
+    paddingHorizontal: SPACING.lg,
+    columnGap: 8,
+  },
+
+  chip: {
+    paddingHorizontal: 15,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F8F8FB",
+    borderWidth: 1,
+    borderColor: COLORS.border,
     justifyContent: "center",
+    alignItems: "center",
   },
 
-  filterText: {
-    fontSize: 22,
-    color: "#6E6E78",
+  chipText: {
+    color: COLORS.muted,
+    fontWeight: "800",
+    fontSize: 13,
+  },
+
+  chipTextActive: {
+    color: COLORS.white,
+    fontWeight: "900",
   },
 
   mapWrapper: {
     flex: 1,
-    marginHorizontal: 0,
     overflow: "hidden",
+    backgroundColor: "#EFEFF4",
     borderTopWidth: 1,
-    borderBottomWidth: 1,
     borderColor: "#EFF0F4",
-    minHeight: height * 0.44,
+    position: "relative",
+    paddingBottom: 86,
   },
 
   map: {
-    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+  },
+
+  mapLoader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  mapLoaderText: {
+    marginTop: 10,
+    color: COLORS.muted,
+    fontSize: 14,
+    fontWeight: "700",
   },
 
   customMarker: {
@@ -180,10 +214,11 @@ export const styles = StyleSheet.create({
     height: 42,
     borderRadius: 21,
     borderWidth: 3,
-    borderColor: colors.white,
+    borderColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.22,
     shadowRadius: 7,
     shadowOffset: { width: 0, height: 4 },
@@ -191,208 +226,129 @@ export const styles = StyleSheet.create({
   },
 
   markerIcon: {
-    fontSize: 20,
-    color: colors.white,
+    fontSize: 17,
+    color: COLORS.white,
     fontWeight: "900",
   },
 
-  floatingMapButtons: {
+  emptyMapCard: {
     position: "absolute",
-    right: 18,
-    bottom: 84,
-    gap: 12,
-  },
-
-  mapCircleBtn: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 5,
-  },
-
-  mapCircleIcon: {
-    fontSize: 26,
-    color: "#686873",
-  },
-
-  categoriesOverlay: {
-    position: "absolute",
-    bottom: 18,
-    left: 0,
-    right: 0,
-    paddingLeft: 18,
-  },
-
-  chip: {
-    flexDirection: "row",
-    backgroundColor: colors.white,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
+    top: 24,
+    left: 22,
+    right: 22,
+    backgroundColor: COLORS.white,
     borderRadius: 22,
-    marginRight: 9,
+    padding: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: colors.border,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 9,
-    shadowOffset: { width: 0, height: 4 },
+    borderColor: COLORS.border,
+
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
     elevation: 4,
   },
 
-  chipActive: {
-    backgroundColor: colors.purpleLight,
-    borderColor: "#D8C8F8",
+  emptyMapIcon: {
+    fontSize: 28,
+    marginBottom: 4,
   },
 
-  chipIcon: {
+  emptyMapTitle: {
     fontSize: 17,
-    marginRight: 7,
-    fontWeight: "800",
-  },
-
-  chipText: {
-    fontWeight: "700",
-    fontSize: 13,
-    color: colors.text,
-  },
-
-  chipTextActive: {
-    color: colors.purple,
     fontWeight: "900",
+    color: COLORS.text,
+  },
+
+  emptyMapText: {
+    marginTop: 3,
+    fontSize: 13,
+    color: COLORS.muted,
+    textAlign: "center",
+    fontWeight: "600",
   },
 
   infoCard: {
     position: "absolute",
-    bottom: 86,
-    left: 0,
-    right: 0,
-    backgroundColor: colors.white,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingTop: 24,
-    paddingHorizontal: 20,
-    paddingBottom: 18,
+    bottom: 104,
+    left: SPACING.lg,
+    right: SPACING.lg,
+    backgroundColor: COLORS.white,
+    borderRadius: 26,
+    padding: 14,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.16,
     shadowRadius: 18,
-    shadowOffset: { width: 0, height: -6 },
-    elevation: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
   },
 
-  locationImgWrap: {
-    width: 104,
-    height: 94,
-    borderRadius: 22,
-    overflow: "hidden",
-    marginRight: 14,
-    position: "relative",
+  infoIconBox: {
+    width: 58,
+    height: 58,
+    borderRadius: 18,
+    backgroundColor: COLORS.purpleSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
   },
 
-  locationImg: {
-    width: "100%",
-    height: "100%",
-  },
-
-  distanceBadge: {
-    position: "absolute",
-    left: 10,
-    bottom: 8,
-    backgroundColor: colors.purple,
-    borderRadius: 15,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-
-  distanceText: {
-    color: colors.white,
-    fontSize: 12,
-    fontWeight: "800",
+  infoIconText: {
+    fontSize: 23,
+    color: COLORS.purple,
+    fontWeight: "900",
   },
 
   infoDetails: {
     flex: 1,
-    paddingRight: 42,
+    paddingRight: 10,
   },
 
   closestTag: {
-    color: colors.purple,
-    fontSize: 12,
+    color: COLORS.purple,
+    fontSize: 11,
     fontWeight: "900",
-    marginBottom: 3,
+    marginBottom: 2,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
   },
 
   locationTitle: {
-    fontSize: 21,
-    lineHeight: 26,
+    fontSize: 17,
+    lineHeight: 22,
     fontWeight: "900",
-    color: colors.text,
-    marginBottom: 6,
-  },
-
-  typeDotsRow: {
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 6,
-  },
-
-  typeDot: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    color: COLORS.text,
   },
 
   locationItems: {
-    fontSize: 14,
-    color: colors.text,
-    marginBottom: 5,
+    fontSize: 12,
+    color: COLORS.muted,
+    marginTop: 2,
+    fontWeight: "600",
   },
 
   openStatus: {
-    fontSize: 13,
-    color: colors.green,
+    fontSize: 12,
+    color: COLORS.green,
     fontWeight: "800",
-  },
-
-  favoriteBtn: {
-    position: "absolute",
-    right: 22,
-    top: 18,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: colors.white,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-
-  favoriteIcon: {
-    color: "#777782",
-    fontSize: 23,
+    marginTop: 3,
   },
 
   arrowBtn: {
-    position: "absolute",
-    right: 24,
-    bottom: 24,
-    backgroundColor: colors.purple,
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    backgroundColor: COLORS.purple,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: colors.purple,
+
+    shadowColor: COLORS.purple,
     shadowOpacity: 0.25,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -400,54 +356,8 @@ export const styles = StyleSheet.create({
   },
 
   arrowText: {
-    color: colors.white,
-    fontSize: 24,
-    fontWeight: "900",
-  },
-
-  bottomTab: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 86,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: "#EFEFF4",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingBottom: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
-  },
-
-  tabItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  tabIcon: {
-    fontSize: 25,
-    color: colors.purple,
-    marginBottom: 2,
-  },
-
-  tabIconActive: {
-    color: colors.green,
-  },
-
-  tabLabel: {
-    fontSize: 12,
-    color: colors.muted,
-  },
-
-  tabLabelActive: {
-    color: colors.green,
+    color: COLORS.white,
+    fontSize: 22,
     fontWeight: "900",
   },
 });
