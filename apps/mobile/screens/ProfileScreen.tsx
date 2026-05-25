@@ -6,26 +6,54 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Modal,
+  TextInput,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/ProfileScreen.styles";
+import { getBadgeAsset } from "../utils/badgeAssets";
 
 type UserData = {
   name: string;
   email: string;
   municipalityId: string;
-  groupId: string;
-  schoolId: string;
-  totalPoints: number;
-  weeklyPoints: number;
-  scanCount: number;
-  quizCompleted: number;
-  streakDays: number;
-  role: string;
+  groupId?: string;
+  schoolId?: string;
+  totalPoints?: number;
+  weeklyPoints?: number;
+  scanCount?: number;
+  quizCompleted?: number;
+  streakDays?: number;
+  role?: string;
+  earnedBadges?: string[];
+  avatarKey?: string;
+};
+
+type BadgeData = {
+  id: string;
+  name: string;
+  description: string;
+  imageKey: string;
+  conditionType: string;
+  conditionValue: number;
+  order: number;
 };
 
 type GroupData = {
@@ -35,49 +63,35 @@ type GroupData = {
   rank?: number;
 };
 
-const studentAchievements = [
+type ActivityData = {
+  id?: string;
+  icon: string;
+  iconBg: string;
+  title: string;
+  description: string;
+  points: string;
+  time: string;
+  pointsColor: string;
+  createdAt?: any;
+};
+
+const avatarOptions = [
   {
-    title: "Eko junak",
-    description: "Zberi 1000 eko točk",
-    ribbon: "EKO JUNAK",
-    image: require("../assets/bin-green.png"),
-    requiredPoints: 1000,
+    key: "lariHello",
+    label: "Lari",
+    image: require("../assets/lari-hello.png"),
   },
   {
-    title: "Varuh planeta",
-    description: "Skeniraj 30 različnih odpadkov",
-    ribbon: "VARUH PLANETA",
+    key: "lariLogo",
+    label: "Logo",
     image: require("../assets/icon-logo.png"),
-    requiredScans: 30,
-  },
-  {
-    title: "Plastika? Ne!",
-    description: "Skeniraj 20 plastenk",
-    ribbon: "PLASTIKA? NE!",
-    image: require("../assets/plastic-bottle.png"),
-    requiredScans: 20,
   },
 ];
 
-const teacherAchievements = [
-  {
-    title: "Super mentor",
-    description: "Najbolj angažiran učitelj tega meseca",
-    ribbon: "SUPER MENTOR",
-    emoji: "⭐",
-  },
-  {
-    title: "Eko vodja",
-    description: "Vodi z zgledom in spodbuja zelene navade",
-    ribbon: "EKO VODJA",
-    emoji: "🌱",
-  },
-  {
-    title: "Kviz mojster",
-    description: "Ustvaril/a 10 odličnih kvizov",
-    ribbon: "KVIZ MOJSTER",
-    emoji: "📋",
-  },
+const MOCK_CLASSES: GroupData[] = [
+  { id: "7b", name: "7.B razred", totalPoints: 1520, rank: 1 },
+  { id: "6a", name: "6.A razred", totalPoints: 1180, rank: 2 },
+  { id: "8c", name: "8.C razred", totalPoints: 780, rank: 3 },
 ];
 
 const MOCK_TEACHER_STATS = {
@@ -87,10 +101,34 @@ const MOCK_TEACHER_STATS = {
   activeDays: 18,
 };
 
-const MOCK_CLASSES: GroupData[] = [
-  { id: "7b", name: "7.B razred", totalPoints: 1520, rank: 1 },
-  { id: "6a", name: "6.A razred", totalPoints: 1180, rank: 2 },
-  { id: "8c", name: "8.C razred", totalPoints: 780, rank: 3 },
+const MOCK_STUDENT_ACTIVITY = [
+  {
+    icon: "♻️",
+    iconBg: "#F0FDF4",
+    title: "Skeniran odpadek",
+    description: "Plastenka PET",
+    points: "+15 točk",
+    time: "Danes, 09:15",
+    pointsColor: "#35A936",
+  },
+  {
+    icon: "❓",
+    iconBg: "#EDE9FE",
+    title: "Zaključen kviz",
+    description: "Ločevanje odpadkov – Nivo 1",
+    points: "+10 točk",
+    time: "Danes, 08:42",
+    pointsColor: "#35A936",
+  },
+  {
+    icon: "🌱",
+    iconBg: "#F0FDF4",
+    title: "Eko točke za aktivnost",
+    description: "Dnevni bonus",
+    points: "+5 točk",
+    time: "Včeraj, 20:10",
+    pointsColor: "#35A936",
+  },
 ];
 
 const MOCK_TEACHER_ACTIVITY = [
@@ -123,35 +161,10 @@ const MOCK_TEACHER_ACTIVITY = [
   },
 ];
 
-const MOCK_STUDENT_ACTIVITY = [
-  {
-    icon: "♻️",
-    iconBg: "#F0FDF4",
-    title: "Skeniran odpadek",
-    description: "Plastenka PET",
-    points: "+15 točk",
-    time: "Danes, 09:15",
-    pointsColor: "#35A936",
-  },
-  {
-    icon: "❓",
-    iconBg: "#EDE9FE",
-    title: "Zaključen kviz",
-    description: "Ločevanje odpadkov – Nivo 1",
-    points: "+10 točk",
-    time: "Danes, 08:42",
-    pointsColor: "#35A936",
-  },
-  {
-    icon: "🌱",
-    iconBg: "#F0FDF4",
-    title: "Eko točke za aktivnost",
-    description: "Dnevni bonus",
-    points: "+5 točk",
-    time: "Včeraj, 20:10",
-    pointsColor: "#35A936",
-  },
-];
+const formatMunicipality = (value?: string) => {
+  if (!value) return "Ni izbrano";
+  return value.charAt(0).toUpperCase() + value.slice(1);
+};
 
 const getRankMedal = (rank: number) => {
   if (rank === 1) return "🥇";
@@ -167,19 +180,68 @@ const getRankColor = (rank: number) => {
   return "#6B7280";
 };
 
-const formatMunicipality = (value?: string) => {
-  if (!value) return "Ni izbrano";
-  return value.charAt(0).toUpperCase() + value.slice(1);
+const getAvatarImage = (avatarKey?: string) => {
+  return (
+    avatarOptions.find((item) => item.key === avatarKey)?.image ??
+    avatarOptions[0].image
+  );
+};
+
+const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
+  if (userData.earnedBadges?.includes(badge.id)) return true;
+
+  const totalPoints = userData.totalPoints ?? 0;
+  const scanCount = userData.scanCount ?? 0;
+  const quizCompleted = userData.quizCompleted ?? 0;
+  const streakDays = userData.streakDays ?? 0;
+
+  if (badge.conditionType === "points") {
+    return totalPoints >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "scan_count") {
+    return scanCount >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "correct_quiz_answers") {
+    return quizCompleted >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "daily_streak") {
+    return streakDays >= badge.conditionValue;
+  }
+
+  if (
+    badge.conditionType === "plastic_scans" ||
+    badge.conditionType === "paper_scans" ||
+    badge.conditionType === "glass_scans"
+  ) {
+    return scanCount >= badge.conditionValue;
+  }
+
+  return false;
 };
 
 export default function ProfileScreen({ navigation }: any) {
+  const [uid, setUid] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [badges, setBadges] = useState<BadgeData[]>([]);
+  const [recentActivities, setRecentActivities] = useState<ActivityData[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [avatarModalVisible, setAvatarModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editedName, setEditedName] = useState("");
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        loadUserData(user.uid);
+        setUid(user.uid);
+        await Promise.all([
+  loadUserData(user.uid),
+  loadBadges(),
+  loadRecentActivities(user.uid),
+]);
       } else {
         navigation.navigate("Login");
       }
@@ -188,19 +250,122 @@ export default function ProfileScreen({ navigation }: any) {
     return unsubscribe;
   }, []);
 
-  const loadUserData = async (uid: string) => {
+  const loadUserData = async (userId: string) => {
     setLoading(true);
 
     try {
-      const userDoc = await getDoc(doc(db, "users", uid));
+      const userDoc = await getDoc(doc(db, "users", userId));
 
       if (userDoc.exists()) {
-        setUserData(userDoc.data() as UserData);
+        const data = userDoc.data() as UserData;
+        setUserData(data);
+        setEditedName(data.name ?? "");
       }
     } catch (err) {
       console.log("Error loading user data:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadBadges = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "badges"));
+      const loaded: BadgeData[] = [];
+
+      snapshot.forEach((docSnap) => {
+        loaded.push({
+          id: docSnap.id,
+          ...(docSnap.data() as Omit<BadgeData, "id">),
+        });
+      });
+
+      loaded.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      setBadges(loaded);
+    } catch (err) {
+      console.log("Error loading badges:", err);
+      setBadges([]);
+    }
+  };
+
+  const loadRecentActivities = async (userId: string) => {
+  try {
+    const activitiesQuery = query(
+      collection(db, "users", userId, "activities"),
+      orderBy("createdAt", "desc"),
+      limit(3)
+    );
+
+    const snapshot = await getDocs(activitiesQuery);
+    const loaded: ActivityData[] = [];
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+
+      loaded.push({
+        id: docSnap.id,
+        icon: data.icon ?? "♻️",
+        iconBg: data.iconBg ?? "#F0FDF4",
+        title: data.title ?? "Aktivnost",
+        description: data.description ?? "",
+        points: data.points ?? "+0 točk",
+        time: data.time ?? "Pravkar",
+        pointsColor: data.pointsColor ?? "#35A936",
+        createdAt: data.createdAt,
+      });
+    });
+
+    setRecentActivities(loaded);
+  } catch (err) {
+    console.log("Error loading activities:", err);
+    setRecentActivities([]);
+  }
+};
+
+  const handleSaveName = async () => {
+    if (!uid || !userData) return;
+
+    const cleanName = editedName.trim();
+
+    if (!cleanName) {
+      Alert.alert("Napaka", "Ime ne sme biti prazno.");
+      return;
+    }
+
+    try {
+      await updateDoc(doc(db, "users", uid), {
+        name: cleanName,
+      });
+
+      setUserData({
+        ...userData,
+        name: cleanName,
+      });
+
+      setEditModalVisible(false);
+    } catch (err) {
+      console.log("Name update error:", err);
+      Alert.alert("Napaka", "Imena ni bilo mogoče posodobiti.");
+    }
+  };
+
+  const handleSelectAvatar = async (avatarKey: string) => {
+    if (!uid || !userData) return;
+
+    try {
+      await updateDoc(doc(db, "users", uid), {
+        avatarKey,
+      });
+
+      setUserData({
+        ...userData,
+        avatarKey,
+      });
+
+      setAvatarModalVisible(false);
+    } catch (err) {
+      console.log("Avatar update error:", err);
+      Alert.alert("Napaka", "Avatarja ni bilo mogoče posodobiti.");
     }
   };
 
@@ -242,38 +407,75 @@ export default function ProfileScreen({ navigation }: any) {
     );
   }
 
-  if (userData.role === "teacher") {
-    return (
-      <TeacherProfile
-        userData={userData}
-        navigation={navigation}
-        onSignOut={handleSignOut}
-      />
-    );
-  }
+  const commonProps = {
+  userData,
+  badges,
+  recentActivities,
+  navigation,
+  onSignOut: handleSignOut,
+  onOpenAvatar: () => setAvatarModalVisible(true),
+  onOpenEdit: () => setEditModalVisible(true),
+};
 
   return (
-    <StudentProfile
-      userData={userData}
-      navigation={navigation}
-      onSignOut={handleSignOut}
-    />
+    <>
+      {userData.role === "teacher" ? (
+        <TeacherProfile {...commonProps} />
+      ) : (
+        <StudentProfile {...commonProps} />
+      )}
+
+      <AvatarModal
+        visible={avatarModalVisible}
+        selectedKey={userData.avatarKey}
+        onClose={() => setAvatarModalVisible(false)}
+        onSelect={handleSelectAvatar}
+      />
+
+      <EditProfileModal
+        visible={editModalVisible}
+        name={editedName}
+        onChangeName={setEditedName}
+        onClose={() => setEditModalVisible(false)}
+        onSave={handleSaveName}
+      />
+    </>
   );
 }
 
-function StudentProfile({ userData, navigation, onSignOut }: any) {
-  const isAchievementUnlocked = (achievement: any) => {
-    if (achievement.requiredPoints) {
-      return userData.totalPoints >= achievement.requiredPoints;
-    }
+function Header() {
+  return (
+    <View style={styles.header}>
+      <View style={styles.brandRow}>
+        <Image
+          source={require("../assets/icon-logo.png")}
+          style={styles.brandIcon}
+          resizeMode="contain"
+        />
 
-    if (achievement.requiredScans) {
-      return userData.scanCount >= achievement.requiredScans;
-    }
+        <Text style={styles.brandText}>
+          <Text style={styles.brandGreen}>Recyc</Text>
+          <Text style={styles.brandPurple}>LAR</Text>
+        </Text>
+      </View>
 
-    return false;
-  };
+      <TouchableOpacity style={styles.notificationBtn} activeOpacity={0.85}>
+        <Text style={styles.notificationText}>🔔</Text>
+        <View style={styles.notificationDot} />
+      </TouchableOpacity>
+    </View>
+  );
+}
 
+function StudentProfile({
+  userData,
+  badges,
+  recentActivities,
+  navigation,
+  onSignOut,
+  onOpenAvatar,
+  onOpenEdit,
+}: any) {
   const stats = [
     {
       label: "Eko točke",
@@ -311,130 +513,25 @@ function StudentProfile({ userData, navigation, onSignOut }: any) {
 
         <Text style={styles.screenTitle}>Profil ✦</Text>
 
-        <View style={styles.profileCard}>
-          <View style={styles.avatarWrap}>
-            <Image
-              source={require("../assets/lari-hello.png")}
-              style={styles.avatar}
-              resizeMode="contain"
-            />
+        <ProfileCard
+          userData={userData}
+          onOpenAvatar={onOpenAvatar}
+          onOpenEdit={onOpenEdit}
+        />
 
-            <TouchableOpacity style={styles.cameraBadge} activeOpacity={0.85}>
-              <Text style={styles.cameraBadgeText}>📷</Text>
-            </TouchableOpacity>
-          </View>
+        <StatsRow stats={stats} />
 
-          <View style={styles.profileInfo}>
-            <View style={styles.nameRow}>
-              <Text style={styles.name} numberOfLines={1}>
-                {userData.name}
-              </Text>
+        <BadgesSection
+  badges={badges}
+  userData={userData}
+  onViewAll={() => navigation.navigate("Achievements")}
+/>
 
-              <TouchableOpacity activeOpacity={0.8}>
-                <Text style={styles.editIcon}>✎</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.profileMetaRow}>
-              <View style={styles.metaBlock}>
-                <Text style={styles.metaEmoji}>📍</Text>
-                <View>
-                  <Text style={styles.metaLabel}>Občina</Text>
-                  <Text style={styles.metaValue}>
-                    {formatMunicipality(userData.municipalityId)}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.metaDivider} />
-
-              <View style={styles.metaBlock}>
-                <Text style={styles.metaEmoji}>🏫</Text>
-                <View>
-                  <Text style={styles.metaLabel}>Skupina</Text>
-                  <Text style={styles.metaValue}>
-                    {userData.groupId || "Ni skupine"}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.statsRow}>
-          {stats.map((item) => (
-            <View key={item.label} style={styles.statCard}>
-              <View style={styles.statIconCircle}>
-                <Text style={styles.statIcon}>{item.icon}</Text>
-              </View>
-
-              <Text style={styles.statLabel}>{item.label}</Text>
-
-              <Text style={[styles.statValue, { color: item.color }]}>
-                {item.value}
-              </Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Dosežki</Text>
-
-            <TouchableOpacity activeOpacity={0.85}>
-              <Text style={styles.viewAll}>Poglej vse ›</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.achievementsRow}>
-            {studentAchievements.map((achievement) => {
-              const unlocked = isAchievementUnlocked(achievement);
-
-              return (
-                <View
-                  key={achievement.title}
-                  style={[
-                    styles.achievementItem,
-                    !unlocked && styles.lockedAchievement,
-                  ]}
-                >
-                  <View style={styles.achievementBadge}>
-                    <Image
-                      source={achievement.image}
-                      style={[
-                        styles.achievementImage,
-                        !unlocked && styles.lockedImage,
-                      ]}
-                      resizeMode="contain"
-                    />
-
-                    <View style={styles.ribbon}>
-                      <Text style={styles.ribbonText}>
-                        {achievement.ribbon}
-                      </Text>
-                    </View>
-
-                    {!unlocked && (
-                      <View style={styles.lockOverlay}>
-                        <Text style={styles.lockIcon}>🔒</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  <Text style={styles.achievementTitle}>
-                    {achievement.title}
-                  </Text>
-
-                  <Text style={styles.achievementDescription}>
-                    {achievement.description}
-                  </Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        <ActivityCard title="Zadnja aktivnost" items={MOCK_STUDENT_ACTIVITY} />
+<ActivityCard
+  title="Zadnja aktivnost"
+  items={recentActivities.length > 0 ? recentActivities : MOCK_STUDENT_ACTIVITY}
+  onViewAll={() => navigation.navigate("ActivityHistory")}
+/>
 
         <TouchableOpacity
           style={styles.signOutBtn}
@@ -450,7 +547,15 @@ function StudentProfile({ userData, navigation, onSignOut }: any) {
   );
 }
 
-function TeacherProfile({ userData, navigation, onSignOut }: any) {
+function TeacherProfile({
+  userData,
+  badges,
+  recentActivities,
+  navigation,
+  onSignOut,
+  onOpenAvatar,
+  onOpenEdit,
+}: any) {
   const teacherStats = [
     {
       label: "Točke razredov",
@@ -488,79 +593,24 @@ function TeacherProfile({ userData, navigation, onSignOut }: any) {
 
         <Text style={styles.screenTitle}>Profil učitelja ✦</Text>
 
-        <View style={styles.profileCard}>
-          <View style={styles.avatarWrap}>
-            <Image
-              source={require("../assets/lari-hello.png")}
-              style={styles.avatar}
-              resizeMode="contain"
-            />
+        <ProfileCard
+          userData={userData}
+          onOpenAvatar={onOpenAvatar}
+          onOpenEdit={onOpenEdit}
+          teacher
+        />
 
-            <TouchableOpacity style={styles.cameraBadge} activeOpacity={0.85}>
-              <Text style={styles.cameraBadgeText}>📷</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.profileInfo}>
-            <View style={styles.nameRow}>
-              <Text style={styles.name} numberOfLines={1}>
-                {userData.name}
-              </Text>
-
-              <TouchableOpacity activeOpacity={0.8}>
-                <Text style={styles.editIcon}>✎</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.teacherMetaRow}>
-              <Text style={styles.teacherMetaEmoji}>👩‍🏫</Text>
-              <Text style={styles.teacherMetaText}>Učitelj/ica</Text>
-            </View>
-
-            <View style={styles.teacherMetaRow}>
-              <Text style={styles.teacherMetaEmoji}>📍</Text>
-              <Text style={styles.teacherMetaText} numberOfLines={1}>
-                {userData.schoolId || "Ni šole"}
-              </Text>
-            </View>
-
-            <View style={styles.teacherMetaRow}>
-              <Text style={styles.teacherMetaEmoji}>👥</Text>
-              <Text style={styles.teacherMetaText} numberOfLines={1}>
-                Razredi{" "}
-                <Text style={styles.teacherMetaHighlight}>
-                  {MOCK_CLASSES.map((item) => item.name.split(" ")[0]).join(
-                    ", "
-                  )}
-                </Text>
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.statsRow}>
-          {teacherStats.map((item) => (
-            <View key={item.label} style={styles.statCard}>
-              <View style={styles.statIconCircle}>
-                <Text style={styles.statIcon}>{item.icon}</Text>
-              </View>
-
-              <Text style={styles.statLabel}>{item.label}</Text>
-
-              <Text style={[styles.statValue, { color: item.color }]}>
-                {item.value}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <StatsRow stats={teacherStats} />
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Moji razredi</Text>
-
-            <TouchableOpacity activeOpacity={0.85}>
-              <Text style={styles.viewAll}>Poglej vse ›</Text>
-            </TouchableOpacity>
+            <TouchableOpacity
+  activeOpacity={0.85}
+  onPress={() => navigation.navigate("LeaderBoard")}
+>
+  <Text style={styles.viewAll}>Poglej vse ›</Text>
+</TouchableOpacity>
           </View>
 
           {MOCK_CLASSES.map((group) => (
@@ -572,9 +622,7 @@ function TeacherProfile({ userData, navigation, onSignOut }: any) {
               <View
                 style={[
                   styles.classCircle,
-                  {
-                    backgroundColor: `${getRankColor(group.rank ?? 99)}22`,
-                  },
+                  { backgroundColor: `${getRankColor(group.rank ?? 99)}22` },
                 ]}
               >
                 <Text
@@ -589,9 +637,7 @@ function TeacherProfile({ userData, navigation, onSignOut }: any) {
 
               <View style={styles.classInfo}>
                 <Text style={styles.className}>{group.name}</Text>
-                <Text style={styles.classPoints}>
-                  {group.totalPoints} točk
-                </Text>
+                <Text style={styles.classPoints}>{group.totalPoints} točk</Text>
               </View>
 
               <Text style={styles.classMedal}>
@@ -603,39 +649,17 @@ function TeacherProfile({ userData, navigation, onSignOut }: any) {
           ))}
         </View>
 
-        <View style={styles.sectionCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Dosežki učitelja</Text>
+        <BadgesSection
+  badges={badges}
+  userData={userData}
+  onViewAll={() => navigation.navigate("Achievements")}
+/>
 
-            <TouchableOpacity activeOpacity={0.85}>
-              <Text style={styles.viewAll}>Poglej vse ›</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.achievementsRow}>
-            {teacherAchievements.map((achievement) => (
-              <View key={achievement.title} style={styles.achievementItem}>
-                <View style={styles.achievementBadge}>
-                  <Text style={styles.teacherAchievementEmoji}>
-                    {achievement.emoji}
-                  </Text>
-
-                  <View style={styles.ribbon}>
-                    <Text style={styles.ribbonText}>{achievement.ribbon}</Text>
-                  </View>
-                </View>
-
-                <Text style={styles.achievementTitle}>{achievement.title}</Text>
-
-                <Text style={styles.achievementDescription}>
-                  {achievement.description}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        <ActivityCard title="Zadnja aktivnost" items={MOCK_TEACHER_ACTIVITY} />
+<ActivityCard
+  title="Zadnja aktivnost"
+  items={recentActivities.length > 0 ? recentActivities : MOCK_TEACHER_ACTIVITY}
+  onViewAll={() => navigation.navigate("ActivityHistory")}
+/>
 
         <TouchableOpacity
           style={styles.signOutBtn}
@@ -651,38 +675,165 @@ function TeacherProfile({ userData, navigation, onSignOut }: any) {
   );
 }
 
-function Header() {
+function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
   return (
-    <View style={styles.header}>
-      <View style={styles.brandRow}>
+    <View style={styles.profileCard}>
+      <View style={styles.avatarWrap}>
         <Image
-          source={require("../assets/icon-logo.png")}
-          style={styles.brandIcon}
+          source={getAvatarImage(userData.avatarKey)}
+          style={styles.avatar}
           resizeMode="contain"
         />
 
-        <Image
-          source={require("../assets/logo.png")}
-          style={styles.brandLogo}
-          resizeMode="contain"
-        />
+        <TouchableOpacity
+          style={styles.cameraBadge}
+          activeOpacity={0.85}
+          onPress={onOpenAvatar}
+        >
+          <Text style={styles.cameraBadgeText}>📷</Text>
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.notificationBtn} activeOpacity={0.85}>
-        <Text style={styles.notificationText}>🔔</Text>
-        <View style={styles.notificationDot} />
-      </TouchableOpacity>
+      <View style={styles.profileInfo}>
+        <View style={styles.nameRow}>
+          <Text style={styles.name} numberOfLines={1}>
+            {userData.name || "Uporabnik"}
+          </Text>
+
+          <TouchableOpacity activeOpacity={0.8} onPress={onOpenEdit}>
+            <Text style={styles.editIcon}>✎</Text>
+          </TouchableOpacity>
+        </View>
+
+        {teacher ? (
+          <>
+            <View style={styles.teacherMetaRow}>
+              <Text style={styles.teacherMetaEmoji}>👩‍🏫</Text>
+              <Text style={styles.teacherMetaText}>Učitelj/ica</Text>
+            </View>
+
+            <View style={styles.teacherMetaRow}>
+              <Text style={styles.teacherMetaEmoji}>📍</Text>
+              <Text style={styles.teacherMetaText} numberOfLines={1}>
+                {userData.schoolId || "Ni šole"}
+              </Text>
+            </View>
+
+            <View style={styles.teacherMetaRow}>
+              <Text style={styles.teacherMetaEmoji}>🏫</Text>
+              <Text style={styles.teacherMetaText} numberOfLines={1}>
+                {formatMunicipality(userData.municipalityId)}
+              </Text>
+            </View>
+          </>
+        ) : (
+          <View style={styles.profileMetaRow}>
+            <View style={styles.metaBlock}>
+              <Text style={styles.metaEmoji}>📍</Text>
+              <View>
+                <Text style={styles.metaLabel}>Občina</Text>
+                <Text style={styles.metaValue}>
+                  {formatMunicipality(userData.municipalityId)}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.metaDivider} />
+
+            <View style={styles.metaBlock}>
+              <Text style={styles.metaEmoji}>🏫</Text>
+              <View>
+                <Text style={styles.metaLabel}>Skupina</Text>
+                <Text style={styles.metaValue}>
+                  {userData.groupId || "Ni skupine"}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+      </View>
     </View>
   );
 }
 
-function ActivityCard({ title, items }: any) {
+function StatsRow({ stats }: any) {
+  return (
+    <View style={styles.statsRow}>
+      {stats.map((item: any) => (
+        <View key={item.label} style={styles.statCard}>
+          <View style={styles.statIconCircle}>
+            <Text style={styles.statIcon}>{item.icon}</Text>
+          </View>
+
+          <Text style={styles.statLabel}>{item.label}</Text>
+
+          <Text style={[styles.statValue, { color: item.color }]}>
+            {item.value}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function BadgesSection({ badges, userData, onViewAll }: any) {
+  const visibleBadges = badges.slice(0, 6);
+
+  return (
+    <View style={styles.sectionCard}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Dosežki</Text>
+
+        <TouchableOpacity activeOpacity={0.85} onPress={onViewAll}>
+          <Text style={styles.viewAll}>Poglej vse ›</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.badgesGrid}>
+        {visibleBadges.map((badge: BadgeData) => {
+          const unlocked = isBadgeUnlocked(badge, userData);
+
+          return (
+            <View
+              key={badge.id}
+              style={[styles.badgeItem, !unlocked && styles.lockedBadgeItem]}
+            >
+              <View style={styles.badgeImageWrap}>
+                <Image
+                  source={getBadgeAsset(badge.imageKey)}
+                  style={[styles.badgeImage, !unlocked && styles.lockedImage]}
+                  resizeMode="contain"
+                />
+
+                {!unlocked && (
+                  <View style={styles.lockOverlay}>
+                    <Text style={styles.lockIcon}>🔒</Text>
+                  </View>
+                )}
+              </View>
+
+              <Text style={styles.badgeTitle} numberOfLines={2}>
+                {badge.name}
+              </Text>
+
+              <Text style={styles.badgeDescription} numberOfLines={2}>
+                {badge.description}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
+function ActivityCard({ title, items, onViewAll }: any) {
   return (
     <View style={styles.sectionCard}>
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>{title}</Text>
 
-        <TouchableOpacity activeOpacity={0.85}>
+        <TouchableOpacity activeOpacity={0.85} onPress={onViewAll}>
           <Text style={styles.viewAll}>Poglej vse ›</Text>
         </TouchableOpacity>
       </View>
@@ -706,10 +857,7 @@ function ActivityCard({ title, items }: any) {
 
             <View style={styles.activityRight}>
               <Text
-                style={[
-                  styles.activityPoints,
-                  { color: item.pointsColor },
-                ]}
+                style={[styles.activityPoints, { color: item.pointsColor }]}
               >
                 {item.points}
               </Text>
@@ -722,5 +870,120 @@ function ActivityCard({ title, items }: any) {
         </View>
       ))}
     </View>
+  );
+}
+
+function AvatarModal({ visible, selectedKey, onClose, onSelect }: any) {
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHandle} />
+
+          <Text style={styles.modalTitle}>Izberi avatar</Text>
+          <Text style={styles.modalSubtitle}>
+            Izberi sliko, ki bo prikazana na profilu.
+          </Text>
+
+          <View style={styles.avatarOptionsRow}>
+            {avatarOptions.map((avatar) => (
+              <TouchableOpacity
+                key={avatar.key}
+                style={[
+                  styles.avatarOption,
+                  selectedKey === avatar.key && styles.avatarOptionActive,
+                ]}
+                onPress={() => onSelect(avatar.key)}
+                activeOpacity={0.85}
+              >
+                <Image
+                  source={avatar.image}
+                  style={styles.avatarOptionImage}
+                  resizeMode="contain"
+                />
+                <Text style={styles.avatarOptionText}>{avatar.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
+            <Text style={styles.modalCloseText}>Zapri</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+function EditProfileModal({
+  visible,
+  name,
+  onChangeName,
+  onClose,
+  onSave,
+}: any) {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.modalOverlay}>
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+
+        <View
+          style={[
+            styles.modalContent,
+            keyboardHeight > 0 && {
+              marginBottom: Platform.OS === "android" ? keyboardHeight - 30 : 0,
+            },
+          ]}
+        >
+          <View style={styles.modalHandle} />
+
+          <Text style={styles.modalTitle}>Uredi profil</Text>
+          <Text style={styles.modalSubtitle}>
+            Trenutno lahko urediš prikazano ime.
+          </Text>
+
+          <Text style={styles.inputLabel}>Ime</Text>
+          <TextInput
+            value={name}
+            onChangeText={onChangeName}
+            placeholder="Vnesi ime"
+            style={styles.textInput}
+            returnKeyType="done"
+            onSubmitEditing={onSave}
+          />
+
+          <View style={styles.modalActions}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
+              <Text style={styles.cancelBtnText}>Prekliči</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.saveBtn} onPress={onSave}>
+              <Text style={styles.saveBtnText}>Shrani</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
   );
 }
