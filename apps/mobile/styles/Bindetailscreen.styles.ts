@@ -1,203 +1,324 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Dimensions } from "react-native";
+import { COLORS, FONT, RADIUS, SPACING } from "../utils/theme";
 
-const colors = {
-  green: "#35A936",
-  purple: "#6B35C9",
-  text: "#252733",
-  muted: "#7A7A86",
-  border: "#ECECF2",
-  white: "#FFFFFF",
-  bg: "#FFFFFF",
-  allowedGreen: "#27AE60",
-  allowedGreenDark: "#1E7E34",
-  allowedGreenBg: "#F4FBF3",
-  allowedGreenBorder: "#B6E8C2",
-  notAllowedRed: "#E53935",
-  notAllowedRedDark: "#C62828",
-  notAllowedRedBg: "#FFF4F4",
-  notAllowedRedBorder: "#F5BBBB",
-  cardBg: "#F8F8FB",
-};
+const { height } = Dimensions.get("window");
+const isSmallPhone = height < 720;
 
 export const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.bg },
-  scrollContent: { paddingHorizontal: 20, paddingTop: 6, paddingBottom: 110 },
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
 
-  // Header
+  scrollContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingTop: isSmallPhone ? 4 : 10,
+    paddingBottom: 112,
+  },
+
   header: {
+    minHeight: 52,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 18,
+    marginBottom: 16,
   },
+
   backBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: colors.white,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.white,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
+
   backText: {
     fontSize: 36,
     lineHeight: 36,
-    color: colors.purple,
-    marginTop: -3,
+    color: COLORS.purple,
+    marginTop: -4,
+    fontWeight: "700",
   },
-  brandRow: { flexDirection: "row", alignItems: "center" },
-  brandIcon: { width: 36, height: 36, marginRight: 8 },
-  brandText: { fontSize: 24, fontWeight: "900" },
-  brandGreen: { color: colors.green },
-  brandPurple: { color: colors.purple },
 
-  // Bin title card
-  binTitleCard: {
+  brandRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 24,
-    borderWidth: 1.5,
-    padding: 18,
-    marginBottom: 18,
-    gap: 16,
   },
-  binTitleImg: { width: 64, height: 64 },
-  binTitleText: { fontSize: 26, fontWeight: "900", marginBottom: 4 },
-  binMunicipality: { fontSize: 14, color: colors.muted },
-  binMunicipalityName: { color: colors.purple, fontWeight: "800" },
 
-  // Rules row
-  rulesRow: { flexDirection: "row", gap: 12, marginBottom: 18 },
-  rulesCard: { flex: 1, borderRadius: 20, borderWidth: 1, padding: 14 },
+  brandIcon: {
+    width: 38,
+    height: 38,
+    marginRight: 8,
+  },
+
+  brandLogo: {
+    width: 128,
+    height: 38,
+  },
+
+  headerSpacer: {
+    width: 44,
+  },
+
+  binHeroCard: {
+    minHeight: 138,
+    borderRadius: RADIUS.lg,
+    borderWidth: 1.5,
+    paddingHorizontal: 18,
+    paddingVertical: 18,
+    marginBottom: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+
+  binHeroText: {
+    flex: 1,
+    paddingRight: 8,
+  },
+
+  overline: {
+    fontSize: 13,
+    color: COLORS.muted,
+    fontWeight: "800",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+
+  binTitleImg: {
+    width: isSmallPhone ? 88 : 108,
+    height: isSmallPhone ? 88 : 108,
+  },
+
+  binTitleText: {
+    fontSize: isSmallPhone ? 25 : 29,
+    lineHeight: isSmallPhone ? 31 : 35,
+    fontWeight: "900",
+    marginBottom: 6,
+    letterSpacing: -0.4,
+  },
+
+  binMunicipality: {
+    fontSize: 15,
+    color: COLORS.muted,
+    fontWeight: "600",
+  },
+
+  binMunicipalityName: {
+    color: COLORS.purple,
+    fontWeight: "900",
+  },
+
+  rulesRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 18,
+  },
+
+  rulesCard: {
+    flex: 1,
+    borderRadius: 22,
+    borderWidth: 1,
+    paddingHorizontal: 13,
+    paddingVertical: 14,
+    minHeight: 230,
+  },
+
   allowedCard: {
-    backgroundColor: colors.allowedGreenBg,
-    borderColor: colors.allowedGreenBorder,
+    backgroundColor: "#F4FBF3",
+    borderColor: "#B6E8C2",
   },
+
   notAllowedCard: {
-    backgroundColor: colors.notAllowedRedBg,
-    borderColor: colors.notAllowedRedBorder,
+    backgroundColor: "#FFF4F4",
+    borderColor: "#F5BBBB",
   },
+
   rulesCardHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
-    gap: 6,
   },
-  allowedDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.allowedGreen,
+
+  allowedIconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#27AE60",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 7,
   },
-  notAllowedDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.notAllowedRed,
+
+  notAllowedIconCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#E53935",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 7,
   },
+
+  allowedIcon: {
+    color: COLORS.white,
+    fontWeight: "900",
+    fontSize: 14,
+  },
+
+  notAllowedIcon: {
+    color: COLORS.white,
+    fontWeight: "900",
+    fontSize: 16,
+    marginTop: -1,
+  },
+
   allowedTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: colors.allowedGreenDark,
+    color: "#1E7E34",
   },
+
   notAllowedTitle: {
     fontSize: 15,
     fontWeight: "900",
-    color: colors.notAllowedRedDark,
+    color: "#C62828",
   },
+
   ruleItem: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+    alignItems: "flex-start",
     marginBottom: 8,
   },
-  ruleEmoji: { fontSize: 18 },
-  ruleLabel: { fontSize: 13, color: colors.text, fontWeight: "600", flex: 1 },
 
-  // Quick examples
-  examplesSection: { marginBottom: 18 },
-  examplesSectionTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: colors.text,
-    marginBottom: 12,
+  ruleBullet: {
+    fontSize: 16,
+    lineHeight: 19,
+    color: COLORS.muted,
+    marginRight: 7,
   },
-  examplesRow: { flexDirection: "row", gap: 10 },
+
+  ruleLabel: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 18,
+    color: COLORS.text,
+    fontWeight: "600",
+  },
+
+  examplesSection: {
+    marginBottom: 18,
+  },
+
+  sectionHeader: {
+    marginBottom: 10,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: COLORS.text,
+  },
+
+  sectionSubtitle: {
+    marginTop: 2,
+    fontSize: 13,
+    color: COLORS.muted,
+    fontWeight: "600",
+  },
+
+  examplesRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+
   exampleCard: {
     flex: 1,
-    borderRadius: 18,
-    backgroundColor: colors.cardBg,
+    minHeight: 86,
+    borderRadius: 20,
+    backgroundColor: "#F8F8FB",
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     padding: 12,
-    alignItems: "center",
+    justifyContent: "space-between",
   },
+
   exampleLabel: {
     fontSize: 13,
-    fontWeight: "700",
-    color: colors.text,
+    lineHeight: 18,
+    fontWeight: "800",
+    color: COLORS.text,
     textAlign: "center",
-    marginBottom: 6,
   },
-  exampleBin: { fontSize: 13, fontWeight: "900", textAlign: "center" },
 
-  // Lari tip
+  exampleBin: {
+    marginTop: 8,
+    fontSize: 13,
+    fontWeight: "900",
+    textAlign: "center",
+  },
+
   lariRow: {
     flexDirection: "row",
     alignItems: "flex-end",
     marginBottom: 18,
-    gap: 12,
   },
-  lariImg: { width: 80, height: 80 },
+
+  lariImg: {
+    width: 84,
+    height: 84,
+    marginRight: 12,
+  },
+
   lariBubble: {
     flex: 1,
-    backgroundColor: colors.cardBg,
-    borderRadius: 20,
+    backgroundColor: "#F8F8FB",
+    borderRadius: 22,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     padding: 14,
   },
+
+  lariLabel: {
+    fontSize: 12,
+    color: COLORS.purple,
+    fontWeight: "900",
+    marginBottom: 4,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+
   lariTipText: {
     fontSize: 15,
     lineHeight: 22,
-    color: colors.text,
+    color: COLORS.text,
     fontWeight: "600",
   },
 
-  // Login hint
-  loginHint: { alignItems: "center", paddingVertical: 8 },
-  loginHintText: { fontSize: 14, color: colors.muted },
-  loginHintLink: { color: colors.purple, fontWeight: "900" },
-
-  // Bottom tab
-  bottomTab: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 86,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: "#EFEFF4",
-    flexDirection: "row",
-    justifyContent: "space-around",
+  loginHint: {
+    minHeight: 46,
     alignItems: "center",
-    paddingBottom: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 12,
+    justifyContent: "center",
+    paddingVertical: 8,
   },
-  tabItem: { flex: 1, alignItems: "center", justifyContent: "center" },
-  tabIcon: { fontSize: 25, color: colors.purple, marginBottom: 2 },
-  tabIconActive: { color: colors.green },
-  tabLabel: { fontSize: 12, color: colors.muted },
-  tabLabelActive: { color: colors.green, fontWeight: "900" },
+
+  loginHintText: {
+    fontSize: 14,
+    color: COLORS.muted,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+
+  loginHintLink: {
+    color: COLORS.purple,
+    fontWeight: "900",
+  },
 });

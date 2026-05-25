@@ -1,81 +1,106 @@
 import { StyleSheet, Dimensions } from "react-native";
+import { COLORS, FONT, RADIUS, SPACING } from "../utils/theme";
 
-const { width } = Dimensions.get("window");
-
-const colors = {
-  green: "#35A936",
-  greenDark: "#238A2E",
-  purple: "#6B35C9",
-  purpleLight: "#EFE8FF",
-  text: "#252733",
-  muted: "#7A7A86",
-  border: "#ECECF2",
-  bg: "#F8FAF5",
-  white: "#FFFFFF",
-  red: "#D84343",
-};
+const { width, height } = Dimensions.get("window");
+const isSmallPhone = height < 720;
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.bg,
+    backgroundColor: "#F8FAF5",
   },
 
   scrollContent: {
-    paddingHorizontal: 22,
-    paddingTop: 8,
-    paddingBottom: 106,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: isSmallPhone ? 4 : 10,
+    paddingBottom: 110,
   },
+topBrandRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  alignSelf: "center",
+  marginTop: 4,
+  marginBottom: 24,
+  paddingHorizontal: 16,
+  paddingVertical: 6,
+  borderRadius: 24,
+  backgroundColor: "rgba(255,255,255,0.65)",
+},
+
+topBrandIcon: {
+  width: 52,
+  height: 52,
+  marginRight: 10,
+},
+
+topBrandText: {
+  fontSize: 30,
+  lineHeight: 36,
+  fontWeight: "900",
+  letterSpacing: -0.3,
+},
+
+topBrandGreen: {
+  color: COLORS.green,
+},
+
+topBrandPurple: {
+  color: COLORS.purple,
+},
 
   welcomeSection: {
-    marginBottom: 22,
+    marginBottom: 18,
   },
 
   welcomeTitle: {
-    fontSize: 38,
-    lineHeight: 44,
+    fontSize: isSmallPhone ? 34 : 38,
+    lineHeight: isSmallPhone ? 39 : 44,
     fontWeight: "900",
-    color: colors.text,
+    color: COLORS.text,
     marginBottom: 8,
+    letterSpacing: -0.8,
   },
 
   welcomeSub: {
-    fontSize: 19,
-    lineHeight: 27,
-    color: colors.muted,
+    maxWidth: 330,
+    fontSize: 17,
+    lineHeight: 25,
+    color: COLORS.muted,
+    fontWeight: "500",
   },
 
   locationCard: {
-    minHeight: 102,
-    borderRadius: 28,
-    backgroundColor: colors.white,
+    minHeight: 96,
+    borderRadius: RADIUS.lg,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: 18,
-    paddingVertical: 18,
+    borderColor: COLORS.border,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
+    marginBottom: 14,
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.07,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
     elevation: 4,
-    marginBottom: 14,
   },
 
   locationIconBg: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors.purpleLight,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: COLORS.purpleSoft,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 16,
+    marginRight: 15,
   },
 
   locationIcon: {
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
   },
 
   locationTextWrap: {
@@ -83,55 +108,59 @@ export const styles = StyleSheet.create({
   },
 
   locationLabel: {
-    fontSize: 15,
-    color: colors.muted,
+    fontSize: 14,
+    color: COLORS.muted,
+    fontWeight: "600",
     marginBottom: 2,
   },
 
   locationName: {
-    fontSize: 28,
+    fontSize: 27,
+    lineHeight: 32,
     fontWeight: "900",
-    color: colors.purple,
-    marginBottom: 2,
+    color: COLORS.purple,
   },
 
   changeLocation: {
-    fontSize: 16,
-    color: colors.purple,
-    fontWeight: "700",
+    fontSize: 15,
+    color: COLORS.purple,
+    fontWeight: "800",
+    marginTop: 2,
   },
 
   mascotArea: {
-    height: 174,
-    marginBottom: 6,
+    height: isSmallPhone ? 142 : 168,
+    marginBottom: 8,
     position: "relative",
   },
 
   speechBubble: {
     position: "absolute",
     left: 0,
-    top: 24,
-    maxWidth: width * 0.52,
-    backgroundColor: colors.white,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
+    top: isSmallPhone ? 18 : 24,
+    maxWidth: width * 0.54,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
     borderRadius: 22,
-    shadowColor: "#000",
+    zIndex: 2,
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.08,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 8 },
     elevation: 3,
-    zIndex: 2,
   },
 
   speechText: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 22,
-    color: colors.text,
+    color: COLORS.text,
+    fontWeight: "600",
   },
 
   speechStrong: {
-    color: colors.purple,
+    color: COLORS.purple,
     fontWeight: "900",
   },
 
@@ -139,73 +168,96 @@ export const styles = StyleSheet.create({
     position: "absolute",
     right: -8,
     bottom: 0,
-    width: 172,
-    height: 172,
+    width: isSmallPhone ? 140 : 170,
+    height: isSmallPhone ? 140 : 170,
   },
 
   scanButton: {
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: colors.green,
+    height: 64,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.green,
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-    shadowColor: colors.green,
-    shadowOpacity: 0.22,
+    marginBottom: 18,
+
+    shadowColor: COLORS.green,
+    shadowOpacity: 0.24,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
     elevation: 5,
-    marginBottom: 18,
   },
 
   scanCameraIcon: {
     position: "absolute",
-    left: 24,
-    width: 31,
-    height: 31,
+    left: 22,
+    width: 30,
+    height: 30,
   },
 
   scanButtonText: {
-    color: colors.white,
-    fontSize: 22,
+    color: COLORS.white,
+    fontSize: FONT.button,
     fontWeight: "900",
+    letterSpacing: 0.1,
   },
 
   scanArrowCircle: {
     position: "absolute",
-    right: 14,
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.white,
+    right: 10,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
   },
 
   scanArrow: {
-    color: colors.green,
-    fontSize: 36,
-    lineHeight: 36,
-    marginTop: -2,
+    color: COLORS.green,
+    fontSize: 38,
+    lineHeight: 38,
+    marginTop: -3,
+    fontWeight: "800",
+  },
+
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    marginBottom: 10,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: COLORS.text,
+  },
+
+  sectionSubtitle: {
+    fontSize: 13,
+    color: COLORS.muted,
+    fontWeight: "600",
   },
 
   binsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 9,
   },
 
   binCard: {
-    width: (width - 60) / 5,
-    minHeight: 84,
+    width: (width - 62) / 5,
+    minHeight: 88,
     borderRadius: 18,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 8,
-    shadowColor: "#000",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.06,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 5 },
@@ -213,33 +265,34 @@ export const styles = StyleSheet.create({
   },
 
   binImg: {
-    width: 42,
-    height: 42,
-    marginBottom: 6,
+    width: 47,
+    height: 47,
+    marginBottom: 5,
   },
 
   binLabel: {
-    fontSize: 12,
-    color: colors.text,
-    fontWeight: "700",
+    fontSize: 11,
+    color: COLORS.text,
+    fontWeight: "800",
     textAlign: "center",
   },
 
   rulesHint: {
     textAlign: "center",
     fontSize: 14,
-    color: colors.muted,
-    marginBottom: 16,
+    color: COLORS.muted,
+    marginBottom: 18,
+    fontWeight: "600",
   },
 
   allowedText: {
-    color: colors.green,
-    fontWeight: "800",
+    color: COLORS.green,
+    fontWeight: "900",
   },
 
   notAllowedText: {
-    color: colors.purple,
-    fontWeight: "800",
+    color: COLORS.purple,
+    fontWeight: "900",
   },
 
   examplesGrid: {
@@ -252,16 +305,17 @@ export const styles = StyleSheet.create({
 
   exampleCard: {
     width: "48%",
-    minHeight: 92,
+    minHeight: 94,
     borderRadius: 22,
-    backgroundColor: colors.white,
+    backgroundColor: COLORS.white,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: COLORS.border,
     paddingHorizontal: 10,
     paddingVertical: 11,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
+
+    shadowColor: COLORS.shadow,
     shadowOpacity: 0.06,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
@@ -280,30 +334,31 @@ export const styles = StyleSheet.create({
 
   exampleTitle: {
     fontSize: 12,
-    color: colors.purple,
+    color: COLORS.purple,
     fontWeight: "900",
     marginBottom: 5,
   },
 
   exampleName: {
     fontSize: 14,
-    color: colors.text,
+    color: COLORS.text,
     fontWeight: "800",
   },
 
   exampleArrow: {
     fontSize: 18,
-    color: colors.text,
+    color: COLORS.text,
     fontWeight: "900",
     marginHorizontal: 4,
   },
 
   exampleBinImg: {
-    width: 28,
-    height: 34,
+    width: 30,
+    height: 36,
   },
 
   loginHint: {
+    minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -312,92 +367,17 @@ export const styles = StyleSheet.create({
 
   loginHintIcon: {
     fontSize: 16,
-    color: colors.muted,
     marginRight: 8,
   },
 
   loginHintText: {
     fontSize: 14,
-    color: colors.muted,
+    color: COLORS.muted,
+    fontWeight: "600",
   },
 
   loginHintLink: {
-    color: colors.purple,
+    color: COLORS.purple,
     fontWeight: "900",
   },
-
-  bottomTab: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 82,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: "#EFEFF4",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingBottom: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: -4 },
-    elevation: 10,
-  },
-
-  tabItem: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  tabIcon: {
-    fontSize: 27,
-    color: colors.purple,
-    marginBottom: 2,
-  },
-
-  tabIconActive: {
-    color: colors.green,
-  },
-
-  tabLabel: {
-    fontSize: 13,
-    color: colors.muted,
-  },
-
-  tabLabelActive: {
-    color: colors.green,
-    fontWeight: "900",
-  },
-
-  topBrandRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  alignSelf: "flex-start",
-  marginTop: 6,
-  marginBottom: 24,
-  paddingHorizontal: 4,
-},
-
-topBrandIcon: {
-  width: 46,
-  height: 46,
-  marginRight: 10,
-},
-
-topBrandText: {
-  fontSize: 28,
-  fontWeight: "900",
-  letterSpacing: 0.3,
-},
-
-topBrandGreen: {
-  color: "#34A936",
-},
-
-topBrandPurple: {
-  color: "#6B35C9",
-},
 });
