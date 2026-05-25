@@ -63,20 +63,30 @@ export const styles = StyleSheet.create({
   },
 
   brandIcon: {
-    width: 46,
-    height: 46,
+    width: 48,
+    height: 48,
     marginRight: 10,
   },
 
-  brandLogo: {
-    width: 150,
-    height: 44,
+  brandText: {
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: "900",
+    letterSpacing: -0.3,
+  },
+
+  brandGreen: {
+    color: COLORS.green,
+  },
+
+  brandPurple: {
+    color: COLORS.purple,
   },
 
   notificationBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: COLORS.white,
     alignItems: "center",
     justifyContent: "center",
@@ -90,16 +100,16 @@ export const styles = StyleSheet.create({
   },
 
   notificationText: {
-    fontSize: 21,
+    fontSize: 22,
   },
 
   notificationDot: {
     position: "absolute",
     top: 9,
     right: 9,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
     backgroundColor: COLORS.purple,
   },
 
@@ -138,11 +148,12 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 16,
     position: "relative",
+    overflow: "visible",
   },
 
   avatar: {
-    width: isSmallPhone ? 86 : 96,
-    height: isSmallPhone ? 86 : 96,
+    width: isSmallPhone ? 86 : 98,
+    height: isSmallPhone ? 86 : 98,
   },
 
   cameraBadge: {
@@ -229,11 +240,11 @@ export const styles = StyleSheet.create({
   teacherMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 5,
   },
 
   teacherMetaEmoji: {
-    fontSize: 15,
+    fontSize: 16,
     marginRight: 7,
   },
 
@@ -241,12 +252,7 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.text,
     flex: 1,
-    fontWeight: "600",
-  },
-
-  teacherMetaHighlight: {
-    color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   statsRow: {
@@ -335,40 +341,42 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  achievementsRow: {
+  badgesGrid: {
     flexDirection: "row",
+    flexWrap: "wrap",
     justifyContent: "space-between",
+    rowGap: 18,
   },
 
-  achievementItem: {
+  badgeItem: {
     width: "31%",
     alignItems: "center",
   },
 
-  lockedAchievement: {
-    opacity: 0.55,
+  lockedBadgeItem: {
+    opacity: 0.6,
   },
 
-  achievementBadge: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+  badgeImageWrap: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     backgroundColor: "#F5F1FF",
     borderWidth: 2,
     borderColor: "#D8C8F8",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
+    marginBottom: 10,
     position: "relative",
   },
 
-  achievementImage: {
-    width: 62,
-    height: 62,
+  badgeImage: {
+    width: 82,
+    height: 82,
   },
 
   lockedImage: {
-    opacity: 0.4,
+    opacity: 0.38,
   },
 
   lockOverlay: {
@@ -382,39 +390,19 @@ export const styles = StyleSheet.create({
   },
 
   lockIcon: {
-    fontSize: 20,
+    fontSize: 22,
   },
 
-  teacherAchievementEmoji: {
-    fontSize: 36,
-  },
-
-  ribbon: {
-    position: "absolute",
-    bottom: -18,
-    backgroundColor: COLORS.purple,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    minWidth: 82,
-    alignItems: "center",
-  },
-
-  ribbonText: {
-    color: COLORS.white,
-    fontSize: 9,
-    fontWeight: "900",
-  },
-
-  achievementTitle: {
+  badgeTitle: {
     fontSize: 13,
     fontWeight: "900",
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 4,
+    minHeight: 34,
   },
 
-  achievementDescription: {
+  badgeDescription: {
     fontSize: 11,
     lineHeight: 15,
     color: COLORS.muted,
@@ -545,5 +533,152 @@ export const styles = StyleSheet.create({
     color: "#EF4444",
     fontWeight: "900",
     fontSize: 15,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.28)",
+    justifyContent: "flex-end",
+  },
+
+  modalContent: {
+  backgroundColor: COLORS.white,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
+  paddingHorizontal: 22,
+  paddingTop: 12,
+  paddingBottom: 34,
+  maxHeight: height * 0.72,
+},
+
+  modalHandle: {
+    width: 44,
+    height: 5,
+    borderRadius: 10,
+    backgroundColor: "#DDDDE6",
+    alignSelf: "center",
+    marginBottom: 18,
+  },
+
+  modalBackdrop: {
+  ...StyleSheet.absoluteFillObject,
+},
+
+  modalTitle: {
+    fontSize: 25,
+    fontWeight: "900",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
+
+  modalSubtitle: {
+    fontSize: 14,
+    color: COLORS.muted,
+    marginBottom: 18,
+    lineHeight: 20,
+  },
+
+  avatarOptionsRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 18,
+  },
+
+  avatarOption: {
+    flex: 1,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: "#F8F8FB",
+    alignItems: "center",
+    paddingVertical: 16,
+  },
+
+  avatarOptionActive: {
+    borderColor: COLORS.purple,
+    backgroundColor: COLORS.purpleSoft,
+  },
+
+  avatarOptionImage: {
+    width: 78,
+    height: 78,
+    marginBottom: 8,
+  },
+
+  avatarOptionText: {
+    fontSize: 14,
+    color: COLORS.text,
+    fontWeight: "800",
+  },
+
+  modalCloseBtn: {
+    minHeight: 52,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1.5,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  modalCloseText: {
+    color: COLORS.purple,
+    fontSize: 16,
+    fontWeight: "900",
+  },
+
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+
+  textInput: {
+    minHeight: 54,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: "#F8F8FB",
+    paddingHorizontal: 16,
+    fontSize: 16,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 18,
+  },
+
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+
+  cancelBtn: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: RADIUS.pill,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  cancelBtnText: {
+    color: COLORS.muted,
+    fontSize: 16,
+    fontWeight: "900",
+  },
+
+  saveBtn: {
+    flex: 1,
+    minHeight: 52,
+    borderRadius: RADIUS.pill,
+    backgroundColor: COLORS.green,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  saveBtnText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "900",
   },
 });

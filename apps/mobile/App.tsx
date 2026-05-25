@@ -11,6 +11,8 @@ import BinDetailScreen from "./screens/Bindetailscreen";
 import ScannerScreen from "./screens/ScannerScreen";
 import QuizScreen from "./screens/QuizScreen";
 import LeaderboardScreen from "./screens/LeaderBoardScreen";
+import AchievementsScreen from "./screens/AchievementsScreen";
+import ActivityHistoryScreen from "./screens/ActivityHistoryScreen";
 
 export type RootStackParamList = {
   Home: undefined;
@@ -23,6 +25,8 @@ export type RootStackParamList = {
   Scanner: undefined;
   Quiz: undefined;
   Leaderboard: undefined;
+  Achievements: undefined;
+  ActivityHistory: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -31,6 +35,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        id={undefined}
         initialRouteName="Home"
         screenOptions={{ headerShown: false }}
       >
@@ -44,6 +49,8 @@ export default function App() {
         <Stack.Screen name="Scanner" component={ScannerScreen} />
         <Stack.Screen name="Quiz" component={QuizScreen} />
         <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
+        <Stack.Screen name="Achievements" component={AchievementsScreen} />
+        <Stack.Screen name="ActivityHistory" component={ActivityHistoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
