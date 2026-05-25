@@ -7,28 +7,16 @@ import {
   ActivityIndicator,
   ScrollView,
   Alert,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import * as FileSystem from "expo-file-system/legacy";
-import * as ExpoAsset from "expo-asset";
-import * as ImageManipulator from "expo-image-manipulator";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db, auth } from "../firebase/firebase";
+import * as ImagePicker from "expo-image-picker";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebase";
 import { styles as s } from "../styles/ScannerScreen.styles";
 
-// ─── TFLite safe import ──────────────────────────────────────────────────────
-let useTensorflowModel: any = null;
-
-try {
-  const tflite = require("react-native-fast-tflite");
-  useTensorflowModel = tflite.useTensorflowModel;
-} catch (e) {
-  console.log("TFLite not available");
-}
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 type BinData = {
   name: string;
   color: string;
@@ -40,10 +28,8 @@ type BinData = {
 };
 
 type BinsMap = Record<string, BinData>;
+type ScanMode = "camera" | "barcode" | "manual";
 
-type ScanMode = "camera" | "barcode";
-
-// ─── Bin colors ──────────────────────────────────────────────────────────────
 const BIN_COLORS: Record<string, string> = {
   blue: "#2B7DE9",
   yellow: "#F2B400",
@@ -57,99 +43,56 @@ const BIN_COLORS: Record<string, string> = {
   special: "#7C3AED",
 };
 
-// ─── TFLite class names ──────────────────────────────────────────────────────
-const CLASS_NAMES = [
-  "biodegradable",
-  "cardboard",
-  "glass",
-  "metal",
-  "paper",
-  "plastic",
-  "trash",
-];
-
-// ─── TFLite class → bin type ─────────────────────────────────────────────────
-const CLASS_TO_BIN_TYPE: Record<string, string> = {
-  biodegradable: "bio",
-  cardboard: "paper",
-  glass: "glass",
-  metal: "packaging",
-  paper: "paper",
-  plastic: "packaging",
-  trash: "mixed",
-};
-
-// ─── Slovenian display names ─────────────────────────────────────────────────
-const CLASS_NAMES_SL: Record<string, string> = {
-  biodegradable: "Bio odpadek",
-  cardboard: "Karton",
-  glass: "Steklo",
-  metal: "Kovina",
-  paper: "Papir",
-  plastic: "Plastika",
-  trash: "Mešani odpadki",
-};
-
-// ─── Fallback: map item text → bin type ──────────────────────────────────────
-const mapTextToBinType = (item: string): string => {
+const mapItemToBin = (item: string): string => {
   const lower = item.toLowerCase();
 
   if (
     lower.includes("paper") ||
     lower.includes("papir") ||
     lower.includes("cardboard") ||
-    lower.includes("karton")
+    lower.includes("karton") ||
+    lower.includes("newspaper") ||
+    lower.includes("časopis")
   ) {
-    return "paper";
+    return "blue";
   }
 
   if (
     lower.includes("plastic") ||
     lower.includes("plastik") ||
-    lower.includes("embalaža") ||
+    lower.includes("bottle") ||
+    lower.includes("can") ||
     lower.includes("metal") ||
-    lower.includes("kovina") ||
+    lower.includes("embalaža") ||
+    lower.includes("packaging") ||
     lower.includes("pločevin")
   ) {
-    return "packaging";
+    return "yellow";
   }
 
-  if (lower.includes("glass") || lower.includes("steklo")) {
-    return "glass";
+  if (
+    lower.includes("glass") ||
+    lower.includes("steklo") ||
+    lower.includes("steklenica")
+  ) {
+    return "green";
   }
 
   if (
     lower.includes("food") ||
     lower.includes("bio") ||
     lower.includes("organic") ||
-    lower.includes("hrana")
+    lower.includes("fruit") ||
+    lower.includes("vegetable") ||
+    lower.includes("hrana") ||
+    lower.includes("banana")
   ) {
-    return "bio";
+    return "brown";
   }
 
   return "mixed";
 };
 
-// ─── Find bin by type ────────────────────────────────────────────────────────
-const findBinByType = (
-  bins: BinsMap,
-  binType: string
-): { binId: string; bin: BinData } => {
-  for (const [binId, bin] of Object.entries(bins)) {
-    if (bin.type === binType) {
-      return { binId, bin };
-    }
-  }
-
-  const fallbackBin = bins["mixed"] ?? Object.values(bins)[0];
-
-  return {
-    binId: "mixed",
-    bin: fallbackBin,
-  };
-};
-
-// ─── Gemini Lari tip ─────────────────────────────────────────────────────────
 const getLariTip = async (
   itemName: string,
   binName: string
@@ -167,7 +110,7 @@ const getLariTip = async (
             {
               parts: [
                 {
-                  text: `Napiši SAMO en kratek praktičen nasvet v slovenščini kako pravilno pripraviti "${itemName}" pred odlaganjem v "${binName}". Odgovori SAMO z nasvetom, brez uvoda, brez razlage.`,
+                  text: `Napiši SAMO en praktičen nasvet v slovenščini kako pravilno pripraviti "${itemName}" pred odlaganjem v "${binName}". Na primer: "Stisni plastenko in odstrani pokrovček." ali "Izperi kozarec pred odlaganjem." Odgovori SAMO z nasvetom, brez uvoda, brez razlage, brez vprašanj.`,
                 },
               ],
             },
@@ -176,217 +119,44 @@ const getLariTip = async (
       }
     );
 
-    if (!res.ok) {
-      return null;
-    }
+    if (!res.ok) return null;
 
     const data = await res.json();
-
     return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? null;
   } catch {
     return null;
   }
 };
 
-// ─── Gemini barcode/product → bin type ───────────────────────────────────────
-const getBinTypeFromGemini = async (
-  itemName: string,
-  packaging: string,
-  categories: string
-): Promise<string> => {
-  try {
-    const isBarcode = /^\d+$/.test(itemName);
-
-    const prompt = isBarcode
-      ? `Barcode številka: ${itemName}. To je verjetno plastična ali kovinska embalaža živilskega produkta. Kateri zabojnik? Odgovori SAMO z eno besedo: packaging, paper, glass, bio, ali mixed.`
-      : `Produkt: "${itemName}", Embalaža: "${packaging}", Kategorije: "${categories}". Kateri zabojnik po slovenskih pravilih? SAMO ena beseda: packaging, paper, glass, bio, ali mixed.`;
-
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${process.env.EXPO_PUBLIC_GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      return "packaging";
-    }
-
-    const data = await res.json();
-
-    const answer =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text
-        ?.trim()
-        .toLowerCase() ?? "packaging";
-
-    if (answer.includes("paper")) return "paper";
-    if (answer.includes("glass")) return "glass";
-    if (answer.includes("bio")) return "bio";
-    if (answer.includes("mixed")) return "mixed";
-
-    return "packaging";
-  } catch {
-    return "packaging";
-  }
-};
-
-// ─── Preprocess image for MobileNetV2 224x224 ────────────────────────────────
-const preprocessImage = async (
-  imageUri: string
-): Promise<Float32Array | null> => {
-  try {
-    const resized = await ImageManipulator.manipulateAsync(
-      imageUri,
-      [{ resize: { width: 224, height: 224 } }],
-      {
-        format: ImageManipulator.SaveFormat.JPEG,
-        base64: true,
-        compress: 1.0,
-      }
-    );
-
-    if (!resized.base64) {
-      return null;
-    }
-
-    const binaryString = atob(resized.base64);
-    const bytes = new Uint8Array(binaryString.length);
-
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    let dataStart = 0;
-
-    for (let i = 0; i < bytes.length - 1; i++) {
-      if (bytes[i] === 0xff && bytes[i + 1] === 0xda) {
-        dataStart = i + 12;
-        break;
-      }
-    }
-
-    const float32Data = new Float32Array(224 * 224 * 3);
-    let pixelIndex = 0;
-
-    for (let i = 0; i < 224 * 224; i++) {
-      const pos = dataStart + i * 3;
-
-      if (pos + 2 < bytes.length) {
-        float32Data[pixelIndex++] = (bytes[pos] - 127.5) / 127.5;
-        float32Data[pixelIndex++] = (bytes[pos + 1] - 127.5) / 127.5;
-        float32Data[pixelIndex++] = (bytes[pos + 2] - 127.5) / 127.5;
-      }
-    }
-
-    return float32Data;
-  } catch (e) {
-    console.error("Preprocess error:", e);
-    return null;
-  }
-};
-
-// ─── Component ───────────────────────────────────────────────────────────────
 export default function ScannerScreen({ navigation }: any) {
   const [permission, requestPermission] = useCameraPermissions();
 
   const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingBins, setLoadingBins] = useState(true);
-
   const [result, setResult] = useState<{
     item: string;
     bin: BinData;
     binId: string;
-    confidence?: number;
   } | null>(null);
 
   const [bins, setBins] = useState<BinsMap>({});
-  const [municipalityId, setMunicipalityId] = useState("maribor");
-  const [municipalityName, setMunicipalityName] = useState("Maribor");
-
   const [scanMode, setScanMode] = useState<ScanMode>("camera");
+  const [manualInput, setManualInput] = useState("");
   const [barcodeScanning, setBarcodeScanning] = useState(false);
-
-  const [modelReady, setModelReady] = useState(false);
-  const [tfliteModel, setTfliteModel] = useState<any>(null);
 
   const cameraRef = useRef<any>(null);
 
   useEffect(() => {
-    prepareModel();
-    loadUserAndBins();
+    loadBinsFromFirebase();
   }, []);
 
-  // ─── Prepare TFLite model ──────────────────────────────────────────────────
-  const prepareModel = async () => {
-    try {
-      const { loadTensorflowModel } = require("react-native-fast-tflite");
-      const dest = FileSystem.cacheDirectory + "recyclar_model.tflite";
-
-      const info = await FileSystem.getInfoAsync(dest);
-
-      if (info.exists) {
-        await FileSystem.deleteAsync(dest);
-      }
-
-      const asset = ExpoAsset.Asset.fromModule(
-        require("../assets/model/recyclar_model.tflite")
-      );
-
-      await asset.downloadAsync();
-
-      await FileSystem.copyAsync({
-        from: asset.localUri!,
-        to: dest,
-      });
-
-      const loaded = await loadTensorflowModel({ url: dest }, []);
-
-      setTfliteModel(loaded);
-      setModelReady(true);
-
-      console.log("✅ TFLite model loaded!");
-    } catch (e) {
-      console.log("Model prep failed:", e);
-      setModelReady(false);
-    }
-  };
-
-  // ─── Load user municipality + bins ─────────────────────────────────────────
-  const loadUserAndBins = async () => {
+  const loadBinsFromFirebase = async () => {
     setLoadingBins(true);
 
     try {
-      const userId = auth.currentUser?.uid;
-      let munId = "maribor";
-
-      if (userId) {
-        const userDoc = await getDoc(doc(db, "users", userId));
-
-        if (userDoc.exists()) {
-          munId = userDoc.data().municipalityId ?? "maribor";
-        }
-      }
-
-      setMunicipalityId(munId);
-      setMunicipalityName(munId.charAt(0).toUpperCase() + munId.slice(1));
-
       const binsSnap = await getDocs(
-        collection(db, "municipalities", munId, "bins")
+        collection(db, "municipalities", "maribor", "bins")
       );
 
       const binsData: BinsMap = {};
@@ -397,12 +167,11 @@ export default function ScannerScreen({ navigation }: any) {
 
       if (Object.keys(binsData).length > 0) {
         setBins(binsData);
-        console.log(`✅ Loaded ${Object.keys(binsData).length} bins for ${munId}`);
       } else {
         setFallbackBins();
       }
-    } catch (e) {
-      console.error("Error loading bins:", e);
+    } catch (err) {
+      console.log("Firebase bins load failed, using fallback:", err);
       setFallbackBins();
     } finally {
       setLoadingBins(false);
@@ -414,16 +183,14 @@ export default function ScannerScreen({ navigation }: any) {
       blue: {
         name: "Modri zabojnik",
         color: "blue",
-        type: "paper",
         description: "Zabojnik za papir.",
         tip: "Papir naj bo čist in suh.",
-        allowed: ["Papir", "Karton"],
+        allowed: ["Čist papir", "Karton"],
         notAllowed: ["Masten papir"],
       },
       yellow: {
         name: "Rumeni zabojnik",
         color: "yellow",
-        type: "packaging",
         description: "Zabojnik za embalažo.",
         tip: "Stisni plastenko pred odlaganjem.",
         allowed: ["Plastika", "Kovine"],
@@ -432,122 +199,61 @@ export default function ScannerScreen({ navigation }: any) {
       green: {
         name: "Zeleni zabojnik",
         color: "green",
-        type: "glass",
         description: "Zabojnik za steklo.",
-        tip: "Izprazni steklenico.",
+        tip: "Izprazni steklenico pred odlaganjem.",
         allowed: ["Steklo"],
         notAllowed: ["Keramika"],
       },
       brown: {
         name: "Rjavi zabojnik",
         color: "brown",
-        type: "bio",
         description: "Zabojnik za bio odpadke.",
         tip: "Samo organski odpadki.",
         allowed: ["Hrana", "Bio"],
-        notAllowed: ["Plastika"],
+        notAllowed: ["Plastične vrečke"],
       },
       mixed: {
         name: "Mešani odpadki",
         color: "mixed",
-        type: "mixed",
-        description: "Za odpadke, ki ne spadajo drugam.",
-        tip: "Sem gre samo tisto, česar ne moreš razvrstiti drugam.",
+        description: "Za kar ne gre drugam.",
+        tip: "Sem gre kar se ne da razvrstiti.",
         allowed: ["Mešani odpadki"],
         notAllowed: [],
       },
     });
   };
 
-  // ─── Run TFLite model ──────────────────────────────────────────────────────
-  const runTFLiteModel = async (imageUri: string) => {
-    if (!tfliteModel) {
-      return null;
+  const showResult = async (itemName: string) => {
+    const binId = mapItemToBin(itemName);
+    const bin = bins[binId] ?? bins["mixed"] ?? Object.values(bins)[0];
+
+    if (!bin) {
+      Alert.alert("Napaka", "Pravila za zabojnike niso naložena.");
+      return;
     }
-
-    try {
-      const inputData = await preprocessImage(imageUri);
-
-      if (!inputData) {
-        return null;
-      }
-
-      const output = await tfliteModel.run([inputData.buffer]);
-
-      if (!output?.[0]) {
-        return null;
-      }
-
-      const predictions = new Float32Array(output[0]);
-
-      let maxIndex = 0;
-      let maxValue = predictions[0];
-
-      for (let i = 1; i < predictions.length; i++) {
-        if (predictions[i] > maxValue) {
-          maxValue = predictions[i];
-          maxIndex = i;
-        }
-      }
-
-      const className = CLASS_NAMES[maxIndex] ?? "trash";
-      const confidence = Math.round(maxValue * 100);
-
-      console.log(`TFLite: ${className} (${confidence}%)`);
-
-      return {
-        className,
-        confidence,
-      };
-    } catch (e) {
-      console.error("TFLite error:", e);
-      return null;
-    }
-  };
-
-  // ─── Show result ───────────────────────────────────────────────────────────
-  const showResult = async (
-    tfliteClass?: string,
-    confidence?: number,
-    fallbackText?: string
-  ) => {
-    const binType = tfliteClass
-      ? CLASS_TO_BIN_TYPE[tfliteClass] ?? "mixed"
-      : mapTextToBinType(fallbackText ?? "");
-
-    const { binId, bin } = findBinByType(bins, binType);
-
-    const displayName = tfliteClass
-      ? CLASS_NAMES_SL[tfliteClass] ?? fallbackText ?? "Odpadek"
-      : fallbackText ?? "Odpadek";
 
     setResult({
-      item: displayName,
+      item: itemName,
       bin,
       binId,
-      confidence,
     });
 
-    const tip = await getLariTip(displayName, bin.name);
+    const geminiTip = await getLariTip(itemName, bin.name);
 
-    if (tip) {
+    if (geminiTip) {
       setResult({
-        item: displayName,
+        item: itemName,
         bin: {
           ...bin,
-          tip,
+          tip: geminiTip,
         },
         binId,
-        confidence,
       });
     }
   };
 
-  // ─── Take picture ──────────────────────────────────────────────────────────
   const takePicture = async () => {
-    if (!cameraRef.current) {
-      return;
-    }
+    if (!cameraRef.current || loadingBins) return;
 
     setLoading(true);
     setResult(null);
@@ -555,35 +261,27 @@ export default function ScannerScreen({ navigation }: any) {
     try {
       const pic = await cameraRef.current.takePictureAsync({
         base64: false,
-        quality: 0.8,
+        quality: 0.75,
       });
 
       setPhoto(pic.uri);
 
-      if (modelReady && tfliteModel) {
-        const tfliteResult = await runTFLiteModel(pic.uri);
-
-        if (tfliteResult && tfliteResult.confidence >= 40) {
-          await showResult(tfliteResult.className, tfliteResult.confidence);
-          setLoading(false);
-          return;
-        }
-      }
-
-      setLoading(false);
-
       Alert.alert(
         "Odpadek posnet! 📷",
-        modelReady
-          ? "Model ni bil prepričan. Poskusi s črtno kodo za boljši rezultat."
-          : "Poskusi s črtno kodo za identifikacijo.",
+        "Kako želiš identificirati odpadek?",
         [
           {
-            text: "🔲 Črtna koda",
+            text: "Skeniraj črtno kodo",
             onPress: () => {
               setPhoto(null);
               setScanMode("barcode");
               setBarcodeScanning(true);
+            },
+          },
+          {
+            text: "Vnesi ročno",
+            onPress: () => {
+              setScanMode("manual");
             },
           },
           {
@@ -593,64 +291,135 @@ export default function ScannerScreen({ navigation }: any) {
           },
         ]
       );
-    } catch {
-      setLoading(false);
+    } catch (err) {
+      console.log("Take picture error:", err);
       Alert.alert("Napaka", "Fotografiranje ni uspelo.");
-    }
-  };
-
-  // ─── Barcode scan ──────────────────────────────────────────────────────────
-  const handleBarcodeScan = async ({ data: barcode }: { data: string }) => {
-    if (!barcodeScanning) {
-      return;
-    }
-
-    setBarcodeScanning(false);
-    setLoading(true);
-    setScanMode("camera");
-
-    try {
-      const binType = await getBinTypeFromGemini(barcode, "", "");
-      const { binId, bin } = findBinByType(bins, binType);
-      const displayName = `Produkt ${barcode}`;
-
-      setResult({
-        item: displayName,
-        bin,
-        binId,
-      });
-
-      const tip = await getLariTip(displayName, bin.name);
-
-      if (tip) {
-        setResult({
-          item: displayName,
-          bin: {
-            ...bin,
-            tip,
-          },
-          binId,
-        });
-      }
-    } catch (e) {
-      console.log("Barcode error:", e);
-      Alert.alert("Napaka", "Skeniranje ni uspelo.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const pickFromGallery = async () => {
+    try {
+      const picked = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        base64: false,
+        quality: 0.7,
+      });
+
+      if (!picked.canceled && picked.assets[0]) {
+        setPhoto(picked.assets[0].uri);
+
+        Alert.alert(
+          "Slika izbrana! 🖼",
+          "Kako želiš identificirati odpadek?",
+          [
+            {
+              text: "Skeniraj črtno kodo",
+              onPress: () => {
+                setPhoto(null);
+                setScanMode("barcode");
+                setBarcodeScanning(true);
+              },
+            },
+            {
+              text: "Vnesi ročno",
+              onPress: () => setScanMode("manual"),
+            },
+            {
+              text: "Prekliči",
+              onPress: () => setPhoto(null),
+              style: "cancel",
+            },
+          ]
+        );
+      }
+    } catch (err) {
+      console.log("Gallery error:", err);
+      Alert.alert("Napaka", "Izbira slike ni uspela.");
+    }
+  };
+
+  const handleBarcodeScan = async ({ data: barcode }: { data: string }) => {
+    if (!barcodeScanning) return;
+
+    setBarcodeScanning(false);
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const res = await fetch(
+        `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`
+      );
+
+      const data = await res.json();
+
+      setLoading(false);
+      setScanMode("camera");
+
+      if (data.status === 1 && data.product) {
+        const product = data.product;
+        const itemName =
+          product.product_name_sl ||
+          product.product_name ||
+          product.generic_name ||
+          barcode;
+
+        const packaging =
+          product.packaging ||
+          product.packaging_text ||
+          product.categories ||
+          "";
+
+        const searchText = `${itemName} ${packaging}`;
+        await showResult(searchText);
+      } else {
+        Alert.alert(
+          "Produkt ni najden",
+          "Ta produkt ni v bazi. Poskusi ročni vnos.",
+          [
+            {
+              text: "Vnesi ročno",
+              onPress: () => setScanMode("manual"),
+            },
+            {
+              text: "Prekliči",
+              style: "cancel",
+            },
+          ]
+        );
+      }
+    } catch (err) {
+      console.log("Barcode error:", err);
+      setLoading(false);
+      setScanMode("camera");
+      Alert.alert("Napaka", "Ni se uspelo povezati z bazo produktov.");
+    }
+  };
+
+  const handleManualSearch = async () => {
+    const value = manualInput.trim();
+
+    if (!value) return;
+
+    setLoading(true);
+    setScanMode("camera");
+    setManualInput("");
+
+    await showResult(value);
+
+    setLoading(false);
   };
 
   const resetScan = () => {
     setPhoto(null);
     setResult(null);
     setScanMode("camera");
+    setManualInput("");
     setBarcodeScanning(false);
   };
 
-  // ─── Permissions ───────────────────────────────────────────────────────────
-  if (!permission) {
-    return <View />;
-  }
+  if (!permission) return <View />;
 
   if (!permission.granted) {
     return (
@@ -666,7 +435,6 @@ export default function ScannerScreen({ navigation }: any) {
     );
   }
 
-  // ─── Barcode mode ──────────────────────────────────────────────────────────
   if (scanMode === "barcode") {
     return (
       <SafeAreaView style={s.container}>
@@ -674,7 +442,6 @@ export default function ScannerScreen({ navigation }: any) {
           <TouchableOpacity
             onPress={() => setScanMode("camera")}
             style={s.backBtn}
-            activeOpacity={0.8}
           >
             <Text style={s.backText}>‹</Text>
           </TouchableOpacity>
@@ -684,14 +451,7 @@ export default function ScannerScreen({ navigation }: any) {
             <Text style={s.headerPurple}> črtno kodo</Text>
           </Text>
 
-          <View style={{ width: 44 }} />
-        </View>
-
-        <View style={s.titleRow}>
-          <Text style={s.title}>Črtna koda</Text>
-          <Text style={s.subtitle}>
-            Usmeri kamero na črtno kodo izdelka.
-          </Text>
+          <View style={{ width: 40 }} />
         </View>
 
         <View style={s.cameraBox}>
@@ -707,24 +467,30 @@ export default function ScannerScreen({ navigation }: any) {
           <View style={s.cornerBR} />
 
           <View style={s.goodLight}>
-            <Text style={s.goodLightText}>🔲 Usmeri na črtno kodo</Text>
+            <Text style={s.goodLightText}>Usmeri na črtno kodo</Text>
           </View>
         </View>
 
         {loading && (
           <View style={s.centerLoader}>
-            <ActivityIndicator size="large" color="#34A936" />
+            <ActivityIndicator size="large" color="#22C55E" />
             <Text style={s.loadingBinsText}>Iščem produkt...</Text>
           </View>
         )}
 
         <View style={s.buttonsRow}>
           <TouchableOpacity
+            style={s.secondBtn}
+            onPress={() => setScanMode("manual")}
+          >
+            <Text style={s.secondBtnText}>Vnesi ročno</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={s.mainBtn}
             onPress={() => setScanMode("camera")}
-            activeOpacity={0.9}
           >
-            <Text style={s.mainBtnText}>← Nazaj na kamero</Text>
+            <Text style={s.mainBtnText}>Nazaj</Text>
           </TouchableOpacity>
         </View>
 
@@ -733,45 +499,81 @@ export default function ScannerScreen({ navigation }: any) {
     );
   }
 
-  // ─── Main camera mode ──────────────────────────────────────────────────────
+  if (scanMode === "manual") {
+    return (
+      <SafeAreaView style={s.container}>
+        <View style={s.header}>
+          <TouchableOpacity
+            onPress={() => setScanMode("camera")}
+            style={s.backBtn}
+          >
+            <Text style={s.backText}>‹</Text>
+          </TouchableOpacity>
+
+          <Text style={s.headerTitle}>
+            <Text style={s.headerGreen}>Recyc</Text>
+            <Text style={s.headerPurple}>LAR</Text>
+          </Text>
+
+          <View style={{ width: 40 }} />
+        </View>
+
+        <View style={s.manualContainer}>
+          <Text style={s.title}>Ročni vnos ✦</Text>
+          <Text style={s.subtitle}>Vpiši ime odpadka ali produkta.</Text>
+
+          <TextInput
+            style={s.manualInput}
+            placeholder="npr. plastenka, karton, steklenica..."
+            placeholderTextColor="#A0A0AA"
+            value={manualInput}
+            onChangeText={setManualInput}
+            autoFocus
+            returnKeyType="search"
+            onSubmitEditing={handleManualSearch}
+          />
+
+          <TouchableOpacity
+            style={[s.mainBtn, !manualInput.trim() && { opacity: 0.4 }]}
+            onPress={handleManualSearch}
+            disabled={!manualInput.trim() || loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={s.mainBtnText}>Poišči</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+
+        <BottomNavBar navigation={navigation} activeRoute="Scanner" />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={s.container}>
       <View style={s.header}>
-        <View style={{ width: 44 }} />
+        <View style={{ width: 40 }} />
 
         <Text style={s.headerTitle}>
           <Text style={s.headerGreen}>Recyc</Text>
           <Text style={s.headerPurple}>LAR</Text>
         </Text>
 
-        <View style={{ width: 44 }} />
+        <View style={{ width: 40 }} />
       </View>
 
       <View style={s.titleRow}>
         <Text style={s.title}>Skener ✦</Text>
-        <Text style={s.subtitle}>
-          Slikaj odpadek ali skeniraj črtno kodo.
-        </Text>
+        <Text style={s.subtitle}>Slikaj odpadek ali skeniraj črtno kodo.</Text>
 
-        <View style={s.statusRow}>
-          {loadingBins ? (
-            <>
-              <ActivityIndicator size="small" color="#34A936" />
-              <Text style={s.statusText}>
-                Nalagam pravila za {municipalityName}...
-              </Text>
-            </>
-          ) : (
-            <>
-              <Text style={s.statusDot}>{modelReady ? "🟢" : "🟡"}</Text>
-              <Text style={s.statusText}>
-                {modelReady
-                  ? `AI model aktiven · ${municipalityName}`
-                  : `Nalagam AI model · ${municipalityName}`}
-              </Text>
-            </>
-          )}
-        </View>
+        {loadingBins && (
+          <View style={s.loadingBinsRow}>
+            <ActivityIndicator size="small" color="#22C55E" />
+            <Text style={s.loadingBinsText}>Nalagam pravila...</Text>
+          </View>
+        )}
       </View>
 
       <View style={s.cameraBox}>
@@ -794,10 +596,8 @@ export default function ScannerScreen({ navigation }: any) {
 
             {loading && (
               <View style={s.loadingOverlay}>
-                <ActivityIndicator size="large" color="#34A936" />
-                <Text style={s.loadingText}>
-                  {modelReady ? "AI analizira odpadek..." : "Analiziram..."}
-                </Text>
+                <ActivityIndicator size="large" color="#22C55E" />
+                <Text style={s.loadingText}>Analiziram...</Text>
               </View>
             )}
           </>
@@ -812,38 +612,19 @@ export default function ScannerScreen({ navigation }: any) {
         {result && !loading && (
           <View style={s.resultCard}>
             <Text style={s.resultLabel}>Prepoznano:</Text>
-
-            <View style={s.resultItemRow}>
-              <Text style={s.resultItem}>{result.item} 🌿</Text>
-
-              {result.confidence && (
-                <View style={s.confidenceBadge}>
-                  <Text style={s.confidenceText}>
-                    {result.confidence}%
-                  </Text>
-                </View>
-              )}
-            </View>
+            <Text style={s.resultItem}>{result.item} 🌿</Text>
 
             <Text style={s.resultLabel}>Odloži v:</Text>
-
             <Text
               style={[
                 s.resultBin,
-                {
-                  color:
-                    BIN_COLORS[result.bin.color] ??
-                    BIN_COLORS[result.binId] ??
-                    "#1F2937",
-                },
+                { color: BIN_COLORS[result.bin.color] ?? BIN_COLORS[result.binId] ?? "#1F2937" },
               ]}
             >
-              ● {result.bin.name}
+              ● {result.bin.name ?? "Neznan zabojnik"}
             </Text>
 
-            <Text style={s.resultDesc}>{result.bin.description}</Text>
-
-            <Text style={s.municipalityBadge}>📍 {municipalityName}</Text>
+            <Text style={s.resultDesc}>{result.bin.description ?? ""}</Text>
           </View>
         )}
 
@@ -852,7 +633,7 @@ export default function ScannerScreen({ navigation }: any) {
             <View style={s.rulesCol}>
               <Text style={s.rulesTitle}>✅ Dovoljeno</Text>
 
-              {(result.bin.allowed ?? []).slice(0, 5).map((item, index) => (
+              {(result.bin.allowed ?? []).slice(0, 4).map((item, index) => (
                 <Text key={index} style={s.rulesItem}>
                   • {item}
                 </Text>
@@ -864,7 +645,7 @@ export default function ScannerScreen({ navigation }: any) {
             <View style={s.rulesCol}>
               <Text style={s.rulesTitleRed}>❌ Ni dovoljeno</Text>
 
-              {(result.bin.notAllowed ?? []).slice(0, 5).map((item, index) => (
+              {(result.bin.notAllowed ?? []).slice(0, 4).map((item, index) => (
                 <Text key={index} style={s.rulesItem}>
                   • {item}
                 </Text>
@@ -875,10 +656,7 @@ export default function ScannerScreen({ navigation }: any) {
 
         {result && !loading && (
           <View style={s.tipCard}>
-            <View style={s.tipHeader}>
-              <Text style={s.tipTitle}>Lari nasvet ✦</Text>
-            </View>
-
+            <Text style={s.tipTitle}>Lari nasvet ✦</Text>
             <Text style={s.tipText}>{result.bin.tip}</Text>
           </View>
         )}
@@ -888,34 +666,45 @@ export default function ScannerScreen({ navigation }: any) {
         {!result ? (
           <>
             <TouchableOpacity
-              style={[s.mainBtn, loadingBins && s.btnDisabled]}
+              style={[s.mainBtn, loadingBins && { opacity: 0.4 }]}
               onPress={takePicture}
               disabled={loadingBins}
-              activeOpacity={0.9}
             >
               <Text style={s.mainBtnText}>📷 Slikaj</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[s.secondBtn, loadingBins && s.btnDisabled]}
+              style={[s.secondBtn, loadingBins && { opacity: 0.4 }]}
               onPress={() => {
                 setScanMode("barcode");
                 setBarcodeScanning(true);
               }}
               disabled={loadingBins}
-              activeOpacity={0.9}
             >
-              <Text style={s.secondBtnText}>🔲 Črtna koda</Text>
+              <Text style={s.secondBtnText}>Črtna koda</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[s.secondBtn, loadingBins && { opacity: 0.4 }]}
+              onPress={pickFromGallery}
+              disabled={loadingBins}
+            >
+              <Text style={s.secondBtnText}>🖼</Text>
             </TouchableOpacity>
           </>
         ) : (
-          <TouchableOpacity
-            style={s.mainBtn}
-            onPress={resetScan}
-            activeOpacity={0.9}
-          >
-            <Text style={s.mainBtnText}>🔄 Skeniraj znova</Text>
-          </TouchableOpacity>
+          <>
+            <TouchableOpacity style={s.mainBtn} onPress={resetScan}>
+              <Text style={s.mainBtnText}>🔄 Znova</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={s.secondBtn}
+              onPress={() => setScanMode("manual")}
+            >
+              <Text style={s.secondBtnText}>Ročno</Text>
+            </TouchableOpacity>
+          </>
         )}
       </View>
 
