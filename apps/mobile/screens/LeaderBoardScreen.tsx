@@ -1,285 +1,365 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import BottomNavBar from "../components/BottomNavBar";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import {
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
-import { styles } from "../styles/LeaderBoardScreen.styles";
+import { styles as s } from "../styles/LeaderBoardScreen.styles";
+import { getAvatarAsset } from "../utils/avatarAssets";
+import { loadCity } from "../utils/cityStorage";
 
-type LeaderboardType = "ucenci" | "razredi";
+// ─── Types ────────────────────────────────────────────────────────────────────
 
-type LeaderboardItem = {
+type FilterType = "weekly" | "monthly" | "allTime";
+type TabType = "posamezniki" | "razredi";
+
+type SchoolItem = {
+  id: string;
   name: string;
-  points: number;
-  razred?: string;
+  displayName?: string;
+  schoolName?: string;
+  weeklyPoints: number;
+  monthlyPoints: number;
+  totalPoints: number;
+  streakDays?: number;
 };
 
-const STATIC_STUDENTS: LeaderboardItem[] = [
-  { name: "Anže Novak", points: 250, razred: "7.B" },
-  { name: "Ema Horvat", points: 180, razred: "6.A" },
-  { name: "Luka Krajnc", points: 120, razred: "8.C" },
+type UserItem = {
+  id: string;
+  name: string;
+  weeklyPoints: number;
+  monthlyPoints: number;
+  totalPoints: number;
+  streakDays?: number;
+  avatarKey?: string;
+  schoolName?: string;
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const SCHOOL_AVATAR_KEYS = [
+  "fox",
+  "raccoon",
+  "hedgehog",
+  "turtle",
+  "rabbit",
+  "owl",
 ];
 
-const STATIC_GROUPS: LeaderboardItem[] = [
-  { name: "7.B", points: 1240 },
-  { name: "6.A", points: 980 },
-  { name: "8.C", points: 760 },
-];
-
-const getRankContent = (index: number) => {
-  if (index === 0) return "🥇";
-  if (index === 1) return "🥈";
-  if (index === 2) return "🥉";
-  return `${index + 1}.`;
+const getPoints = (item: SchoolItem | UserItem, filter: FilterType): number => {
+  if (filter === "weekly") return item.weeklyPoints ?? 0;
+  if (filter === "monthly") return item.monthlyPoints ?? 0;
+  return item.totalPoints ?? 0;
 };
 
-const getRankBoxStyle = (index: number) => {
-  if (index === 0) return styles.rankBoxTop1;
-  if (index === 1) return styles.rankBoxTop2;
-  if (index === 2) return styles.rankBoxTop3;
-  return null;
-};
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LeaderboardScreen({ navigation }: any) {
   const currentUser = auth.currentUser;
 
-  const [leaderboardType, setLeaderboardType] =
-    useState<LeaderboardType>("ucenci");
-  const [dataList, setDataList] = useState<LeaderboardItem[]>([]);
+  const [activeTab, setActiveTab] = useState<TabType>("razredi");
+  const [activeFilter, setActiveFilter] = useState<FilterType>("weekly");
+  const [schools, setSchools] = useState<SchoolItem[]>([]);
+  const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [mySchoolId, setMySchoolId] = useState<string | null>(null);
+  const [myUserId, setMyUserId] = useState<string | null>(null);
+  const [myMunicipality, setMyMunicipality] = useState<string>("Maribor");
+  const [cityLoaded, setCityLoaded] = useState(false); // Додадено за контрола на вчитување
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!currentUser) return;
+      setMyUserId(currentUser.uid);
+
+      loadCity().then((city) => {
+        setMyMunicipality(city.charAt(0).toUpperCase() + city.slice(1));
+        setCityLoaded(true); // Обележуваме дека градот е вчитан
+      });
+
+      getDoc(doc(db, "users", currentUser.uid)).then((snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          setMySchoolId(data.schoolId ?? null);
+        }
+      });
+    }, [currentUser]),
+  );
 
   useEffect(() => {
-    if (currentUser) {
-      loadLeaderboard();
+    // Вчитуваме само ако градот е веќе сетиран во state-от
+    if (currentUser && cityLoaded) {
+      if (activeTab === "razredi") loadSchools();
+      else loadUsers();
     }
-  }, [leaderboardType, currentUser]);
+  }, [activeTab, currentUser, myMunicipality, cityLoaded]);
 
-  const loadLeaderboard = async () => {
+  const loadSchools = async () => {
     setLoading(true);
-
     try {
-      if (leaderboardType === "ucenci") {
-        const usersQuery = query(
-          collection(db, "users"),
-          orderBy("totalPoints", "desc"),
-          limit(20)
-        );
-
-        const snapshot = await getDocs(usersQuery);
-        const fetchedUsers: LeaderboardItem[] = [];
-
-        snapshot.forEach((document) => {
-          const userData = document.data();
-
-          fetchedUsers.push({
-            name:
-              userData.displayName ||
-              userData.name ||
-              userData.email?.split("@")[0] ||
-              "Anonimni učenec",
-            points: userData.totalPoints || 0,
-            razred: userData.razred || userData.class || userData.groupId || "",
-          });
-        });
-
-        setDataList(fetchedUsers.length > 0 ? fetchedUsers : STATIC_STUDENTS);
-      } else {
-        const groupsQuery = query(
+      const municipalityId = myMunicipality.toLowerCase();
+      const snap = await getDocs(
+        query(
           collection(db, "groups"),
           orderBy("totalPoints", "desc"),
-          limit(10)
-        );
-
-        const snapshot = await getDocs(groupsQuery);
-        const fetchedGroups: LeaderboardItem[] = [];
-
-        snapshot.forEach((document) => {
-          const groupData = document.data();
-
-          fetchedGroups.push({
-            name: groupData.name || "Neznan razred",
-            points: groupData.totalPoints || 0,
-          });
-        });
-
-        setDataList(fetchedGroups.length > 0 ? fetchedGroups : STATIC_GROUPS);
-      }
-    } catch (err) {
-      console.log("Napaka pri nalaganju lestvice:", err);
-
-      setDataList(
-        leaderboardType === "ucenci" ? STATIC_STUDENTS : STATIC_GROUPS
+          limit(50),
+        ),
       );
+
+      const list: SchoolItem[] = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        const groupMunicipality = (data.municipalityId ?? "").toLowerCase();
+
+        if (groupMunicipality === municipalityId) {
+          list.push({
+            id: d.id,
+            name: data.name ?? d.id,
+            displayName: data.displayName ?? data.name ?? d.id,
+            schoolName: data.schoolName ?? data.schoolId ?? "",
+            weeklyPoints: data.weeklyPoints ?? 0,
+            monthlyPoints: data.monthlyPoints ?? 0,
+            totalPoints: data.totalPoints ?? 0,
+            streakDays: data.streakDays ?? 0,
+          });
+        }
+      });
+      setSchools(list);
+    } catch (e) {
+      console.log("loadSchools error:", e);
+      setSchools([]);
     } finally {
       setLoading(false);
     }
   };
 
-  if (!currentUser) {
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const snap = await getDocs(
+        query(
+          collection(db, "users"),
+          orderBy("totalPoints", "desc"),
+          limit(20),
+        ),
+      );
+      const list: UserItem[] = [];
+      snap.forEach((d) => {
+        const data = d.data();
+        list.push({
+          id: d.id,
+          name:
+            data.displayName ??
+            data.name ??
+            data.email?.split("@")[0] ??
+            "Učenec",
+          weeklyPoints: data.weeklyPoints ?? 0,
+          monthlyPoints: data.monthlyPoints ?? 0,
+          totalPoints: data.totalPoints ?? 0,
+          streakDays: data.streakDays ?? 0,
+          avatarKey: data.avatarKey,
+          schoolName: data.schoolName,
+        });
+      });
+      setUsers(list);
+    } catch (e) {
+      console.log("loadUsers error:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rawList = activeTab === "razredi" ? schools : users;
+  const sortedList = [...rawList].sort(
+    (a, b) => getPoints(b, activeFilter) - getPoints(a, activeFilter),
+  );
+  const top3 = sortedList.slice(0, 3);
+  const rest = sortedList.slice(3);
+  const myId = activeTab === "razredi" ? mySchoolId : myUserId;
+  const myRank = sortedList.findIndex((item) => item.id === myId);
+  const myItem = myRank >= 0 ? sortedList[myRank] : null;
+
+  if (!currentUser)
     return (
-      <SafeAreaView style={styles.whiteContainer}>
-        <View style={styles.lockedContent}>
-          <Text style={styles.lockedIcon}>🏆</Text>
-
-          <Text style={styles.lockedTitle}>Poglej lestvico</Text>
-
-          <Text style={styles.lockedText}>
-            Želiš videti, kateri učenci in razredi so reciklirali največ?
-            Prijavi se in pomagaj svojemu timu do zmage.
-          </Text>
-
+      <SafeAreaView style={s.whiteContainer}>
+        <View style={s.lockedContent}>
+          <Text style={s.lockedIcon}>🏆</Text>
+          <Text style={s.lockedTitle}>Poglej lestvico</Text>
           <TouchableOpacity
-            style={styles.loginButton}
+            style={s.loginButton}
             onPress={() => navigation.navigate("Login")}
-            activeOpacity={0.9}
           >
-            <Text style={styles.loginButtonText}>
-              Prijavi se v svoj profil
-            </Text>
+            <Text style={s.loginButtonText}>Prijavi se v svoj profil</Text>
           </TouchableOpacity>
         </View>
-
         <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
       </SafeAreaView>
     );
-  }
 
-  const topItem = dataList[0];
+  const renderAvatar = (
+    item: SchoolItem | UserItem,
+    index: number,
+    size: number,
+  ) => {
+    const avatarKey =
+      (item as UserItem).avatarKey ??
+      SCHOOL_AVATAR_KEYS[index % SCHOOL_AVATAR_KEYS.length];
+    return (
+      <Image
+        source={getAvatarAsset(avatarKey)}
+        style={{ width: size, height: size, borderRadius: size / 2 }}
+      />
+    );
+  };
+
+  const renderPodiumCard = (
+    item: SchoolItem | UserItem | undefined,
+    rank: 1 | 2 | 3,
+    index: number,
+  ) => {
+    if (!item) return <View style={s.podiumPlaceholder} />;
+    const pts = getPoints(item, activeFilter);
+    const isMe = item.id === myId;
+    return (
+      <View
+        style={[
+          s.podiumCard,
+          rank === 1
+            ? s.podiumCard1
+            : rank === 2
+              ? s.podiumCard2
+              : s.podiumCard3,
+          isMe && s.podiumCardMe,
+        ]}
+      >
+        <View
+          style={[
+            s.medalBadge,
+            {
+              backgroundColor:
+                rank === 1 ? "#FDE68A" : rank === 2 ? "#E5E7EB" : "#FDDBB4",
+            },
+          ]}
+        >
+          <Text style={s.medalRank}>{rank}</Text>
+        </View>
+        <View style={s.podiumAvatarWrap}>
+          {renderAvatar(item, index, rank === 1 ? 70 : 56)}
+        </View>
+        <Text style={s.podiumName} numberOfLines={2}>
+          {item.name}
+        </Text>
+        <Text style={s.podiumPts}>🌿 {pts.toLocaleString()} točk</Text>
+      </View>
+    );
+  };
+
+  const renderRow = (
+    item: SchoolItem | UserItem,
+    rank: number,
+    index: number,
+  ) => {
+    const pts = getPoints(item, activeFilter);
+    const isMe = item.id === myId;
+    return (
+      <View key={item.id} style={[s.rowCard, isMe && s.rowCardMe]}>
+        <Text style={s.rowRank}>{rank}</Text>
+        <View style={s.rowAvatarWrap}>{renderAvatar(item, index + 3, 44)}</View>
+        <View style={s.rowInfo}>
+          <Text style={s.rowName} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {"schoolName" in item && item.schoolName ? (
+            <Text style={s.rowSub}>{item.schoolName}</Text>
+          ) : null}
+        </View>
+        <Text style={s.rowPts}>{pts.toLocaleString()} t</Text>
+      </View>
+    );
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <View>
-              <Text style={styles.title}>Lestvica</Text>
-              <Text style={styles.subtitle}>
-                Najboljši učenci in razredi v aplikaciji RecycLAR.
+    <SafeAreaView style={s.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={s.scrollContent}
+      >
+        <View style={s.header}>
+          <Text style={s.title}>Lestvica ✨</Text>
+          <View style={s.locationPill}>
+            <Text style={s.locationText}>📍 {myMunicipality}</Text>
+          </View>
+        </View>
+        <View style={s.filterRow}>
+          {(["weekly", "monthly", "allTime"] as FilterType[]).map((f) => (
+            <TouchableOpacity
+              key={f}
+              style={[s.filterBtn, activeFilter === f && s.filterBtnActive]}
+              onPress={() => setActiveFilter(f)}
+            >
+              <Text
+                style={[s.filterText, activeFilter === f && s.filterTextActive]}
+              >
+                {f === "weekly"
+                  ? "📊 Tedensko"
+                  : f === "monthly"
+                    ? "📅 Mesečno"
+                    : "👑 Vsi časi"}
               </Text>
-            </View>
-
-            <View style={styles.trophyCircle}>
-              <Text style={styles.trophyText}>🏆</Text>
-            </View>
-          </View>
+            </TouchableOpacity>
+          ))}
         </View>
-
-        <View style={styles.switchWrap}>
+        <View style={s.tabRow}>
           <TouchableOpacity
-            style={[
-              styles.switchButton,
-              leaderboardType === "ucenci" && styles.switchButtonActive,
-            ]}
-            onPress={() => setLeaderboardType("ucenci")}
-            activeOpacity={0.85}
+            style={[s.tabBtn, activeTab === "posamezniki" && s.tabBtnActive]}
+            onPress={() => setActiveTab("posamezniki")}
           >
-            <Text
-              style={[
-                styles.switchText,
-                leaderboardType === "ucenci" && styles.switchTextActive,
-              ]}
-            >
-              Učenci
-            </Text>
+            <Text style={s.tabText}>👤 Posamezniki</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
-            style={[
-              styles.switchButton,
-              leaderboardType === "razredi" && styles.switchButtonActive,
-            ]}
-            onPress={() => setLeaderboardType("razredi")}
-            activeOpacity={0.85}
+            style={[s.tabBtn, activeTab === "razredi" && s.tabBtnActive]}
+            onPress={() => setActiveTab("razredi")}
           >
-            <Text
-              style={[
-                styles.switchText,
-                leaderboardType === "razredi" && styles.switchTextActive,
-              ]}
-            >
-              Razredi
-            </Text>
+            <Text style={s.tabText}>🏫 Razredi</Text>
           </TouchableOpacity>
         </View>
-
         {loading ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color="#35A936" />
-            <Text style={styles.loadingText}>Nalagam lestvico...</Text>
-          </View>
+          <ActivityIndicator size="large" />
         ) : (
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listContent}
-          >
-            {topItem && (
-              <View style={styles.topCard}>
-                <Text style={styles.topCardLabel}>
-                  Trenutno vodi
-                </Text>
-                <Text style={styles.topCardName}>{topItem.name}</Text>
-                <Text style={styles.topCardPoints}>
-                  ⭐ {topItem.points} točk
-                </Text>
+          <>
+            <View style={s.podiumRow}>
+              <View style={s.podiumSide}>
+                {renderPodiumCard(top3[1], 2, 1)}
               </View>
-            )}
-
-            {dataList.length === 0 ? (
-              <View style={styles.emptyCard}>
-                <Text style={styles.emptyIcon}>🌱</Text>
-                <Text style={styles.emptyTitle}>Lestvica je prazna</Text>
-                <Text style={styles.emptyText}>
-                  Ko uporabniki začnejo zbirati točke, se bodo rezultati
-                  prikazali tukaj.
-                </Text>
+              <View style={s.podiumCenter}>
+                {renderPodiumCard(top3[0], 1, 0)}
               </View>
-            ) : (
-              dataList.map((item, index) => (
-                <View key={`${item.name}-${index}`} style={styles.rowCard}>
-                  <View style={[styles.rankBox, getRankBoxStyle(index)]}>
-                    <Text
-                      style={
-                        index < 3 ? styles.rankMedal : styles.rankNumber
-                      }
-                    >
-                      {getRankContent(index)}
-                    </Text>
-                  </View>
-
-                  <View style={styles.itemInfo}>
-                    <Text style={styles.itemName} numberOfLines={1}>
-                      {item.name}
-                    </Text>
-
-                    {leaderboardType === "ucenci" && item.razred ? (
-                      <Text style={styles.itemClass}>
-                        Razred: {item.razred}
-                      </Text>
-                    ) : (
-                      <Text style={styles.itemClass}>
-                        {leaderboardType === "razredi"
-                          ? "Skupinski rezultat"
-                          : "Učenec"}
-                      </Text>
-                    )}
-                  </View>
-
-                  <View style={styles.pointsPill}>
-                    <Text style={styles.pointsText}>{item.points} t</Text>
-                  </View>
-                </View>
-              ))
-            )}
-          </ScrollView>
+              <View style={s.podiumSide}>
+                {renderPodiumCard(top3[2], 3, 2)}
+              </View>
+            </View>
+            <View style={s.listSection}>
+              {rest.map((item, i) => renderRow(item, i + 4, i))}
+            </View>
+          </>
         )}
-      </View>
-
+      </ScrollView>
       <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
     </SafeAreaView>
   );
