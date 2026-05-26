@@ -313,10 +313,10 @@ export const styles = StyleSheet.create({
   },
 
   pathContent: {
-  paddingTop: isSmallPhone ? 10 : 16,
-  paddingHorizontal: SPACING.lg,
-  paddingBottom: 130,
-},
+    paddingTop: isSmallPhone ? 10 : 16,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: 130,
+  },
 
   levelNode: {
     justifyContent: "center",
@@ -743,247 +743,289 @@ export const styles = StyleSheet.create({
   },
 
   pathHeaderCard: {
-  backgroundColor: COLORS.white,
-  borderRadius: 26,
-  padding: 14,
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 16,
-  borderWidth: 1,
-  borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
+    borderRadius: 26,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.07,
-  shadowRadius: 14,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 4,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
 
-pathHeaderText: {
-  flex: 1,
-},
+  pathHeaderText: {
+    flex: 1,
+  },
 
-pathHeroCard: {
-  backgroundColor: COLORS.white,
-  borderRadius: 28,
-  borderWidth: 1.5,
-  padding: 18,
-  marginBottom: 22,
-  flexDirection: "row",
-  alignItems: "center",
-  overflow: "hidden",
+  pathHeroCard: {
+    backgroundColor: COLORS.white,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    padding: 18,
+    marginBottom: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    overflow: "hidden",
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.07,
-  shadowRadius: 16,
-  shadowOffset: { width: 0, height: 8 },
-  elevation: 4,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.07,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+  },
 
-pathHeroTextWrap: {
-  flex: 1,
-  paddingRight: 8,
-},
+  pathHeroTextWrap: {
+    flex: 1,
+    paddingRight: 8,
+  },
 
-pathHeroOverline: {
-  fontSize: 12,
-  fontWeight: "900",
-  letterSpacing: 0.8,
-  marginBottom: 6,
-},
+  pathHeroOverline: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
 
-pathHeroTitle: {
-  fontSize: 23,
-  lineHeight: 29,
-  fontWeight: "900",
-  color: COLORS.text,
-  letterSpacing: -0.4,
-  marginBottom: 6,
-},
+  pathHeroTitle: {
+    fontSize: 23,
+    lineHeight: 29,
+    fontWeight: "900",
+    color: COLORS.text,
+    letterSpacing: -0.4,
+    marginBottom: 6,
+  },
 
-pathHeroSubtitle: {
-  fontSize: 14,
-  lineHeight: 20,
-  color: COLORS.muted,
-  fontWeight: "600",
-},
+  pathHeroSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: COLORS.muted,
+    fontWeight: "600",
+  },
 
-pathLari: {
-  width: isSmallPhone ? 86 : 102,
-  height: isSmallPhone ? 86 : 102,
-  marginRight: -6,
-},
+  pathLari: {
+    width: isSmallPhone ? 86 : 102,
+    height: isSmallPhone ? 86 : 102,
+    marginRight: -6,
+  },
 
-levelMap: {
-  position: "relative",
-  paddingTop: 4,
-},
+  levelMap: {
+    position: "relative",
+    paddingTop: 4,
+  },
 
-pathStep: {
-  position: "relative",
-  marginBottom: 2,
-},
+  pathStep: {
+    position: "relative",
+    marginBottom: 2,
+  },
 
-stepContentRow: {
-  width: "100%",
-  alignItems: "flex-start",
-},
+  stepContentRow: {
+    width: "100%",
+    alignItems: "flex-start",
+  },
 
-stepContentRowRight: {
-  alignItems: "flex-end",
-},
+  stepContentRowRight: {
+    alignItems: "flex-end",
+  },
 
-levelPathCard: {
-  width: "82%",
-  minHeight: 132,
-  backgroundColor: COLORS.white,
-  borderRadius: 26,
-  borderWidth: 2,
-  borderColor: COLORS.border,
-  padding: 14,
-  flexDirection: "row",
-  alignItems: "center",
-  position: "relative",
+  levelPathCard: {
+    width: "82%",
+    minHeight: 132,
+    backgroundColor: COLORS.white,
+    borderRadius: 26,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 14,
-  shadowOffset: { width: 0, height: 7 },
-  elevation: 4,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 7 },
+    elevation: 4,
+  },
 
-levelPathCardLocked: {
-  backgroundColor: "#F7F7FA",
-  borderColor: "#E5E7EB",
-  shadowOpacity: 0.03,
-},
+  levelPathCardLocked: {
+    backgroundColor: "#F7F7FA",
+    borderColor: "#E5E7EB",
+    shadowOpacity: 0.03,
+  },
 
-levelPathIcon: {
-  width: 62,
-  height: 62,
-  borderRadius: 31,
-  alignItems: "center",
-  justifyContent: "center",
-  marginRight: 13,
-  borderWidth: 3,
-  borderColor: COLORS.white,
-},
+  levelPathIcon: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 13,
+    borderWidth: 3,
+    borderColor: COLORS.white,
+  },
 
-levelPathEmoji: {
-  fontSize: 27,
-  fontWeight: "900",
-  color: COLORS.white,
-},
+  levelPathEmoji: {
+    fontSize: 27,
+    fontWeight: "900",
+    color: COLORS.white,
+  },
 
-levelPathInfo: {
-  flex: 1,
-},
+  levelPathInfo: {
+    flex: 1,
+  },
 
-levelPathTopRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  flexWrap: "wrap",
-  marginBottom: 3,
-},
+  levelPathTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginBottom: 3,
+  },
 
-levelPathNumber: {
-  fontSize: 12,
-  color: COLORS.lightText,
-  fontWeight: "900",
-  marginRight: 7,
-  textTransform: "uppercase",
-  letterSpacing: 0.4,
-},
+  levelPathNumber: {
+    fontSize: 12,
+    color: COLORS.lightText,
+    fontWeight: "900",
+    marginRight: 7,
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
 
-levelPathTitle: {
-  fontSize: 20,
-  lineHeight: 25,
-  color: COLORS.text,
-  fontWeight: "900",
-  letterSpacing: -0.3,
-},
+  levelPathTitle: {
+    fontSize: 20,
+    lineHeight: 25,
+    color: COLORS.text,
+    fontWeight: "900",
+    letterSpacing: -0.3,
+  },
 
-levelPathTitleLocked: {
-  color: "#9CA3AF",
-},
+  levelPathTitleLocked: {
+    color: "#9CA3AF",
+  },
 
-levelPathReward: {
-  fontSize: 13,
-  fontWeight: "800",
-  marginTop: 3,
-  marginBottom: 8,
-},
+  levelPathReward: {
+    fontSize: 13,
+    fontWeight: "800",
+    marginTop: 3,
+    marginBottom: 8,
+  },
 
-levelPathProgressTrack: {
-  height: 7,
-  backgroundColor: "#EEF0F4",
-  borderRadius: 999,
-  overflow: "hidden",
-},
+  levelPathProgressTrack: {
+    height: 7,
+    backgroundColor: "#EEF0F4",
+    borderRadius: 999,
+    overflow: "hidden",
+  },
 
-levelPathProgressFill: {
-  height: 7,
-  borderRadius: 999,
-},
+  levelPathProgressFill: {
+    height: 7,
+    borderRadius: 999,
+  },
 
-levelPathProgressText: {
-  fontSize: 11,
-  color: COLORS.muted,
-  fontWeight: "700",
-  marginTop: 5,
-},
+  levelPathProgressText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontWeight: "700",
+    marginTop: 5,
+  },
 
-currentBadge: {
-  paddingHorizontal: 8,
-  paddingVertical: 3,
-  borderRadius: 999,
-},
+  currentBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
 
-currentBadgeText: {
-  fontSize: 10,
-  fontWeight: "900",
-},
+  currentBadgeText: {
+    fontSize: 10,
+    fontWeight: "900",
+  },
 
-doneBadge: {
-  paddingHorizontal: 8,
-  paddingVertical: 3,
-  borderRadius: 999,
-  backgroundColor: "#DCFCE7",
-},
+  doneBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: "#DCFCE7",
+  },
 
-doneBadgeText: {
-  fontSize: 10,
-  fontWeight: "900",
-  color: "#16A34A",
-},
+  doneBadgeText: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#16A34A",
+  },
 
-dottedConnector: {
-  height: 54,
-  alignItems: "center",
-  justifyContent: "space-around",
-  marginVertical: 2,
-},
+  dottedConnector: {
+    height: 54,
+    alignItems: "center",
+    justifyContent: "space-around",
+    marginVertical: 2,
+  },
 
-connectorDot: {
-  width: 7,
-  height: 7,
-  borderRadius: 4,
-},
+  connectorDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
 
-miniLariGuide: {
-  position: "absolute",
-  width: 52,
-  height: 52,
-  top: -34,
-  zIndex: 10,
-},
+  miniLariGuide: {
+    position: "absolute",
+    width: 52,
+    height: 52,
+    top: -34,
+    zIndex: 10,
+  },
 
-miniLariRight: {
-  right: -6,
-},
+  miniLariRight: {
+    right: -6,
+  },
 
-miniLariLeft: {
-  left: -6,
-},
+  miniLariLeft: {
+    left: -6,
+  },
 
+  leaderboardBanner: {
+    backgroundColor: COLORS.white,
+    borderRadius: 22,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: "#E0D4F7",
+    shadowColor: COLORS.purple,
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 5 },
+    elevation: 3,
+  },
+  leaderboardBannerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  leaderboardBannerEmoji: {
+    fontSize: 32,
+    marginRight: 4,
+  },
+  leaderboardBannerTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: COLORS.text,
+  },
+  leaderboardBannerSub: {
+    fontSize: 12,
+    color: COLORS.muted,
+    fontWeight: "600",
+    marginTop: 2,
+  },
+  leaderboardBannerChevron: {
+    fontSize: 24,
+    color: COLORS.purple,
+    fontWeight: "900",
+  },
 });

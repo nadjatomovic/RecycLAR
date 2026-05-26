@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,24 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/HomeScreen.styles";
+import { saveCity, loadCity } from "../utils/cityStorage";
 
 const municipalities = ["Maribor", "Celje", "Ljubljana", "Kranj", "Koper"];
 
 export default function HomeScreen({ navigation }: any) {
   const [selectedCity, setSelectedCity] = useState("Maribor");
   const [modalVisible, setModalVisible] = useState(false);
+
+  // Вчитај зачуван град при отворање
+  useEffect(() => {
+    loadCity().then((city) => setSelectedCity(city));
+  }, []);
+
+  const handleSelectCity = (city: string) => {
+    setSelectedCity(city);
+    saveCity(city);
+    setModalVisible(false);
+  };
 
   const handleStart = () => {
     navigation.navigate("Dashboard", { selectedCity });
@@ -33,15 +45,12 @@ export default function HomeScreen({ navigation }: any) {
             style={styles.mainIcon}
             resizeMode="contain"
           />
-
           <Image
             source={require("../assets/logo.png")}
             style={styles.logoText}
             resizeMode="contain"
           />
-
           <Text style={styles.tagline}>Skeniraj. Loči. Uči se.</Text>
-
           <Text style={styles.description}>
             Pametno recikliranje za domove, šole in občine.
           </Text>
@@ -68,13 +77,11 @@ export default function HomeScreen({ navigation }: any) {
                 resizeMode="contain"
               />
             </View>
-
             <View>
               <Text style={styles.dropdownSmallLabel}>Izbrana občina</Text>
               <Text style={styles.dropdownLabel}>{selectedCity}</Text>
             </View>
           </View>
-
           <Text style={styles.chevron}>⌄</Text>
         </TouchableOpacity>
 
@@ -85,7 +92,6 @@ export default function HomeScreen({ navigation }: any) {
         >
           <Text style={styles.mainButtonIcon}>🌿</Text>
           <Text style={styles.mainButtonText}>Začni</Text>
-
           <View style={styles.arrowCircle}>
             <Text style={styles.arrowText}>›</Text>
           </View>
@@ -115,12 +121,10 @@ export default function HomeScreen({ navigation }: any) {
         >
           <Pressable style={styles.modalContent}>
             <View style={styles.modalHandle} />
-
             <Text style={styles.modalTitle}>Izberi občino</Text>
             <Text style={styles.modalSubtitle}>
               Pravila ločevanja se prilagodijo izbrani občini.
             </Text>
-
             {municipalities.map((city) => (
               <TouchableOpacity
                 key={city}
@@ -129,10 +133,7 @@ export default function HomeScreen({ navigation }: any) {
                   selectedCity === city && styles.cityOptionActive,
                 ]}
                 activeOpacity={0.85}
-                onPress={() => {
-                  setSelectedCity(city);
-                  setModalVisible(false);
-                }}
+                onPress={() => handleSelectCity(city)}
               >
                 <Text
                   style={[
@@ -142,7 +143,6 @@ export default function HomeScreen({ navigation }: any) {
                 >
                   {city}
                 </Text>
-
                 {selectedCity === city && (
                   <Text style={styles.cityCheck}>✓</Text>
                 )}
