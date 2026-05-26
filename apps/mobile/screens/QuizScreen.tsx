@@ -876,180 +876,105 @@ export default function QuizScreen({ navigation }: any) {
             />
           </View>
 
-          <View style={s.levelMap}>
-            {LEVELS.map((levelObj, index) => {
-              const unlocked = isLevelUnlocked(selectedTopic, levelObj.level);
-              const isCurrent = levelObj.level === progress.currentLevel;
-              const isDone = progress.completedLevels.includes(levelObj.level);
-              const isRight = index % 2 !== 0;
+         <View style={s.levelMap}>
+  {[...LEVELS].reverse().map((levelObj, index, arr) => {
+    const unlocked = isLevelUnlocked(selectedTopic, levelObj.level);
+    const isCurrent = levelObj.level === progress.currentLevel;
+    const isDone = progress.completedLevels.includes(levelObj.level);
 
-              const progressPercent = isCurrent
-                ? getLevelProgressPercent(selectedTopic)
-                : isDone
-                  ? 100
-                  : 0;
+    const nodePosition = ZIGZAG[index] ?? { left: 0.5 };
+    const nextNodePosition = ZIGZAG[index + 1] ?? { left: 0.5 };
 
-              return (
-                <View key={levelObj.level} style={s.pathStep}>
-                  <View
-                    style={[s.stepContentRow, isRight && s.stepContentRowRight]}
-                  >
-                    <TouchableOpacity
-                      activeOpacity={0.88}
-                      onPress={() => {
-                        if (!unlocked) {
-                          Alert.alert(
-                            "Zaklenjeno 🔒",
-                            `Najprej zaključi Nivo ${levelObj.level - 1}.`,
-                          );
-                          return;
-                        }
+    const leftPercent = `${nodePosition.left * 100}%`;
+    const rotateDeg =
+      nextNodePosition.left > nodePosition.left ? "28deg" : "-28deg";
 
-                        startQuiz(levelObj.level);
-                      }}
-                      style={[
-                        s.levelPathCard,
-                        isCurrent && {
-                          borderColor: topic.color,
-                          shadowColor: topic.color,
-                        },
-                        isDone && {
-                          backgroundColor: "#F0FDF4",
-                          borderColor: "#BBF7D0",
-                        },
-                        !unlocked && s.levelPathCardLocked,
-                      ]}
-                    >
-                      {isCurrent && (
-                        <Image
-                          source={require("../assets/lari-hello.png")}
-                          style={[
-                            s.miniLariGuide,
-                            isRight ? s.miniLariLeft : s.miniLariRight,
-                          ]}
-                          resizeMode="contain"
-                        />
-                      )}
+    const progressText = isDone
+      ? "Končano"
+      : isCurrent
+        ? `${progress.levelPoints}/${levelObj.pointsToUnlock}t`
+        : unlocked
+          ? `+${levelObj.pointsPerQ}t / vprašanje`
+          : "Zaklenjeno";
 
-                      <View
-                        style={[
-                          s.levelPathIcon,
-                          {
-                            backgroundColor: !unlocked
-                              ? "#E5E7EB"
-                              : isDone
-                                ? "#22C55E"
-                                : topic.color,
-                          },
-                        ]}
-                      >
-                        <Text style={s.levelPathEmoji}>
-                          {!unlocked ? "🔒" : isDone ? "✓" : levelObj.emoji}
-                        </Text>
-                      </View>
+    return (
+      <View key={levelObj.level} style={s.duoStep}>
+        <View
+  style={[
+    s.duoStepInner,
+    {
+      left: leftPercent as any,
+      transform: [{ translateX: -60 }],
+    },
+  ]}
+>
+          <TouchableOpacity
+            activeOpacity={0.88}
+            onPress={() => {
+              if (!unlocked) {
+                Alert.alert(
+                  "Zaklenjeno 🔒",
+                  `Najprej zaključi Nivo ${levelObj.level - 1}.`,
+                );
+                return;
+              }
 
-                      <View style={s.levelPathInfo}>
-                        <View style={s.levelPathTopRow}>
-                          <Text style={s.levelPathNumber}>
-                            Nivo {levelObj.level}
-                          </Text>
+              startQuiz(levelObj.level);
+            }}
+            style={[
+              s.duoNode,
+              isCurrent && [
+                s.duoNodeCurrent,
+                {
+                  borderColor: topic.color,
+                  shadowColor: topic.color,
+                },
+              ],
+              isDone && s.duoNodeDone,
+              !unlocked && s.duoNodeLocked,
+            ]}
+          >
+            <View
+              style={[
+                s.duoNodeInner,
+                {
+                  backgroundColor: !unlocked
+                    ? "#D1D5DB"
+                    : isDone
+                      ? "#22C55E"
+                      : topic.color,
+                },
+              ]}
+            >
+              <Text style={s.duoNodeEmoji}>
+                {!unlocked ? "🔒" : isDone ? "✓" : levelObj.emoji}
+              </Text>
+            </View>
+          </TouchableOpacity>
 
-                          {isCurrent && (
-                            <View
-                              style={[
-                                s.currentBadge,
-                                { backgroundColor: `${topic.color}18` },
-                              ]}
-                            >
-                              <Text
-                                style={[
-                                  s.currentBadgeText,
-                                  { color: topic.color },
-                                ]}
-                              >
-                                Trenutni
-                              </Text>
-                            </View>
-                          )}
+          {isCurrent && (
+            <Image
+              source={require("../assets/lari-hello.png")}
+              style={s.duoLari}
+              resizeMode="contain"
+            />
+          )}
 
-                          {isDone && (
-                            <View style={s.doneBadge}>
-                              <Text style={s.doneBadgeText}>Končano</Text>
-                            </View>
-                          )}
-                        </View>
-
-                        <Text
-                          style={[
-                            s.levelPathTitle,
-                            !unlocked && s.levelPathTitleLocked,
-                          ]}
-                        >
-                          {levelObj.label}
-                        </Text>
-
-                        <Text
-                          style={[
-                            s.levelPathReward,
-                            { color: unlocked ? topic.color : "#9CA3AF" },
-                          ]}
-                        >
-                          {unlocked
-                            ? `+${levelObj.pointsPerQ} točk na vprašanje`
-                            : "Zaklenjeno"}
-                        </Text>
-
-                        <View style={s.levelPathProgressTrack}>
-                          <View
-                            style={[
-                              s.levelPathProgressFill,
-                              {
-                                width: `${progressPercent}%`,
-                                backgroundColor: unlocked
-                                  ? topic.color
-                                  : "#D1D5DB",
-                              },
-                            ]}
-                          />
-                        </View>
-
-                        <Text style={s.levelPathProgressText}>
-                          {isDone
-                            ? "100% zaključeno"
-                            : isCurrent
-                              ? `${progress.levelPoints}/${levelObj.pointsToUnlock} točk`
-                              : unlocked
-                                ? "Odklenjeno"
-                                : `Najprej reši Nivo ${levelObj.level - 1}`}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-
-                  {index !== LEVELS.length - 1 && (
-                    <View style={s.dottedConnector}>
-                      {Array.from({ length: 6 }).map((_, dotIndex) => (
-                        <View
-                          key={dotIndex}
-                          style={[
-                            s.connectorDot,
-                            {
-                              backgroundColor:
-                                progress.completedLevels.includes(
-                                  levelObj.level,
-                                )
-                                  ? topic.color
-                                  : "#D8C8F8",
-                            },
-                          ]}
-                        />
-                      ))}
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-          </View>
+          <Text style={s.duoLevelMini}>NIVO {levelObj.level}</Text>
+          <Text style={s.duoLevelTitle}>{levelObj.label}</Text>
+          <Text
+            style={[
+              s.duoLevelMeta,
+              { color: unlocked ? topic.color : "#9CA3AF" },
+            ]}
+          >
+            {progressText}
+          </Text>
+        </View>
+      </View>
+    );
+  })}
+</View>
         </ScrollView>
 
         <BottomNavBar navigation={navigation} activeRoute="Quiz" />

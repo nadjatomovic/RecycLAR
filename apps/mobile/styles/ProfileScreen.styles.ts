@@ -104,14 +104,25 @@ export const styles = StyleSheet.create({
   },
 
   notificationDot: {
-    position: "absolute",
-    top: 9,
-    right: 9,
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: COLORS.purple,
-  },
+  position: "absolute",
+  top: 6,
+  right: 6,
+  minWidth: 17,
+  height: 17,
+  borderRadius: 9,
+  backgroundColor: COLORS.purple,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingHorizontal: 4,
+  borderWidth: 2,
+  borderColor: COLORS.white,
+},
+
+notificationDotText: {
+  color: COLORS.white,
+  fontSize: 9,
+  fontWeight: "900",
+},
 
   screenTitle: {
     fontSize: isSmallPhone ? 36 : 40,
@@ -122,120 +133,100 @@ export const styles = StyleSheet.create({
     letterSpacing: -0.9,
   },
 
-  profileCard: {
-    borderRadius: 30,
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 18,
+ profileCard: {
+  borderRadius: 30,
+  backgroundColor: COLORS.white,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  padding: isSmallPhone ? 14 : 16,
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 18,
 
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
-  },
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.08,
+  shadowRadius: 18,
+  shadowOffset: { width: 0, height: 8 },
+  elevation: 5,
+},
 
-  avatarWrap: {
-    width: isSmallPhone ? 96 : 108,
-    height: isSmallPhone ? 96 : 108,
-    borderRadius: isSmallPhone ? 48 : 54,
-    backgroundColor: COLORS.purpleSoft,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 16,
-    position: "relative",
-    overflow: "visible",
-  },
+avatarWrap: {
+  width: isSmallPhone ? 88 : 96,
+  height: isSmallPhone ? 88 : 96,
+  borderRadius: isSmallPhone ? 44 : 48,
+  backgroundColor: COLORS.purpleSoft,
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: 13,
+  position: "relative",
+  overflow: "visible",
+},
 
-  avatar: {
-    width: isSmallPhone ? 86 : 98,
-    height: isSmallPhone ? 86 : 98,
-  },
+avatar: {
+  width: isSmallPhone ? 78 : 86,
+  height: isSmallPhone ? 78 : 86,
+},
 
-  cameraBadge: {
-    position: "absolute",
-    right: -2,
-    bottom: 4,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: COLORS.purple,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
-    borderColor: COLORS.white,
-  },
+profileInfo: {
+  flex: 1,
+  minWidth: 0,
+},
 
-  cameraBadgeText: {
-    color: COLORS.white,
-    fontSize: 17,
-    fontWeight: "900",
-  },
+nameRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 14,
+},
 
-  profileInfo: {
-    flex: 1,
-  },
+name: {
+  flex: 1,
+  fontSize: isSmallPhone ? 25 : 28,
+  fontWeight: "900",
+  color: COLORS.text,
+  marginRight: 8,
+  letterSpacing: -0.5,
+},
 
-  nameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 18,
-  },
+profileMetaRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  width: "100%",
+},
 
-  name: {
-    flex: 1,
-    fontSize: isSmallPhone ? 26 : 30,
-    fontWeight: "900",
-    color: COLORS.text,
-    marginRight: 8,
-    letterSpacing: -0.5,
-  },
+metaBlock: {
+  flexDirection: "row",
+  alignItems: "center",
+  flex: 1,
+  minWidth: 0,
+},
 
-  editIcon: {
-    fontSize: 24,
-    color: COLORS.purple,
-    fontWeight: "900",
-  },
+metaEmoji: {
+  fontSize: 17,
+  marginRight: 5,
+},
 
-  profileMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
+metaLabel: {
+  fontSize: 11,
+  color: COLORS.muted,
+  marginBottom: 2,
+  fontWeight: "700",
+},
 
-  metaBlock: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
+metaValue: {
+  fontSize: isSmallPhone ? 13 : 14,
+  lineHeight: isSmallPhone ? 17 : 18,
+  color: COLORS.purple,
+  fontWeight: "900",
+  flexShrink: 1,
+},
 
-  metaEmoji: {
-    fontSize: 18,
-    marginRight: 6,
-  },
+metaDivider: {
+  width: 1,
+  height: 38,
+  backgroundColor: COLORS.border,
+  marginHorizontal: 7,
+},
 
-  metaLabel: {
-    fontSize: 12,
-    color: COLORS.muted,
-    marginBottom: 2,
-    fontWeight: "600",
-  },
-
-  metaValue: {
-    fontSize: 15,
-    color: COLORS.purple,
-    fontWeight: "900",
-  },
-
-  metaDivider: {
-    width: 1,
-    height: 42,
-    backgroundColor: COLORS.border,
-    marginHorizontal: 9,
-  },
 
   teacherMetaRow: {
     flexDirection: "row",
@@ -578,21 +569,23 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
 
-  avatarOptionsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 18,
-  },
+ avatarOptionsRow: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+  rowGap: 12,
+  marginBottom: 18,
+},
 
   avatarOption: {
-    flex: 1,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: "#F8F8FB",
-    alignItems: "center",
-    paddingVertical: 16,
-  },
+  width: "48%",
+  borderRadius: 22,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  backgroundColor: "#F8F8FB",
+  alignItems: "center",
+  paddingVertical: 16,
+},
 
   avatarOptionActive: {
     borderColor: COLORS.purple,
@@ -681,4 +674,120 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "900",
   },
+  cameraBadge: {
+  position: "absolute",
+  right: -2,
+  bottom: 4,
+  width: 38,
+  height: 38,
+  borderRadius: 19,
+  backgroundColor: COLORS.purple,
+  alignItems: "center",
+  justifyContent: "center",
+  borderWidth: 3,
+  borderColor: COLORS.white,
+
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.12,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 4,
+},
+
+cameraBadgeText: {
+  color: COLORS.white,
+  fontSize: 17,
+  fontWeight: "900",
+},
+
+editIcon: {
+  fontSize: 24,
+  color: COLORS.purple,
+  fontWeight: "900",
+},
+
+notificationsList: {
+  marginBottom: 18,
+},
+
+notificationItem: {
+  flexDirection: "row",
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  backgroundColor: "#F8F8FB",
+  padding: 12,
+  marginBottom: 10,
+},
+
+notificationItemUnread: {
+  backgroundColor: "#F3EEFF",
+  borderColor: "#D8C8F8",
+},
+
+notificationItemIcon: {
+  width: 42,
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: COLORS.white,
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: 12,
+},
+
+notificationItemEmoji: {
+  fontSize: 20,
+},
+
+notificationItemContent: {
+  flex: 1,
+},
+
+notificationItemTitle: {
+  fontSize: 14,
+  fontWeight: "900",
+  color: COLORS.text,
+  marginBottom: 3,
+},
+
+notificationItemMessage: {
+  fontSize: 12,
+  lineHeight: 17,
+  color: COLORS.muted,
+  fontWeight: "600",
+  marginBottom: 5,
+},
+
+notificationItemTime: {
+  fontSize: 11,
+  color: COLORS.purple,
+  fontWeight: "800",
+},
+
+emptyNotificationsBox: {
+  alignItems: "center",
+  paddingVertical: 22,
+  marginBottom: 12,
+},
+
+emptyNotificationsIcon: {
+  fontSize: 34,
+  marginBottom: 8,
+},
+
+emptyNotificationsTitle: {
+  fontSize: 17,
+  fontWeight: "900",
+  color: COLORS.text,
+  marginBottom: 4,
+},
+
+emptyNotificationsText: {
+  fontSize: 13,
+  lineHeight: 19,
+  color: COLORS.muted,
+  textAlign: "center",
+  fontWeight: "600",
+}
+
 });
