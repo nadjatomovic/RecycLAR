@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { styles } from "../styles/DashboardScreen.styles";
 import BottomNavBar from "../components/BottomNavBar";
 import { getBinAsset } from "../utils/binAssets";
+import { saveCity, loadCity } from "../utils/cityStorage";
 
 const binsByMunicipality: Record<string, any[]> = {
   Maribor: [
@@ -71,8 +73,25 @@ const quickExamples = [
 ];
 
 const DashboardScreen = ({ navigation, route }: any) => {
-  const selectedCity = route?.params?.selectedCity ?? "Maribor";
-  const bins = binsByMunicipality[selectedCity] ?? binsByMunicipality.Maribor;
+  const [selectedCity, setSelectedCity] = useState<string>("Maribor");
+
+  // Секогаш кога се враќаме на Dashboard — земи го зачуваниот град
+  useFocusEffect(
+    useCallback(() => {
+      // Ако доаѓа нов params од Home — зачувај го и прикажи го
+      const cityFromParams = route?.params?.selectedCity;
+      if (cityFromParams) {
+        setSelectedCity(cityFromParams);
+        saveCity(cityFromParams);
+      } else {
+        // Инаку вчитај го од AsyncStorage
+        loadCity().then((city) => setSelectedCity(city));
+      }
+    }, [route?.params?.selectedCity]),
+  );
+
+  const bins =
+    binsByMunicipality[selectedCity] ?? binsByMunicipality["Maribor"];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -80,18 +99,17 @@ const DashboardScreen = ({ navigation, route }: any) => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-       <View style={styles.topBrandRow}>
-  <Image
-    source={require("../assets/icon-logo.png")}
-    style={styles.topBrandIcon}
-    resizeMode="contain"
-  />
-
-  <Text style={styles.topBrandText}>
-    <Text style={styles.topBrandGreen}>Recyc</Text>
-    <Text style={styles.topBrandPurple}>LAR</Text>
-  </Text>
-</View>
+        <View style={styles.topBrandRow}>
+          <Image
+            source={require("../assets/icon-logo.png")}
+            style={styles.topBrandIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.topBrandText}>
+            <Text style={styles.topBrandGreen}>Recyc</Text>
+            <Text style={styles.topBrandPurple}>LAR</Text>
+          </Text>
+        </View>
 
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>Pozdravljeni!</Text>
@@ -112,7 +130,6 @@ const DashboardScreen = ({ navigation, route }: any) => {
               resizeMode="contain"
             />
           </View>
-
           <View style={styles.locationTextWrap}>
             <Text style={styles.locationLabel}>Izbrana občina</Text>
             <Text style={styles.locationName}>{selectedCity}</Text>
@@ -127,7 +144,6 @@ const DashboardScreen = ({ navigation, route }: any) => {
               {"\n"}takoj preveri, kam spada!
             </Text>
           </View>
-
           <Image
             source={require("../assets/lari-hello.png")}
             style={styles.mascotImage}
@@ -145,9 +161,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
             style={styles.scanCameraIcon}
             resizeMode="contain"
           />
-
           <Text style={styles.scanButtonText}>Začni skeniranje</Text>
-
           <View style={styles.scanArrowCircle}>
             <Text style={styles.scanArrow}>›</Text>
           </View>
@@ -202,14 +216,11 @@ const DashboardScreen = ({ navigation, route }: any) => {
                 style={styles.exampleWasteImg}
                 resizeMode="contain"
               />
-
               <View style={styles.exampleMiddle}>
                 <Text style={styles.exampleTitle}>Hiter primer</Text>
                 <Text style={styles.exampleName}>{example.title}</Text>
               </View>
-
               <Text style={styles.exampleArrow}>→</Text>
-
               <Image
                 source={getBinAsset(example.image)}
                 style={styles.exampleBinImg}

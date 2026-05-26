@@ -213,7 +213,7 @@ export default function QuizScreen({ navigation }: any) {
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(
-    null
+    null,
   );
   const [isAnswered, setIsAnswered] = useState(false);
   const [score, setScore] = useState(0);
@@ -265,12 +265,15 @@ export default function QuizScreen({ navigation }: any) {
   const getLevelProgressPercent = (topicId: string): number => {
     const progress = getProgress(topicId);
     const levelObj = LEVELS.find(
-      (levelItem) => levelItem.level === progress.currentLevel
+      (levelItem) => levelItem.level === progress.currentLevel,
     );
 
     if (!levelObj) return 0;
 
-    return Math.min(100, (progress.levelPoints / levelObj.pointsToUnlock) * 100);
+    return Math.min(
+      100,
+      (progress.levelPoints / levelObj.pointsToUnlock) * 100,
+    );
   };
 
   const getQuestionLevel = (topicId: string, level: number): number => {
@@ -299,7 +302,7 @@ export default function QuizScreen({ navigation }: any) {
   const getFallbackQuestions = (
     topic: string,
     level: number,
-    points: number
+    points: number,
   ): Question[] => [
     {
       id: "f1",
@@ -370,8 +373,8 @@ export default function QuizScreen({ navigation }: any) {
         query(
           collection(db, "quizQuestions"),
           where("topic", "==", selectedTopic),
-          where("level", "==", questionLevel)
-        )
+          where("level", "==", questionLevel),
+        ),
       );
 
       let list: Question[] = [];
@@ -401,8 +404,8 @@ export default function QuizScreen({ navigation }: any) {
           query(
             collection(db, "quizQuestions"),
             where("topic", "==", selectedTopic),
-            where("difficulty", "==", difficultyMap[questionLevel] ?? "lahko")
-          )
+            where("difficulty", "==", difficultyMap[questionLevel] ?? "lahko"),
+          ),
         );
 
         fallbackSnap.forEach((document) => {
@@ -417,7 +420,7 @@ export default function QuizScreen({ navigation }: any) {
         list = getFallbackQuestions(
           selectedTopic,
           questionLevel,
-          levelObj.pointsPerQ
+          levelObj.pointsPerQ,
         );
       }
 
@@ -455,7 +458,9 @@ export default function QuizScreen({ navigation }: any) {
 
     if (correct) {
       setScore((previousScore) => previousScore + 1);
-      setGainedPoints((previousPoints) => previousPoints + currentQuestion.points);
+      setGainedPoints(
+        (previousPoints) => previousPoints + currentQuestion.points,
+      );
 
       Animated.sequence([
         Animated.spring(bounceAnim, {
@@ -514,7 +519,7 @@ export default function QuizScreen({ navigation }: any) {
 
       const newLevelPoints = Math.min(
         progress.levelPoints + gainedPoints,
-        levelObj.pointsToUnlock
+        levelObj.pointsToUnlock,
       );
 
       const justCompleted =
@@ -592,12 +597,12 @@ export default function QuizScreen({ navigation }: any) {
                   setGenerateProgress(message);
                   setGenerateCurrent(current);
                   setGenerateTotal(total);
-                }
+                },
               );
 
               Alert.alert(
                 "Končano! ✅",
-                `Uspešno: ${result.success}\nNeuspešno: ${result.failed}`
+                `Uspešno: ${result.success}\nNeuspešno: ${result.failed}`,
               );
             } catch (e) {
               console.log("Generate questions error:", e);
@@ -608,7 +613,7 @@ export default function QuizScreen({ navigation }: any) {
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -686,9 +691,7 @@ export default function QuizScreen({ navigation }: any) {
                 <Text
                   style={[
                     s.teacherTitle,
-                    generating
-                      ? s.teacherTitleDisabled
-                      : s.teacherTitleActive,
+                    generating ? s.teacherTitleDisabled : s.teacherTitleActive,
                   ]}
                 >
                   {generating ? "Generiram..." : "Generiraj AI vprašanja"}
@@ -709,10 +712,28 @@ export default function QuizScreen({ navigation }: any) {
 
           <Text style={s.sectionTitle}>Izberi temo:</Text>
 
+          {/* ── Leaderboard banner ─────────────────────────────────── */}
+          <TouchableOpacity
+            style={s.leaderboardBanner}
+            onPress={() => navigation.navigate("Leaderboard")}
+            activeOpacity={0.88}
+          >
+            <View style={s.leaderboardBannerLeft}>
+              <Text style={s.leaderboardBannerEmoji}>🏆</Text>
+              <View>
+                <Text style={s.leaderboardBannerTitle}>Lestvica šol</Text>
+                <Text style={s.leaderboardBannerSub}>
+                  Poglej kako se kotirate
+                </Text>
+              </View>
+            </View>
+            <Text style={s.leaderboardBannerChevron}>›</Text>
+          </TouchableOpacity>
+
           {TOPICS.map((topic) => {
             const progress = getProgress(topic.id);
             const levelObj = LEVELS.find(
-              (item) => item.level === progress.currentLevel
+              (item) => item.level === progress.currentLevel,
             )!;
             const progressPercent = getLevelProgressPercent(topic.id);
 
@@ -750,26 +771,16 @@ export default function QuizScreen({ navigation }: any) {
                     <View style={{ flex: 1 }}>
                       <Text style={s.topicLabel}>{topic.label}</Text>
 
-                      <Text
-                        style={[s.topicLevel, { color: topic.color }]}
-                      >
+                      <Text style={[s.topicLevel, { color: topic.color }]}>
                         {levelObj.emoji} {levelObj.label} · Nivo{" "}
                         {progress.currentLevel}/10
                       </Text>
                     </View>
 
                     <View
-                      style={[
-                        s.topicPointsPill,
-                        { backgroundColor: topic.bg },
-                      ]}
+                      style={[s.topicPointsPill, { backgroundColor: topic.bg }]}
                     >
-                      <Text
-                        style={[
-                          s.topicPointsText,
-                          { color: topic.dark },
-                        ]}
-                      >
+                      <Text style={[s.topicPointsText, { color: topic.dark }]}>
                         {progress.levelPoints}/{levelObj.pointsToUnlock}t
                       </Text>
                     </View>
@@ -809,242 +820,242 @@ export default function QuizScreen({ navigation }: any) {
   }
 
   if (currentScreen === "path") {
-  const topic = TOPICS.find((item) => item.id === selectedTopic)!;
-  const progress = getProgress(selectedTopic);
-  const currentLevelObj = LEVELS.find(
-    (item) => item.level === progress.currentLevel
-  );
+    const topic = TOPICS.find((item) => item.id === selectedTopic)!;
+    const progress = getProgress(selectedTopic);
+    const currentLevelObj = LEVELS.find(
+      (item) => item.level === progress.currentLevel,
+    );
 
-  return (
-    <SafeAreaView style={s.container}>
-      <ScrollView
-        contentContainerStyle={s.pathContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={s.pathHeaderCard}>
-          <TouchableOpacity
-            onPress={() => setCurrentScreen("topics")}
-            style={s.pathBack}
-            activeOpacity={0.85}
-          >
-            <Text style={s.pathBackText}>‹</Text>
-          </TouchableOpacity>
+    return (
+      <SafeAreaView style={s.container}>
+        <ScrollView
+          contentContainerStyle={s.pathContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={s.pathHeaderCard}>
+            <TouchableOpacity
+              onPress={() => setCurrentScreen("topics")}
+              style={s.pathBack}
+              activeOpacity={0.85}
+            >
+              <Text style={s.pathBackText}>‹</Text>
+            </TouchableOpacity>
 
-          <View style={s.pathHeaderText}>
-            <Text style={s.pathTitle}>{topic.label}</Text>
-            <Text style={s.pathSubtitle}>
-              {currentLevelObj?.emoji} Trenutni nivo {progress.currentLevel}/10
-            </Text>
+            <View style={s.pathHeaderText}>
+              <Text style={s.pathTitle}>{topic.label}</Text>
+              <Text style={s.pathSubtitle}>
+                {currentLevelObj?.emoji} Trenutni nivo {progress.currentLevel}
+                /10
+              </Text>
+            </View>
+
+            <View style={s.pathPointsPill}>
+              <Text style={s.pathPointsText}>
+                {progress.levelPoints}/{currentLevelObj?.pointsToUnlock}t
+              </Text>
+            </View>
           </View>
 
-          <View style={s.pathPointsPill}>
-            <Text style={s.pathPointsText}>
-              {progress.levelPoints}/{currentLevelObj?.pointsToUnlock}t
-            </Text>
+          <View style={[s.pathHeroCard, { borderColor: `${topic.color}33` }]}>
+            <View style={s.pathHeroTextWrap}>
+              <Text style={[s.pathHeroOverline, { color: topic.color }]}>
+                EKO POT KVIZA
+              </Text>
+
+              <Text style={s.pathHeroTitle}>Napreduj od nivoja do nivoja</Text>
+
+              <Text style={s.pathHeroSubtitle}>
+                Rešuj kvize, zbiraj točke in odkleni nove izzive.
+              </Text>
+            </View>
+
+            <Image
+              source={require("../assets/lari-hello.png")}
+              style={s.pathLari}
+              resizeMode="contain"
+            />
           </View>
-        </View>
 
-        <View style={[s.pathHeroCard, { borderColor: `${topic.color}33` }]}>
-          <View style={s.pathHeroTextWrap}>
-            <Text style={[s.pathHeroOverline, { color: topic.color }]}>
-              EKO POT KVIZA
-            </Text>
+          <View style={s.levelMap}>
+            {LEVELS.map((levelObj, index) => {
+              const unlocked = isLevelUnlocked(selectedTopic, levelObj.level);
+              const isCurrent = levelObj.level === progress.currentLevel;
+              const isDone = progress.completedLevels.includes(levelObj.level);
+              const isRight = index % 2 !== 0;
 
-            <Text style={s.pathHeroTitle}>Napreduj od nivoja do nivoja</Text>
+              const progressPercent = isCurrent
+                ? getLevelProgressPercent(selectedTopic)
+                : isDone
+                  ? 100
+                  : 0;
 
-            <Text style={s.pathHeroSubtitle}>
-              Rešuj kvize, zbiraj točke in odkleni nove izzive.
-            </Text>
-          </View>
-
-          <Image
-            source={require("../assets/lari-hello.png")}
-            style={s.pathLari}
-            resizeMode="contain"
-          />
-        </View>
-
-        <View style={s.levelMap}>
-          {LEVELS.map((levelObj, index) => {
-            const unlocked = isLevelUnlocked(selectedTopic, levelObj.level);
-            const isCurrent = levelObj.level === progress.currentLevel;
-            const isDone = progress.completedLevels.includes(levelObj.level);
-            const isRight = index % 2 !== 0;
-
-            const progressPercent = isCurrent
-              ? getLevelProgressPercent(selectedTopic)
-              : isDone
-              ? 100
-              : 0;
-
-            return (
-              <View key={levelObj.level} style={s.pathStep}>
-                <View
-                  style={[
-                    s.stepContentRow,
-                    isRight && s.stepContentRowRight,
-                  ]}
-                >
-                  <TouchableOpacity
-                    activeOpacity={0.88}
-                    onPress={() => {
-                      if (!unlocked) {
-                        Alert.alert(
-                          "Zaklenjeno 🔒",
-                          `Najprej zaključi Nivo ${levelObj.level - 1}.`
-                        );
-                        return;
-                      }
-
-                      startQuiz(levelObj.level);
-                    }}
-                    style={[
-                      s.levelPathCard,
-                      isCurrent && {
-                        borderColor: topic.color,
-                        shadowColor: topic.color,
-                      },
-                      isDone && {
-                        backgroundColor: "#F0FDF4",
-                        borderColor: "#BBF7D0",
-                      },
-                      !unlocked && s.levelPathCardLocked,
-                    ]}
+              return (
+                <View key={levelObj.level} style={s.pathStep}>
+                  <View
+                    style={[s.stepContentRow, isRight && s.stepContentRowRight]}
                   >
-                    {isCurrent && (
-                      <Image
-                        source={require("../assets/lari-hello.png")}
-                        style={[
-                          s.miniLariGuide,
-                          isRight ? s.miniLariLeft : s.miniLariRight,
-                        ]}
-                        resizeMode="contain"
-                      />
-                    )}
+                    <TouchableOpacity
+                      activeOpacity={0.88}
+                      onPress={() => {
+                        if (!unlocked) {
+                          Alert.alert(
+                            "Zaklenjeno 🔒",
+                            `Najprej zaključi Nivo ${levelObj.level - 1}.`,
+                          );
+                          return;
+                        }
 
-                    <View
+                        startQuiz(levelObj.level);
+                      }}
                       style={[
-                        s.levelPathIcon,
-                        {
-                          backgroundColor: !unlocked
-                            ? "#E5E7EB"
-                            : isDone
-                            ? "#22C55E"
-                            : topic.color,
+                        s.levelPathCard,
+                        isCurrent && {
+                          borderColor: topic.color,
+                          shadowColor: topic.color,
                         },
+                        isDone && {
+                          backgroundColor: "#F0FDF4",
+                          borderColor: "#BBF7D0",
+                        },
+                        !unlocked && s.levelPathCardLocked,
                       ]}
                     >
-                      <Text style={s.levelPathEmoji}>
-                        {!unlocked ? "🔒" : isDone ? "✓" : levelObj.emoji}
-                      </Text>
-                    </View>
+                      {isCurrent && (
+                        <Image
+                          source={require("../assets/lari-hello.png")}
+                          style={[
+                            s.miniLariGuide,
+                            isRight ? s.miniLariLeft : s.miniLariRight,
+                          ]}
+                          resizeMode="contain"
+                        />
+                      )}
 
-                    <View style={s.levelPathInfo}>
-                      <View style={s.levelPathTopRow}>
-                        <Text style={s.levelPathNumber}>
-                          Nivo {levelObj.level}
+                      <View
+                        style={[
+                          s.levelPathIcon,
+                          {
+                            backgroundColor: !unlocked
+                              ? "#E5E7EB"
+                              : isDone
+                                ? "#22C55E"
+                                : topic.color,
+                          },
+                        ]}
+                      >
+                        <Text style={s.levelPathEmoji}>
+                          {!unlocked ? "🔒" : isDone ? "✓" : levelObj.emoji}
                         </Text>
-
-                        {isCurrent && (
-                          <View
-                            style={[
-                              s.currentBadge,
-                              { backgroundColor: `${topic.color}18` },
-                            ]}
-                          >
-                            <Text
-                              style={[
-                                s.currentBadgeText,
-                                { color: topic.color },
-                              ]}
-                            >
-                              Trenutni
-                            </Text>
-                          </View>
-                        )}
-
-                        {isDone && (
-                          <View style={s.doneBadge}>
-                            <Text style={s.doneBadgeText}>Končano</Text>
-                          </View>
-                        )}
                       </View>
 
-                      <Text
-                        style={[
-                          s.levelPathTitle,
-                          !unlocked && s.levelPathTitleLocked,
-                        ]}
-                      >
-                        {levelObj.label}
-                      </Text>
+                      <View style={s.levelPathInfo}>
+                        <View style={s.levelPathTopRow}>
+                          <Text style={s.levelPathNumber}>
+                            Nivo {levelObj.level}
+                          </Text>
 
-                      <Text
-                        style={[
-                          s.levelPathReward,
-                          { color: unlocked ? topic.color : "#9CA3AF" },
-                        ]}
-                      >
-                        {unlocked
-                          ? `+${levelObj.pointsPerQ} točk na vprašanje`
-                          : "Zaklenjeno"}
-                      </Text>
+                          {isCurrent && (
+                            <View
+                              style={[
+                                s.currentBadge,
+                                { backgroundColor: `${topic.color}18` },
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  s.currentBadgeText,
+                                  { color: topic.color },
+                                ]}
+                              >
+                                Trenutni
+                              </Text>
+                            </View>
+                          )}
 
-                      <View style={s.levelPathProgressTrack}>
-                        <View
+                          {isDone && (
+                            <View style={s.doneBadge}>
+                              <Text style={s.doneBadgeText}>Končano</Text>
+                            </View>
+                          )}
+                        </View>
+
+                        <Text
                           style={[
-                            s.levelPathProgressFill,
+                            s.levelPathTitle,
+                            !unlocked && s.levelPathTitleLocked,
+                          ]}
+                        >
+                          {levelObj.label}
+                        </Text>
+
+                        <Text
+                          style={[
+                            s.levelPathReward,
+                            { color: unlocked ? topic.color : "#9CA3AF" },
+                          ]}
+                        >
+                          {unlocked
+                            ? `+${levelObj.pointsPerQ} točk na vprašanje`
+                            : "Zaklenjeno"}
+                        </Text>
+
+                        <View style={s.levelPathProgressTrack}>
+                          <View
+                            style={[
+                              s.levelPathProgressFill,
+                              {
+                                width: `${progressPercent}%`,
+                                backgroundColor: unlocked
+                                  ? topic.color
+                                  : "#D1D5DB",
+                              },
+                            ]}
+                          />
+                        </View>
+
+                        <Text style={s.levelPathProgressText}>
+                          {isDone
+                            ? "100% zaključeno"
+                            : isCurrent
+                              ? `${progress.levelPoints}/${levelObj.pointsToUnlock} točk`
+                              : unlocked
+                                ? "Odklenjeno"
+                                : `Najprej reši Nivo ${levelObj.level - 1}`}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+
+                  {index !== LEVELS.length - 1 && (
+                    <View style={s.dottedConnector}>
+                      {Array.from({ length: 6 }).map((_, dotIndex) => (
+                        <View
+                          key={dotIndex}
+                          style={[
+                            s.connectorDot,
                             {
-                              width: `${progressPercent}%`,
-                              backgroundColor: unlocked
-                                ? topic.color
-                                : "#D1D5DB",
+                              backgroundColor:
+                                progress.completedLevels.includes(
+                                  levelObj.level,
+                                )
+                                  ? topic.color
+                                  : "#D8C8F8",
                             },
                           ]}
                         />
-                      </View>
-
-                      <Text style={s.levelPathProgressText}>
-                        {isDone
-                          ? "100% zaključeno"
-                          : isCurrent
-                          ? `${progress.levelPoints}/${levelObj.pointsToUnlock} točk`
-                          : unlocked
-                          ? "Odklenjeno"
-                          : `Najprej reši Nivo ${levelObj.level - 1}`}
-                      </Text>
+                      ))}
                     </View>
-                  </TouchableOpacity>
+                  )}
                 </View>
+              );
+            })}
+          </View>
+        </ScrollView>
 
-                {index !== LEVELS.length - 1 && (
-                  <View style={s.dottedConnector}>
-                    {Array.from({ length: 6 }).map((_, dotIndex) => (
-                      <View
-                        key={dotIndex}
-                        style={[
-                          s.connectorDot,
-                          {
-                            backgroundColor:
-                              progress.completedLevels.includes(levelObj.level)
-                                ? topic.color
-                                : "#D8C8F8",
-                          },
-                        ]}
-                      />
-                    ))}
-                  </View>
-                )}
-              </View>
-            );
-          })}
-        </View>
-      </ScrollView>
-
-      <BottomNavBar navigation={navigation} activeRoute="Quiz" />
-    </SafeAreaView>
-  );
-}
+        <BottomNavBar navigation={navigation} activeRoute="Quiz" />
+      </SafeAreaView>
+    );
+  }
 
   if (currentScreen === "quiz") {
     const topic = TOPICS.find((item) => item.id === selectedTopic)!;
@@ -1093,8 +1104,8 @@ export default function QuizScreen({ navigation }: any) {
         >
           <View style={s.quizMetaRow}>
             <Text style={[s.quizMetaText, { color: topic.color }]}>
-              {topic.emoji} Nivo {selectedLevel} ·{" "}
-              {currentQuestionIndex + 1}/{questions.length}
+              {topic.emoji} Nivo {selectedLevel} · {currentQuestionIndex + 1}/
+              {questions.length}
             </Text>
 
             {isReview && (
@@ -1242,8 +1253,7 @@ export default function QuizScreen({ navigation }: any) {
                 style={[
                   s.actionButtonText,
                   {
-                    color:
-                      selectedAnswerIndex !== null ? "#FFFFFF" : "#9CA3AF",
+                    color: selectedAnswerIndex !== null ? "#FFFFFF" : "#9CA3AF",
                   },
                 ]}
               >
@@ -1283,7 +1293,9 @@ export default function QuizScreen({ navigation }: any) {
           <View style={s.unlockBanner}>
             <Text style={s.unlockEmoji}>🎉</Text>
 
-            <Text style={s.unlockTitle}>Nivo {selectedLevel + 1} odklenjen!</Text>
+            <Text style={s.unlockTitle}>
+              Nivo {selectedLevel + 1} odklenjen!
+            </Text>
 
             <Text style={s.unlockSubtitle}>
               {LEVELS.find((item) => item.level === selectedLevel + 1)?.emoji}{" "}
@@ -1296,16 +1308,16 @@ export default function QuizScreen({ navigation }: any) {
           {score === questions.length
             ? "🏆"
             : score >= questions.length * 0.6
-            ? "⭐"
-            : "💪"}
+              ? "⭐"
+              : "💪"}
         </Text>
 
         <Text style={s.resultTitle}>
           {score === questions.length
             ? "Popolno!"
             : score >= questions.length * 0.6
-            ? "Odlično!"
-            : "Poskusi znova!"}
+              ? "Odlično!"
+              : "Poskusi znova!"}
         </Text>
 
         <Text style={s.resultSubtitle}>

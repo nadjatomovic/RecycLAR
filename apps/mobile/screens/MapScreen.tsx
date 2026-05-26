@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,11 +10,13 @@ import {
   Keyboard,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { WebView } from "react-native-webview";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { styles } from "../styles/MapScreen.styles";
 import BottomNavBar from "../components/BottomNavBar";
+import { loadCity } from "../utils/cityStorage";
 
 const { width, height } = Dimensions.get("window");
 
@@ -28,15 +30,29 @@ const CITY_COORDINATES: Record<string, any> = {
 
 const FILTERS = [
   { label: "Vse", type: "all", color: "#6B35C9" },
-  { label: "EKO otok", type: "eco_island", color: "#35A936" }, 
+  { label: "EKO otok", type: "eco_island", color: "#35A936" },
   { label: "Zbirni center", type: "collection_center", color: "#F59E0B" },
   { label: "BIO", type: "bio_bin", color: "#8A5A32" },
   { label: "Embalaža", type: "packaging_bin", color: "#F2B400" },
 ];
 
 export default function MapScreen({ route, navigation }: any) {
-  const selectedMunicipality = route.params?.municipality || "Celje";
+  // ── Секогаш земи го градот од AsyncStorage, params се само backup ─────────
+  const [selectedMunicipality, setSelectedMunicipality] =
+    useState<string>("Maribor");
+
+  useFocusEffect(
+    useCallback(() => {
+      // AsyncStorage е единствен извор на вистина
+      loadCity().then((city) => {
+        setSelectedMunicipality(city);
+      });
+    }, []),
+  );
+
   const municipalityIdLower = selectedMunicipality.toLowerCase();
+  const currentCoords =
+    CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES.Maribor;
 
   const webViewRef = useRef<WebView | null>(null);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -50,15 +66,15 @@ export default function MapScreen({ route, navigation }: any) {
   const [selectedLocation, setSelectedLocation] = useState<any | null>(null);
   const [isMapReady, setIsMapReady] = useState(false);
 
-  const currentCoords = CITY_COORDINATES[selectedMunicipality] || CITY_COORDINATES.Celje;
-
-  // 1. Читање на постоечките податоци од Firebase Firestore
   useEffect(() => {
     async function fetchLocations() {
       setLoading(true);
       try {
         const colRef = collection(db, "recyclingLocations");
-        const locationsQuery = query(colRef, where("municipalityId", "==", municipalityIdLower));
+        const locationsQuery = query(
+          colRef,
+          where("municipalityId", "==", municipalityIdLower),
+        );
         const snapshot = await getDocs(locationsQuery);
 
         const fetched: any[] = [];
@@ -80,6 +96,7 @@ export default function MapScreen({ route, navigation }: any) {
 
         setLocations(fetched);
         if (fetched.length > 0) setSelectedLocation(fetched[0]);
+        else setSelectedLocation(null);
       } catch (error) {
         console.log("Firebase Error:", error);
       } finally {
@@ -90,19 +107,21 @@ export default function MapScreen({ route, navigation }: any) {
   }, [selectedMunicipality]);
 
   const filteredLocations = locations.filter((loc) => {
-    const matchesSearch = loc.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          loc.address.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      loc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      loc.address.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = activeFilter === "all" || loc.type === activeFilter;
     return matchesSearch && matchesFilter;
   });
 
-  // Функција која сигурно ги пренесува локациите од базата во мапата
   const sendMarkersToMap = () => {
     if (webViewRef.current && isMapReady) {
-      webViewRef.current.postMessage(JSON.stringify({
-        center: currentCoords,
-        markers: filteredLocations,
-      }));
+      webViewRef.current.postMessage(
+        JSON.stringify({
+          center: currentCoords,
+          markers: filteredLocations,
+        }),
+      );
     }
   };
 
@@ -120,10 +139,11 @@ export default function MapScreen({ route, navigation }: any) {
     try {
       setSearchingAddress(true);
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        `${text}, ${selectedMunicipality}, Slovenia`
+        `${text}, ${selectedMunicipality}, Slovenia`,
       )}&limit=4`;
-
-      const response = await fetch(url, { headers: { "User-Agent": "RecycLAR-Mobile-App" } });
+      const response = await fetch(url, {
+        headers: { "User-Agent": "RecycLAR-Mobile-App" },
+      });
       const data = await response.json();
       setAddressResults(data);
     } catch (err) {
@@ -140,17 +160,22 @@ export default function MapScreen({ route, navigation }: any) {
       setAddressResults([]);
       return;
     }
-    searchTimeoutRef.current = setTimeout(() => searchStreetsOnInternet(text), 600);
+    searchTimeoutRef.current = setTimeout(
+      () => searchStreetsOnInternet(text),
+      600,
+    );
   };
 
   const handleSelectStreet = (item: any) => {
     const lat = parseFloat(item.lat);
     const lon = parseFloat(item.lon);
     if (webViewRef.current) {
-      webViewRef.current.postMessage(JSON.stringify({
-        center: { lat, lng: lon, zoom: 16 },
-        markers: filteredLocations,
-      }));
+      webViewRef.current.postMessage(
+        JSON.stringify({
+          center: { lat, lng: lon, zoom: 16 },
+          markers: filteredLocations,
+        }),
+      );
     }
     setSearchQuery(item.display_name.split(",")[0]);
     setAddressResults([]);
@@ -160,14 +185,15 @@ export default function MapScreen({ route, navigation }: any) {
   const focusLocation = (location: any) => {
     if (!location?.lat || !location?.lng) return;
     if (webViewRef.current) {
-      webViewRef.current.postMessage(JSON.stringify({
-        center: { lat: location.lat, lng: location.lng, zoom: 16 },
-        markers: filteredLocations,
-      }));
+      webViewRef.current.postMessage(
+        JSON.stringify({
+          center: { lat: location.lat, lng: location.lng, zoom: 16 },
+          markers: filteredLocations,
+        }),
+      );
     }
   };
 
-  // ПОПРАВЕН HTML: Оптимизиран за нативен Android WebView во изграден APK (Development Client)
   const mapHtml = `
     <!DOCTYPE html>
     <html>
@@ -190,12 +216,10 @@ export default function MapScreen({ route, navigation }: any) {
     <body>
       <div id="map"></div>
       <script>
-        // Иницијализација
         var map = L.map('map', { zoomControl: false }).setView([${currentCoords.lat}, ${currentCoords.lng}], ${currentCoords.zoom || 13});
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         var markerGroup = L.layerGroup().addTo(map);
 
-        // Испрати сигнал до React Native нативниот клиент дека сè е подготвено
         function emitReady() {
           if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
             window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MAP_READY" }));
@@ -203,94 +227,44 @@ export default function MapScreen({ route, navigation }: any) {
             setTimeout(emitReady, 100);
           }
         }
-        
-        window.onload = function() {
-          emitReady();
-        };
+        window.onload = function() { emitReady(); };
 
-        // Слушач на пораки со податоците од базата
         function handleReactNativeMessage(e) {
-  try {
-    var data = JSON.parse(e.data);
-
-    if (!data || data.type === "MAP_READY") return;
-
-    if (data.center && data.center.lat && data.center.lng) {
-      map.setView([data.center.lat, data.center.lng], data.center.zoom || 14);
-    }
-
-    markerGroup.clearLayers();
-
-    if (!data.markers || !Array.isArray(data.markers)) return;
-
-    data.markers.forEach(function(loc) {
-      var lat = Number(loc.lat);
-      var lng = Number(loc.lng);
-
-      if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
-
-      var color = "#35A936";
-      var iconText = "♻";
-
-      if (loc.type === "collection_center") {
-        color = "#F59E0B";
-        iconText = "Z";
-      } else if (loc.type === "bio_bin") {
-        color = "#8A5A32";
-        iconText = "B";
-      } else if (loc.type === "packaging_bin") {
-        color = "#F2B400";
-        iconText = "E";
-      }
-
-      var customIcon = L.divIcon({
-        className: "",
-        html:
-          '<div style="' +
-          'background-color:' + color + ';' +
-          'width:38px;' +
-          'height:38px;' +
-          'border-radius:19px;' +
-          'border:3px solid white;' +
-          'display:flex;' +
-          'align-items:center;' +
-          'justify-content:center;' +
-          'color:white;' +
-          'font-weight:900;' +
-          'font-size:16px;' +
-          'box-shadow:0 4px 10px rgba(0,0,0,0.35);' +
-          '">' + iconText + '</div>',
-        iconSize: [38, 38],
-        iconAnchor: [19, 19],
-      });
-
-      var marker = L.marker([lat, lng], { icon: customIcon }).addTo(markerGroup);
-
-      marker.on("click", function() {
-        window.ReactNativeWebView.postMessage(
-          JSON.stringify({
-            type: "MARKER_CLICK",
-            location: loc,
-          })
-        );
-      });
-    });
-
-    setTimeout(function() {
-      map.invalidateSize();
-    }, 100);
-  } catch (err) {
-    window.ReactNativeWebView.postMessage(
-      JSON.stringify({
-        type: "MAP_ERROR",
-        message: String(err),
-      })
-    );
-  }
-}
-
-window.addEventListener("message", handleReactNativeMessage);
-document.addEventListener("message", handleReactNativeMessage);
+          try {
+            var data = JSON.parse(e.data);
+            if (!data || data.type === "MAP_READY") return;
+            if (data.center && data.center.lat && data.center.lng) {
+              map.setView([data.center.lat, data.center.lng], data.center.zoom || 14);
+            }
+            markerGroup.clearLayers();
+            if (!data.markers || !Array.isArray(data.markers)) return;
+            data.markers.forEach(function(loc) {
+              var lat = Number(loc.lat);
+              var lng = Number(loc.lng);
+              if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
+              var color = "#35A936";
+              var iconText = "♻";
+              if (loc.type === "collection_center") { color = "#F59E0B"; iconText = "Z"; }
+              else if (loc.type === "bio_bin") { color = "#8A5A32"; iconText = "B"; }
+              else if (loc.type === "packaging_bin") { color = "#F2B400"; iconText = "E"; }
+              var customIcon = L.divIcon({
+                className: "",
+                html: '<div style="background-color:' + color + ';width:38px;height:38px;border-radius:19px;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,0.35);">' + iconText + '</div>',
+                iconSize: [38, 38],
+                iconAnchor: [19, 19],
+              });
+              var marker = L.marker([lat, lng], { icon: customIcon }).addTo(markerGroup);
+              marker.on("click", function() {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MARKER_CLICK", location: loc }));
+              });
+            });
+            setTimeout(function() { map.invalidateSize(); }, 100);
+          } catch (err) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MAP_ERROR", message: String(err) }));
+          }
+        }
+        window.addEventListener("message", handleReactNativeMessage);
+        document.addEventListener("message", handleReactNativeMessage);
       </script>
     </body>
     </html>
@@ -298,7 +272,6 @@ document.addEventListener("message", handleReactNativeMessage);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Хедер */}
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <Text style={[styles.brandText, styles.brandGreen]}>Recyc</Text>
@@ -309,15 +282,15 @@ document.addEventListener("message", handleReactNativeMessage);
         </View>
       </View>
 
-      {/* Наслов */}
       <View style={styles.titleSection}>
         <View style={styles.titleTextWrap}>
           <Text style={styles.mainTitle}>Zemljevid</Text>
-          <Text style={styles.subTitle}>Poišči najbližji EKO otok ali zbirni center.</Text>
+          <Text style={styles.subTitle}>
+            Poišči najbližji EKO otok ali zbirni center.
+          </Text>
         </View>
       </View>
 
-      {/* Пребарувач */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>⌕</Text>
@@ -328,28 +301,42 @@ document.addEventListener("message", handleReactNativeMessage);
             value={searchQuery}
             onChangeText={handleSearchTextChange}
           />
-          {searchingAddress && <ActivityIndicator size="small" color="#6B35C9" />}
+          {searchingAddress && (
+            <ActivityIndicator size="small" color="#6B35C9" />
+          )}
         </View>
 
         {addressResults.length > 0 && (
-          <View style={{
-            backgroundColor: "white",
-            borderRadius: 8,
-            marginTop: 5,
-            padding: 5,
-            maxHeight: 200,
-            borderWidth: 1,
-            borderColor: "#EFEFF4",
-            zIndex: 999
-          }}>
+          <View
+            style={{
+              backgroundColor: "white",
+              borderRadius: 8,
+              marginTop: 5,
+              padding: 5,
+              maxHeight: 200,
+              borderWidth: 1,
+              borderColor: "#EFEFF4",
+              zIndex: 999,
+            }}
+          >
             <ScrollView keyboardShouldPersistTaps="handled">
               {addressResults.map((item, index) => (
                 <TouchableOpacity
                   key={index}
-                  style={{ paddingVertical: 10, paddingHorizontal: 10, borderBottomWidth: 0.5, borderBottomColor: "#EFEFF4" }}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 10,
+                    borderBottomWidth: 0.5,
+                    borderBottomColor: "#EFEFF4",
+                  }}
                   onPress={() => handleSelectStreet(item)}
                 >
-                  <Text style={{ fontSize: 14, color: "#1C1C1E" }} numberOfLines={1}>📍 {item.display_name}</Text>
+                  <Text
+                    style={{ fontSize: 14, color: "#1C1C1E" }}
+                    numberOfLines={1}
+                  >
+                    📍 {item.display_name}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </ScrollView>
@@ -357,9 +344,12 @@ document.addEventListener("message", handleReactNativeMessage);
         )}
       </View>
 
-      {/* Филтри */}
       <View style={styles.filtersWrap}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersContent}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filtersContent}
+        >
           {FILTERS.map((filter) => (
             <FilterChip
               key={filter.type}
@@ -373,7 +363,6 @@ document.addEventListener("message", handleReactNativeMessage);
         </ScrollView>
       </View>
 
-      {/* Нативно прилагоден WebView за Android Development Client */}
       <View style={styles.mapWrapper}>
         {loading ? (
           <View style={styles.mapLoader}>
@@ -389,18 +378,18 @@ document.addEventListener("message", handleReactNativeMessage);
             javaScriptEnabled={true}
             domStorageEnabled={true}
             allowFileAccess={true}
-            allowUniversalAccessFromFileURLs={true} // Овозможува пристап до скрипти во APK
-            mixedContentMode="always" // Дозволува вчитавање на CDN ресурси
+            allowUniversalAccessFromFileURLs={true}
+            mixedContentMode="always"
             onMessage={(event) => {
               try {
                 const res = JSON.parse(event.nativeEvent.data);
                 if (res.type === "MAP_READY") {
-  setIsMapReady(true);
-} else if (res.type === "MARKER_CLICK") {
-  setSelectedLocation(res.location);
-} else if (res.type === "MAP_ERROR") {
-  console.log("Leaflet map error:", res.message);
-}
+                  setIsMapReady(true);
+                } else if (res.type === "MARKER_CLICK") {
+                  setSelectedLocation(res.location);
+                } else if (res.type === "MAP_ERROR") {
+                  console.log("Leaflet map error:", res.message);
+                }
               } catch (e) {}
             }}
           />
@@ -410,26 +399,41 @@ document.addEventListener("message", handleReactNativeMessage);
           <View style={styles.emptyMapCard}>
             <Text style={styles.emptyMapIcon}>🌱</Text>
             <Text style={styles.emptyMapTitle}>Ni lokacij</Text>
-            <Text style={styles.emptyMapText}>Za ta filter trenutno ni prikazanih lokacij.</Text>
+            <Text style={styles.emptyMapText}>
+              Za ta filter trenutno ni prikazanih lokacij.
+            </Text>
           </View>
         )}
 
         {selectedLocation && (
           <View style={styles.infoCard}>
             <View style={styles.infoIconBox}>
-              <Text style={styles.infoIconText}>{
-                selectedLocation.type === "collection_center" ? "Z" :
-                selectedLocation.type === "bio_bin" ? "B" :
-                selectedLocation.type === "packaging_bin" ? "E" : "♻"
-              }</Text>
+              <Text style={styles.infoIconText}>
+                {selectedLocation.type === "collection_center"
+                  ? "Z"
+                  : selectedLocation.type === "bio_bin"
+                    ? "B"
+                    : selectedLocation.type === "packaging_bin"
+                      ? "E"
+                      : "♻"}
+              </Text>
             </View>
             <View style={styles.infoDetails}>
               <Text style={styles.closestTag}>Izbrana lokacija</Text>
-              <Text style={styles.locationTitle} numberOfLines={1}>{selectedLocation.title}</Text>
-              <Text style={styles.locationItems} numberOfLines={1}>{selectedLocation.address || "Naslov ni vpisan"}</Text>
-              <Text style={styles.openStatus}>Zabojniki: {selectedLocation.items}</Text>
+              <Text style={styles.locationTitle} numberOfLines={1}>
+                {selectedLocation.title}
+              </Text>
+              <Text style={styles.locationItems} numberOfLines={1}>
+                {selectedLocation.address || "Naslov ni vpisan"}
+              </Text>
+              <Text style={styles.openStatus}>
+                Zabojniki: {selectedLocation.items}
+              </Text>
             </View>
-            <TouchableOpacity style={styles.arrowBtn} onPress={() => focusLocation(selectedLocation)}>
+            <TouchableOpacity
+              style={styles.arrowBtn}
+              onPress={() => focusLocation(selectedLocation)}
+            >
               <Text style={styles.arrowText}>⌖</Text>
             </TouchableOpacity>
           </View>
@@ -444,8 +448,13 @@ document.addEventListener("message", handleReactNativeMessage);
 const FilterChip = ({ label, type, active, onPress, color }: any) => (
   <TouchableOpacity
     onPress={() => onPress(type)}
-    style={[styles.chip, active && { backgroundColor: color, borderColor: color }]}
+    style={[
+      styles.chip,
+      active && { backgroundColor: color, borderColor: color },
+    ]}
   >
-    <Text style={[styles.chipText, active && styles.chipTextActive]}>{label}</Text>
+    <Text style={[styles.chipText, active && styles.chipTextActive]}>
+      {label}
+    </Text>
   </TouchableOpacity>
 );
