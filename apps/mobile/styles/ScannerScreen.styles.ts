@@ -470,4 +470,30 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
     fontSize: 16,
   },
+
+  loadingBinsRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 8,
+},
+
+manualContainer: {
+  flex: 1,
+  paddingHorizontal: SPACING.lg,
+  paddingTop: 26,
+},
+
+manualInput: {
+  minHeight: 56,
+  borderRadius: 18,
+  borderWidth: 1.5,
+  borderColor: COLORS.border,
+  backgroundColor: COLORS.white,
+  paddingHorizontal: 16,
+  fontSize: 16,
+  color: COLORS.text,
+  fontWeight: "700",
+  marginTop: 18,
+  marginBottom: 16,
+}
 });
