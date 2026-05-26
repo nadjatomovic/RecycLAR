@@ -296,66 +296,100 @@ topBrandPurple: {
   },
 
   examplesGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    rowGap: 12,
-    marginBottom: 18,
-  },
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+  rowGap: 12,
+  marginBottom: 18,
+},
 
-  exampleCard: {
-    width: "48%",
-    minHeight: 94,
-    borderRadius: 22,
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    paddingHorizontal: 10,
-    paddingVertical: 11,
-    flexDirection: "row",
-    alignItems: "center",
+exampleCard: {
+  width: "48%",
+  minHeight: 132,
+  borderRadius: 22,
+  backgroundColor: COLORS.white,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  paddingHorizontal: 12,
+  paddingVertical: 12,
+  alignItems: "center",
+  justifyContent: "center",
 
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
-  },
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.06,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 3,
+},
 
-  exampleWasteImg: {
-    width: 38,
-    height: 44,
-    marginRight: 9,
-  },
+exampleVisualRow: {
+  width: "100%",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginBottom: 9,
+},
 
-  exampleMiddle: {
-    flex: 1,
-  },
+exampleIconBox: {
+  width: 48,
+  height: 48,
+  borderRadius: 16,
+  backgroundColor: "#F8F8FB",
+  alignItems: "center",
+  justifyContent: "center",
+},
 
-  exampleTitle: {
-    fontSize: 12,
-    color: COLORS.purple,
-    fontWeight: "900",
-    marginBottom: 5,
-  },
+exampleWasteImg: {
+  width: 34,
+  height: 38,
+},
 
-  exampleName: {
-    fontSize: 14,
-    color: COLORS.text,
-    fontWeight: "800",
-  },
+exampleArrowCircle: {
+  width: 30,
+  height: 30,
+  borderRadius: 15,
+  backgroundColor: COLORS.purpleSoft,
+  alignItems: "center",
+  justifyContent: "center",
+},
 
-  exampleArrow: {
-    fontSize: 18,
-    color: COLORS.text,
-    fontWeight: "900",
-    marginHorizontal: 4,
-  },
+exampleArrow: {
+  fontSize: 18,
+  lineHeight: 20,
+  color: COLORS.purple,
+  fontWeight: "900",
+},
 
-  exampleBinImg: {
-    width: 30,
-    height: 36,
-  },
+exampleBinImg: {
+  width: 34,
+  height: 38,
+},
+
+exampleTitle: {
+  fontSize: 12,
+  color: COLORS.purple,
+  fontWeight: "900",
+  marginBottom: 3,
+  textAlign: "center",
+},
+
+exampleName: {
+  fontSize: 16,
+  lineHeight: 20,
+  color: COLORS.text,
+  fontWeight: "900",
+  textAlign: "center",
+  maxWidth: "100%",
+},
+
+exampleBinName: {
+  marginTop: 2,
+  fontSize: 12,
+  color: COLORS.muted,
+  fontWeight: "800",
+  textAlign: "center",
+},
+
 
   loginHint: {
     minHeight: 44,

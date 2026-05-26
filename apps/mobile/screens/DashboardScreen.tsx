@@ -6,6 +6,8 @@ import { styles } from "../styles/DashboardScreen.styles";
 import BottomNavBar from "../components/BottomNavBar";
 import { getBinAsset } from "../utils/binAssets";
 import { saveCity, loadCity } from "../utils/cityStorage";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase/firebase";
 
 const binsByMunicipality: Record<string, any[]> = {
   Maribor: [
@@ -74,6 +76,7 @@ const quickExamples = [
 
 const DashboardScreen = ({ navigation, route }: any) => {
   const [selectedCity, setSelectedCity] = useState<string>("Maribor");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Секогаш кога се враќаме на Dashboard — земи го зачуваниот град
   useFocusEffect(
@@ -89,6 +92,14 @@ const DashboardScreen = ({ navigation, route }: any) => {
       }
     }, [route?.params?.selectedCity]),
   );
+
+  useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    setIsLoggedIn(!!user);
+  });
+
+  return unsubscribe;
+}, []);
 
   const bins =
     binsByMunicipality[selectedCity] ?? binsByMunicipality["Maribor"];
@@ -209,38 +220,61 @@ const DashboardScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.examplesGrid}>
-          {quickExamples.map((example) => (
-            <View key={example.title} style={styles.exampleCard}>
-              <Image
-                source={example.itemImg}
-                style={styles.exampleWasteImg}
-                resizeMode="contain"
-              />
-              <View style={styles.exampleMiddle}>
-                <Text style={styles.exampleTitle}>Hiter primer</Text>
-                <Text style={styles.exampleName}>{example.title}</Text>
-              </View>
-              <Text style={styles.exampleArrow}>→</Text>
-              <Image
-                source={getBinAsset(example.image)}
-                style={styles.exampleBinImg}
-                resizeMode="contain"
-              />
-            </View>
-          ))}
+  {quickExamples.map((example) => (
+    <View key={example.title} style={styles.exampleCard}>
+      <View style={styles.exampleVisualRow}>
+        <View style={styles.exampleIconBox}>
+          <Image
+            source={example.itemImg}
+            style={styles.exampleWasteImg}
+            resizeMode="contain"
+          />
         </View>
 
-        <TouchableOpacity
-          style={styles.loginHint}
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate("Login")}
-        >
-          <Text style={styles.loginHintIcon}>🎓</Text>
-          <Text style={styles.loginHintText}>
-            Želiš preveriti svoje znanje?{" "}
-            <Text style={styles.loginHintLink}>Prijavi se</Text>
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.exampleArrowCircle}>
+          <Text style={styles.exampleArrow}>→</Text>
+        </View>
+
+        <View style={styles.exampleIconBox}>
+          <Image
+            source={getBinAsset(example.image)}
+            style={styles.exampleBinImg}
+            resizeMode="contain"
+          />
+        </View>
+      </View>
+
+      <Text style={styles.exampleTitle}>Hiter primer</Text>
+
+      <Text
+        style={styles.exampleName}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.85}
+      >
+        {example.title}
+      </Text>
+
+      <Text style={styles.exampleBinName} numberOfLines={1}>
+        {example.bin}
+      </Text>
+    </View>
+  ))}
+</View>
+
+        {!isLoggedIn && (
+  <TouchableOpacity
+    style={styles.loginHint}
+    activeOpacity={0.8}
+    onPress={() => navigation.navigate("Login")}
+  >
+    <Text style={styles.loginHintIcon}>🎓</Text>
+    <Text style={styles.loginHintText}>
+      Želiš preveriti svoje znanje?{" "}
+      <Text style={styles.loginHintLink}>Prijavi se</Text>
+    </Text>
+  </TouchableOpacity>
+)}
       </ScrollView>
 
       <BottomNavBar

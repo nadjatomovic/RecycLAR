@@ -68,6 +68,13 @@ const getPoints = (item: SchoolItem | UserItem, filter: FilterType): number => {
   return item.totalPoints ?? 0;
 };
 
+const getDisplayName = (item: SchoolItem | UserItem) => {
+  if ("displayName" in item && item.displayName) {
+    return item.displayName;
+  }
+
+  return item.name;
+};
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LeaderboardScreen({ navigation }: any) {
@@ -111,43 +118,60 @@ export default function LeaderboardScreen({ navigation }: any) {
   }, [activeTab, currentUser, myMunicipality, cityLoaded]);
 
   const loadSchools = async () => {
-    setLoading(true);
-    try {
-      const municipalityId = myMunicipality.toLowerCase();
-      const snap = await getDocs(
-        query(
-          collection(db, "groups"),
-          orderBy("totalPoints", "desc"),
-          limit(50),
-        ),
-      );
+  setLoading(true);
 
-      const list: SchoolItem[] = [];
-      snap.forEach((d) => {
-        const data = d.data();
-        const groupMunicipality = (data.municipalityId ?? "").toLowerCase();
+  try {
+    const municipalityId = (myMunicipality || "Maribor")
+      .toLowerCase()
+      .trim();
 
-        if (groupMunicipality === municipalityId) {
-          list.push({
-            id: d.id,
-            name: data.name ?? d.id,
-            displayName: data.displayName ?? data.name ?? d.id,
-            schoolName: data.schoolName ?? data.schoolId ?? "",
-            weeklyPoints: data.weeklyPoints ?? 0,
-            monthlyPoints: data.monthlyPoints ?? 0,
-            totalPoints: data.totalPoints ?? 0,
-            streakDays: data.streakDays ?? 0,
-          });
-        }
-      });
-      setSchools(list);
-    } catch (e) {
-      console.log("loadSchools error:", e);
-      setSchools([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const snap = await getDocs(
+      query(
+        collection(db, "groups"),
+        orderBy("totalPoints", "desc"),
+        limit(50)
+      )
+    );
+
+    const list: SchoolItem[] = [];
+
+    snap.forEach((d) => {
+      const data = d.data();
+
+      const groupMunicipality = (data.municipalityId ?? "")
+        .toString()
+        .toLowerCase()
+        .trim();
+
+      if (groupMunicipality === municipalityId) {
+        const schoolName = data.schoolName ?? data.schoolId ?? "";
+
+        list.push({
+          id: d.id,
+          name: data.name ?? d.id,
+          displayName:
+            data.displayName ??
+            (schoolName ? `${data.name ?? d.id} · ${schoolName}` : data.name ?? d.id),
+          schoolName,
+          weeklyPoints: Number(data.weeklyPoints ?? 0),
+          monthlyPoints: Number(data.monthlyPoints ?? 0),
+          totalPoints: Number(data.totalPoints ?? 0),
+          streakDays: Number(data.streakDays ?? 0),
+        });
+      }
+    });
+
+    console.log("Municipality filter:", municipalityId);
+    console.log("Loaded groups:", list.length, list);
+
+    setSchools(list);
+  } catch (e) {
+    console.log("loadSchools error:", e);
+    setSchools([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loadUsers = async () => {
     setLoading(true);
@@ -263,7 +287,7 @@ export default function LeaderboardScreen({ navigation }: any) {
           {renderAvatar(item, index, rank === 1 ? 70 : 56)}
         </View>
         <Text style={s.podiumName} numberOfLines={2}>
-          {item.name}
+          {getDisplayName(item)}
         </Text>
         <Text style={s.podiumPts}>🌿 {pts.toLocaleString()} točk</Text>
       </View>
@@ -283,7 +307,7 @@ export default function LeaderboardScreen({ navigation }: any) {
         <View style={s.rowAvatarWrap}>{renderAvatar(item, index + 3, 44)}</View>
         <View style={s.rowInfo}>
           <Text style={s.rowName} numberOfLines={1}>
-            {item.name}
+            {getDisplayName(item)}
           </Text>
           {"schoolName" in item && item.schoolName ? (
             <Text style={s.rowSub}>{item.schoolName}</Text>
@@ -339,26 +363,41 @@ export default function LeaderboardScreen({ navigation }: any) {
             <Text style={s.tabText}>🏫 Razredi</Text>
           </TouchableOpacity>
         </View>
+        
         {loading ? (
-          <ActivityIndicator size="large" />
-        ) : (
-          <>
-            <View style={s.podiumRow}>
-              <View style={s.podiumSide}>
-                {renderPodiumCard(top3[1], 2, 1)}
-              </View>
-              <View style={s.podiumCenter}>
-                {renderPodiumCard(top3[0], 1, 0)}
-              </View>
-              <View style={s.podiumSide}>
-                {renderPodiumCard(top3[2], 3, 2)}
-              </View>
-            </View>
-            <View style={s.listSection}>
-              {rest.map((item, i) => renderRow(item, i + 4, i))}
-            </View>
-          </>
-        )}
+  <View style={s.loadingBox}>
+    <ActivityIndicator size="large" color="#35A936" />
+    <Text style={s.loadingText}>Nalagam lestvico...</Text>
+  </View>
+) : sortedList.length === 0 ? (
+  <View style={s.emptyCard}>
+    <Text style={{ fontSize: 42, marginBottom: 8 }}>🌱</Text>
+    <Text style={s.emptyTitle}>Lestvica je prazna</Text>
+    <Text style={s.emptyText}>
+      Za izbrano občino ni podatkov za prikaz.
+    </Text>
+  </View>
+) : (
+  <>
+    <View style={s.podiumRow}>
+      <View style={s.podiumSide}>
+        {renderPodiumCard(top3[1], 2, 1)}
+      </View>
+
+      <View style={s.podiumCenter}>
+        {renderPodiumCard(top3[0], 1, 0)}
+      </View>
+
+      <View style={s.podiumSide}>
+        {renderPodiumCard(top3[2], 3, 2)}
+      </View>
+    </View>
+
+    <View style={s.listSection}>
+      {rest.map((item, i) => renderRow(item, i + 4, i))}
+    </View>
+  </>
+)}
       </ScrollView>
       <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
     </SafeAreaView>

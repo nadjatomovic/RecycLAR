@@ -1028,4 +1028,303 @@ export const styles = StyleSheet.create({
     color: COLORS.purple,
     fontWeight: "900",
   },
+  zigzagStep: {
+  width: "100%",
+  alignItems: "center",
+  marginBottom: 0,
+},
+
+zigzagNodeRow: {
+  width: "100%",
+  flexDirection: "row",
+  alignItems: "center",
+},
+
+zigzagNodeRowLeft: {
+  justifyContent: "flex-start",
+},
+
+zigzagNodeRowRight: {
+  justifyContent: "flex-end",
+},
+
+levelBubble: {
+  width: "78%",
+  minHeight: 118,
+  borderRadius: 34,
+  backgroundColor: COLORS.white,
+  borderWidth: 2,
+  borderColor: COLORS.border,
+  padding: 13,
+  flexDirection: "row",
+  alignItems: "center",
+  position: "relative",
+
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.08,
+  shadowRadius: 14,
+  shadowOffset: { width: 0, height: 7 },
+  elevation: 4,
+},
+
+levelBubbleDone: {
+  backgroundColor: "#F0FDF4",
+  borderColor: "#BBF7D0",
+},
+
+levelBubbleLocked: {
+  backgroundColor: "#F8F8FB",
+  borderColor: "#E5E7EB",
+  shadowOpacity: 0.03,
+},
+
+levelCircleBig: {
+  width: 74,
+  height: 74,
+  borderRadius: 37,
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: 13,
+  borderWidth: 4,
+  borderColor: COLORS.white,
+},
+
+levelCircleEmoji: {
+  fontSize: 32,
+  fontWeight: "900",
+  color: COLORS.white,
+},
+
+levelBubbleInfo: {
+  flex: 1,
+  minWidth: 0,
+},
+
+levelBubbleTop: {
+  flexDirection: "row",
+  alignItems: "center",
+  flexWrap: "wrap",
+  marginBottom: 3,
+},
+
+levelBubbleNumber: {
+  fontSize: 12,
+  color: COLORS.lightText,
+  fontWeight: "900",
+  marginRight: 7,
+  letterSpacing: 0.5,
+},
+
+levelDonePill: {
+  paddingHorizontal: 8,
+  paddingVertical: 3,
+  borderRadius: 999,
+  backgroundColor: "#DCFCE7",
+},
+
+levelDonePillText: {
+  fontSize: 10,
+  fontWeight: "900",
+  color: "#16A34A",
+},
+
+levelCurrentPill: {
+  paddingHorizontal: 8,
+  paddingVertical: 3,
+  borderRadius: 999,
+},
+
+levelCurrentPillText: {
+  fontSize: 10,
+  fontWeight: "900",
+},
+
+levelBubbleTitle: {
+  fontSize: 22,
+  lineHeight: 27,
+  color: COLORS.text,
+  fontWeight: "900",
+  letterSpacing: -0.3,
+},
+
+levelBubbleTitleLocked: {
+  color: "#9CA3AF",
+},
+
+levelBubbleReward: {
+  fontSize: 13,
+  fontWeight: "800",
+  marginTop: 3,
+  marginBottom: 8,
+},
+
+levelBubbleProgressTrack: {
+  height: 7,
+  backgroundColor: "#EEF0F4",
+  borderRadius: 999,
+  overflow: "hidden",
+},
+
+levelBubbleProgressFill: {
+  height: 7,
+  borderRadius: 999,
+},
+
+levelBubbleProgressText: {
+  fontSize: 11,
+  color: COLORS.muted,
+  fontWeight: "700",
+  marginTop: 5,
+},
+
+zigzagConnectorWrap: {
+  width: "42%",
+  height: 64,
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  marginVertical: -2,
+},
+
+connectorLeftToRight: {
+  alignSelf: "center",
+  transform: [{ rotate: "26deg" }],
+},
+
+connectorRightToLeft: {
+  alignSelf: "center",
+  transform: [{ rotate: "-26deg" }],
+},
+
+zigzagConnectorDot: {
+  width: 8,
+  height: 8,
+  borderRadius: 4,
+},
+
+zigzagLari: {
+  position: "absolute",
+  width: 54,
+  height: 54,
+  top: -34,
+  zIndex: 10,
+},
+
+zigzagLariRight: {
+  right: -4,
+},
+
+zigzagLariLeft: {
+  left: -4,
+},
+
+duoStep: {
+  width: "100%",
+  minHeight: 190,
+  position: "relative",
+},
+
+duoStepInner: {
+  width: 120,
+  alignItems: "center",
+  position: "absolute",
+  top: 0,
+},
+
+duoNode: {
+  width: 84,
+  height: 84,
+  borderRadius: 42,
+  backgroundColor: COLORS.white,
+  justifyContent: "center",
+  alignItems: "center",
+  borderWidth: 4,
+  borderColor: "#E5E7EB",
+
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.08,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 4,
+},
+
+duoNodeCurrent: {
+  width: 96,
+  height: 96,
+  borderRadius: 48,
+},
+
+duoNodeDone: {
+  borderColor: "#86EFAC",
+  backgroundColor: "#F0FDF4",
+},
+
+duoNodeLocked: {
+  backgroundColor: "#F3F4F6",
+  borderColor: "#E5E7EB",
+},
+
+duoNodeInner: {
+  width: 64,
+  height: 64,
+  borderRadius: 32,
+  justifyContent: "center",
+  alignItems: "center",
+},
+
+duoNodeEmoji: {
+  fontSize: 30,
+  color: "#FFFFFF",
+  fontWeight: "900",
+},
+
+duoLari: {
+  position: "absolute",
+  width: 48,
+  height: 48,
+  right: -6,
+  top: -20,
+  zIndex: 5,
+},
+
+duoLevelMini: {
+  marginTop: 8,
+  fontSize: 11,
+  fontWeight: "900",
+  color: COLORS.lightText,
+  textTransform: "uppercase",
+  letterSpacing: 0.6,
+  textAlign: "center",
+},
+
+duoLevelTitle: {
+  marginTop: 2,
+  fontSize: 18,
+  fontWeight: "900",
+  color: COLORS.text,
+  textAlign: "center",
+},
+
+duoLevelMeta: {
+  marginTop: 2,
+  fontSize: 12,
+  fontWeight: "800",
+  textAlign: "center",
+},
+
+duoConnector: {
+  position: "absolute",
+  top: 118,
+  left: "35%",
+  height: 74,
+  width: 120,
+  justifyContent: "space-between",
+  alignItems: "center",
+},
+
+duoConnectorDot: {
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+}
 });
