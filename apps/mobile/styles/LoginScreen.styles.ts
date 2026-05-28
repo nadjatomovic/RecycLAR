@@ -233,4 +233,109 @@ export const styles = StyleSheet.create({
     color: COLORS.purple,
     fontWeight: "900",
   },
+
+  /* ================= НОВИ СТИЛОВИ ЗА МОДАЛОТ ================= */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+
+  modalContainer: {
+    backgroundColor: COLORS.white,
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: 24,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: COLORS.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+
+  modalHandle: {
+    width: 40,
+    height: 5,
+    backgroundColor: "#E4E4E7",
+    borderRadius: 3,
+    marginBottom: 16,
+  },
+
+  modalLogo: {
+    width: 50,
+    height: 50,
+    marginBottom: 12,
+  },
+
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+
+  modalSubtitle: {
+    fontSize: 14,
+    color: COLORS.muted,
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+
+  modalInputWrapper: {
+    width: "100%",
+    marginBottom: 16,
+  },
+
+  modalInput: {
+    backgroundColor: "#F4F4F5",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 15,
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+
+  modalErrorText: {
+    color: "#EF4444",
+    fontSize: 13,
+    marginBottom: 12,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+
+  modalSubmitButton: {
+    backgroundColor: COLORS.green,
+    width: "100%",
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+  },
+
+  modalSubmitButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: "600",
+  },
+
+  modalCancelButton: {
+    width: "100%",
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+
+  modalCancelButtonText: {
+    color: COLORS.muted,
+    fontSize: 14,
+    fontWeight: "500",
+  },
 });
