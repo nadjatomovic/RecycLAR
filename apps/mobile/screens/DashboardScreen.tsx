@@ -7,7 +7,8 @@ import BottomNavBar from "../components/BottomNavBar";
 import { getBinAsset } from "../utils/binAssets";
 import { saveCity, loadCity } from "../utils/cityStorage";
 import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebase";
 
 const binsByMunicipality: Record<string, any[]> = {
   Maribor: [
@@ -77,40 +78,66 @@ const quickExamples = [
 const DashboardScreen = ({ navigation, route }: any) => {
   const [selectedCity, setSelectedCity] = useState<string>("Maribor");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState<string>("Eko Junak");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Состојба за dropdown менито
 
-  // Секогаш кога се враќаме на Dashboard — земи го зачуваниот град
+  const citiesList = Object.keys(binsByMunicipality);
+
   useFocusEffect(
     useCallback(() => {
-      // Ако доаѓа нов params од Home — зачувај го и прикажи го
       const cityFromParams = route?.params?.selectedCity;
       if (cityFromParams) {
         setSelectedCity(cityFromParams);
         saveCity(cityFromParams);
       } else {
-        // Инаку вчитај го од AsyncStorage
         loadCity().then((city) => setSelectedCity(city));
       }
     }, [route?.params?.selectedCity]),
   );
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    setIsLoggedIn(!!user);
-  });
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        if (user.displayName) {
+          setUserName(user.displayName);
+        } else {
+          try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              const name = userData.firstName || userData.name || "Eko Junak";
+              setUserName(name);
+            }
+          } catch (error) {
+            console.log("Error fetching user name:", error);
+          }
+        }
+      } else {
+        setIsLoggedIn(false);
+        setUserName("");
+      }
+    });
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
 
   const bins =
     binsByMunicipality[selectedCity] ?? binsByMunicipality["Maribor"];
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
-      >
-        <View style={styles.topBrandRow}>
+      {/* ГОРНА ЛЕНТА: Додадено копче за враќање на почетниот HomeScreen */}
+      <View style={styles.topBrandRow}>
+        <TouchableOpacity
+          style={styles.topBackButton}
+          onPress={() => navigation.navigate("Home")}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.topBackText}>‹</Text>
+        </TouchableOpacity>
+
+        <View style={styles.brandLogoWrapper}>
           <Image
             source={require("../assets/icon-logo.png")}
             style={styles.topBrandIcon}
@@ -121,18 +148,31 @@ const DashboardScreen = ({ navigation, route }: any) => {
             <Text style={styles.topBrandPurple}>LAR</Text>
           </Text>
         </View>
+        <View style={styles.placeholderSpacer} />
+      </View>
 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <View style={styles.welcomeSection}>
-          <Text style={styles.welcomeTitle}>Pozdravljeni!</Text>
+          <Text style={styles.welcomeTitle}>
+            {isLoggedIn && userName
+              ? `Pozdravljeni, ${userName}! 👋`
+              : "Pozdravljeni!"}
+          </Text>
           <Text style={styles.welcomeSub}>
-            Pripravljeni ste za hitro ločevanje odpadkov brez prijave.
+            {isLoggedIn
+              ? "Pripravljeni ste na pravilno ločevanje odpadkov in zbiranje točk."
+              : "Pripravljeni ste za hitro ločevanje odpadkov brez prijave."}
           </Text>
         </View>
 
+        {/* КАРТИЧКА ЗА ЛОКАЦИЈА: Сега го отвора/затвора Dropdown-от на клик */}
         <TouchableOpacity
           style={styles.locationCard}
           activeOpacity={0.85}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => setIsDropdownOpen(!isDropdownOpen)}
         >
           <View style={styles.locationIconBg}>
             <Image
@@ -144,9 +184,43 @@ const DashboardScreen = ({ navigation, route }: any) => {
           <View style={styles.locationTextWrap}>
             <Text style={styles.locationLabel}>Izbrana občina</Text>
             <Text style={styles.locationName}>{selectedCity}</Text>
-            <Text style={styles.changeLocation}>Spremeni občino ›</Text>
+            <Text style={styles.changeLocation}>
+              {isDropdownOpen ? "Zapri izbor ▴" : "Spremeni občino ▾"}
+            </Text>
           </View>
         </TouchableOpacity>
+
+        {/* МОДЕРЕН DROPDOWN: Се прикажува веднаш под картичката */}
+        {isDropdownOpen && (
+          <View style={styles.dropdownContainer}>
+            {citiesList.map((city) => (
+              <TouchableOpacity
+                key={city}
+                style={[
+                  styles.dropdownItem,
+                  selectedCity === city && styles.dropdownItemActive,
+                ]}
+                onPress={() => {
+                  setSelectedCity(city);
+                  saveCity(city);
+                  setIsDropdownOpen(false);
+                }}
+              >
+                <Text
+                  style={[
+                    styles.dropdownItemText,
+                    selectedCity === city && styles.dropdownItemTextActive,
+                  ]}
+                >
+                  {city}
+                </Text>
+                {selectedCity === city && (
+                  <Text style={styles.dropdownCheckmark}>✓</Text>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
         <View style={styles.mascotArea}>
           <View style={styles.speechBubble}>
@@ -220,61 +294,61 @@ const DashboardScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.examplesGrid}>
-  {quickExamples.map((example) => (
-    <View key={example.title} style={styles.exampleCard}>
-      <View style={styles.exampleVisualRow}>
-        <View style={styles.exampleIconBox}>
-          <Image
-            source={example.itemImg}
-            style={styles.exampleWasteImg}
-            resizeMode="contain"
-          />
+          {quickExamples.map((example) => (
+            <View key={example.title} style={styles.exampleCard}>
+              <View style={styles.exampleVisualRow}>
+                <View style={styles.exampleIconBox}>
+                  <Image
+                    source={example.itemImg}
+                    style={styles.exampleWasteImg}
+                    resizeMode="contain"
+                  />
+                </View>
+
+                <View style={styles.exampleArrowCircle}>
+                  <Text style={styles.exampleArrow}>→</Text>
+                </View>
+
+                <View style={styles.exampleIconBox}>
+                  <Image
+                    source={getBinAsset(example.image)}
+                    style={styles.exampleBinImg}
+                    resizeMode="contain"
+                  />
+                </View>
+              </View>
+
+              <Text style={styles.exampleTitle}>Hiter primer</Text>
+
+              <Text
+                style={styles.exampleName}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
+              >
+                {example.title}
+              </Text>
+
+              <Text style={styles.exampleBinName} numberOfLines={1}>
+                {example.bin}
+              </Text>
+            </View>
+          ))}
         </View>
-
-        <View style={styles.exampleArrowCircle}>
-          <Text style={styles.exampleArrow}>→</Text>
-        </View>
-
-        <View style={styles.exampleIconBox}>
-          <Image
-            source={getBinAsset(example.image)}
-            style={styles.exampleBinImg}
-            resizeMode="contain"
-          />
-        </View>
-      </View>
-
-      <Text style={styles.exampleTitle}>Hiter primer</Text>
-
-      <Text
-        style={styles.exampleName}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.85}
-      >
-        {example.title}
-      </Text>
-
-      <Text style={styles.exampleBinName} numberOfLines={1}>
-        {example.bin}
-      </Text>
-    </View>
-  ))}
-</View>
 
         {!isLoggedIn && (
-  <TouchableOpacity
-    style={styles.loginHint}
-    activeOpacity={0.8}
-    onPress={() => navigation.navigate("Login")}
-  >
-    <Text style={styles.loginHintIcon}>🎓</Text>
-    <Text style={styles.loginHintText}>
-      Želiš preveriti svoje znanje?{" "}
-      <Text style={styles.loginHintLink}>Prijavi se</Text>
-    </Text>
-  </TouchableOpacity>
-)}
+          <TouchableOpacity
+            style={styles.loginHint}
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.loginHintIcon}>🎓</Text>
+            <Text style={styles.loginHintText}>
+              Želiš preveriti svoje znanje?{" "}
+              <Text style={styles.loginHintLink}>Prijavi se</Text>
+            </Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
 
       <BottomNavBar

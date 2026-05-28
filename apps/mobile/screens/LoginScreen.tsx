@@ -9,18 +9,30 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Modal,
+  Pressable,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase/firebase";
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/LoginScreen.styles";
+import { saveCity } from "../utils/cityStorage";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [forgotModalVisible, setForgotModalVisible] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState("");
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
@@ -32,7 +44,21 @@ export default function LoginScreen({ navigation }: any) {
     setError("");
 
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
+      const user = userCredential.user;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.municipalityName) {
+          await saveCity(userData.municipalityName);
+        }
+      }
+
       navigation.navigate("Dashboard");
     } catch (err: any) {
       switch (err.code) {
@@ -54,6 +80,40 @@ export default function LoginScreen({ navigation }: any) {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResetPasswordEmail = async () => {
+    if (!forgotEmail.trim()) {
+      setModalError("Prosimo, vnesi e-poštni naslov.");
+      return;
+    }
+
+    setModalLoading(true);
+    setModalError("");
+
+    try {
+      await sendPasswordResetEmail(auth, forgotEmail.trim());
+      setForgotModalVisible(false);
+
+      Alert.alert(
+        "E-pošta poslana",
+        `Povezava za ponastavitev gesla je bila uspešno poslana na naslov: ${forgotEmail.trim()}`,
+        [{ text: "V redu", onPress: () => setForgotEmail("") }],
+      );
+    } catch (err: any) {
+      switch (err.code) {
+        case "auth/invalid-email":
+          setModalError("Neveljaven e-poštni naslov.");
+          break;
+        case "auth/user-not-found":
+          setModalError("Uporabnik s tem e-poštnim naslovom ne obstaja.");
+          break;
+        default:
+          setModalError("Napaka. Poskusi znova.");
+      }
+    } finally {
+      setModalLoading(false);
     }
   };
 
@@ -82,7 +142,6 @@ export default function LoginScreen({ navigation }: any) {
               style={styles.logoIcon}
               resizeMode="contain"
             />
-
             <Image
               source={require("../assets/logo.png")}
               style={styles.logoText}
@@ -137,7 +196,15 @@ export default function LoginScreen({ navigation }: any) {
               </View>
             ) : null}
 
-            <TouchableOpacity style={styles.forgotButton} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.forgotButton}
+              activeOpacity={0.8}
+              onPress={() => {
+                setForgotEmail(email);
+                setModalError("");
+                setForgotModalVisible(true);
+              }}
+            >
               <Text style={styles.forgotText}>Pozabljeno geslo?</Text>
             </TouchableOpacity>
 
@@ -180,6 +247,75 @@ export default function LoginScreen({ navigation }: any) {
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ================= MODAL ЗА ЗАБОРАВЕНА ЛОЗИНКА ================= */}
+      <Modal visible={forgotModalVisible} transparent animationType="fade">
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => !modalLoading && setForgotModalVisible(false)}
+        >
+          <Pressable style={styles.modalContainer}>
+            <View style={styles.modalHandle} />
+
+            <Image
+              source={require("../assets/icon-logo.png")}
+              style={styles.modalLogo}
+              resizeMode="contain"
+            />
+
+            <Text style={styles.modalTitle}>Ponastavitev gesla</Text>
+            <Text style={styles.modalSubtitle}>
+              Vnesite svoj e-poštni naslov. Poslali vam bomo varno povezavo za
+              spremembo gesla.
+            </Text>
+
+            <View style={styles.modalInputWrapper}>
+              <TextInput
+                style={styles.modalInput}
+                placeholder="vnesi e-pošto"
+                placeholderTextColor="#A0A0AA"
+                value={forgotEmail}
+                onChangeText={(text) => {
+                  setForgotEmail(text);
+                  setModalError("");
+                }}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
+            {modalError ? (
+              <Text style={styles.modalErrorText}>⚠ {modalError}</Text>
+            ) : null}
+
+            <TouchableOpacity
+              style={[
+                styles.modalSubmitButton,
+                modalLoading && styles.disabledButton,
+              ]}
+              onPress={handleResetPasswordEmail}
+              disabled={modalLoading}
+            >
+              {modalLoading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.modalSubmitButtonText}>
+                  Pošlji povezavo
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalCancelButton}
+              onPress={() => setForgotModalVisible(false)}
+              disabled={modalLoading}
+            >
+              <Text style={styles.modalCancelButtonText}>Prekliči</Text>
+            </TouchableOpacity>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }

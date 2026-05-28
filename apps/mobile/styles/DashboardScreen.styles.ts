@@ -15,39 +15,75 @@ export const styles = StyleSheet.create({
     paddingTop: isSmallPhone ? 4 : 10,
     paddingBottom: 110,
   },
-topBrandRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  alignSelf: "center",
-  marginTop: 4,
-  marginBottom: 24,
-  paddingHorizontal: 16,
-  paddingVertical: 6,
-  borderRadius: 24,
-  backgroundColor: "rgba(255,255,255,0.65)",
-},
 
-topBrandIcon: {
-  width: 52,
-  height: 52,
-  marginRight: 10,
-},
+  /* ================= ГОРНА ЛЕНТА (СЕГА ПОДДРЖУВА КОПЧЕ НАЗАД И ЛОГО) ================= */
+  topBrandRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 8,
+    marginBottom: 20,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: 4,
+  },
 
-topBrandText: {
-  fontSize: 30,
-  lineHeight: 36,
-  fontWeight: "900",
-  letterSpacing: -0.3,
-},
+  topBackButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.white,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
 
-topBrandGreen: {
-  color: COLORS.green,
-},
+  topBackText: {
+    fontSize: 34,
+    lineHeight: 34,
+    color: COLORS.purple,
+    fontWeight: "600",
+    marginTop: -4,
+  },
 
-topBrandPurple: {
-  color: COLORS.purple,
-},
+  brandLogoWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+  },
 
+  topBrandIcon: {
+    width: 46,
+    height: 46,
+    marginRight: 8,
+  },
+
+  topBrandText: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "900",
+    letterSpacing: -0.5,
+  },
+
+  topBrandGreen: {
+    color: COLORS.green,
+  },
+
+  topBrandPurple: {
+    color: COLORS.purple,
+  },
+
+  placeholderSpacer: {
+    width: 44, // Служи за перфектно флекс-центрирање на логото во средината
+  },
+
+  /* ================= ПОЗДРАВЕН ДЕЛ ================= */
   welcomeSection: {
     marginBottom: 18,
   },
@@ -69,6 +105,7 @@ topBrandPurple: {
     fontWeight: "500",
   },
 
+  /* ================= КАРТИЧКА ЗА ЛОКАЦИЈА ================= */
   locationCard: {
     minHeight: 96,
     borderRadius: RADIUS.lg,
@@ -128,6 +165,54 @@ topBrandPurple: {
     marginTop: 2,
   },
 
+  /* ================= СТИЛОВИ ЗА НОВИОТ DROPDOWN ИЗБОР ================= */
+  dropdownContainer: {
+    backgroundColor: COLORS.white,
+    borderRadius: RADIUS.lg,
+    marginTop: -6,
+    marginBottom: 18,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+
+  dropdownItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 14,
+  },
+
+  dropdownItemActive: {
+    backgroundColor: "#F0FDF4", // Нежна зелена позадина за селектираниот град
+  },
+
+  dropdownItemText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+
+  dropdownItemTextActive: {
+    color: COLORS.green,
+    fontWeight: "900",
+  },
+
+  dropdownCheckmark: {
+    fontSize: 16,
+    color: COLORS.green,
+    fontWeight: "900",
+  },
+
+  /* ================= МАСКОТА И ЗБОРУВАЊЕ ================= */
   mascotArea: {
     height: isSmallPhone ? 142 : 168,
     marginBottom: 8,
@@ -172,6 +257,7 @@ topBrandPurple: {
     height: isSmallPhone ? 140 : 170,
   },
 
+  /* ================= КОПЧЕ ЗА СКЕНИРАЊЕ ================= */
   scanButton: {
     height: 64,
     borderRadius: RADIUS.pill,
@@ -221,6 +307,7 @@ topBrandPurple: {
     fontWeight: "800",
   },
 
+  /* ================= СЕКЦИИ И КАНТИ ================= */
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -295,102 +382,103 @@ topBrandPurple: {
     fontWeight: "900",
   },
 
+  /* ================= ХИТРИ ПРИМЕРИГРИД ================= */
   examplesGrid: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "space-between",
-  rowGap: 12,
-  marginBottom: 18,
-},
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 12,
+    marginBottom: 18,
+  },
 
-exampleCard: {
-  width: "48%",
-  minHeight: 132,
-  borderRadius: 22,
-  backgroundColor: COLORS.white,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  paddingHorizontal: 12,
-  paddingVertical: 12,
-  alignItems: "center",
-  justifyContent: "center",
+  exampleCard: {
+    width: "48%",
+    minHeight: 132,
+    borderRadius: 22,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.06,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 3,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 3,
+  },
 
-exampleVisualRow: {
-  width: "100%",
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginBottom: 9,
-},
+  exampleVisualRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 9,
+  },
 
-exampleIconBox: {
-  width: 48,
-  height: 48,
-  borderRadius: 16,
-  backgroundColor: "#F8F8FB",
-  alignItems: "center",
-  justifyContent: "center",
-},
+  exampleIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 16,
+    backgroundColor: "#F8F8FB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-exampleWasteImg: {
-  width: 34,
-  height: 38,
-},
+  exampleWasteImg: {
+    width: 34,
+    height: 38,
+  },
 
-exampleArrowCircle: {
-  width: 30,
-  height: 30,
-  borderRadius: 15,
-  backgroundColor: COLORS.purpleSoft,
-  alignItems: "center",
-  justifyContent: "center",
-},
+  exampleArrowCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: COLORS.purpleSoft,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-exampleArrow: {
-  fontSize: 18,
-  lineHeight: 20,
-  color: COLORS.purple,
-  fontWeight: "900",
-},
+  exampleArrow: {
+    fontSize: 18,
+    lineHeight: 20,
+    color: COLORS.purple,
+    fontWeight: "900",
+  },
 
-exampleBinImg: {
-  width: 34,
-  height: 38,
-},
+  exampleBinImg: {
+    width: 34,
+    height: 38,
+  },
 
-exampleTitle: {
-  fontSize: 12,
-  color: COLORS.purple,
-  fontWeight: "900",
-  marginBottom: 3,
-  textAlign: "center",
-},
+  exampleTitle: {
+    fontSize: 12,
+    color: COLORS.purple,
+    fontWeight: "900",
+    marginBottom: 3,
+    textAlign: "center",
+  },
 
-exampleName: {
-  fontSize: 16,
-  lineHeight: 20,
-  color: COLORS.text,
-  fontWeight: "900",
-  textAlign: "center",
-  maxWidth: "100%",
-},
+  exampleName: {
+    fontSize: 16,
+    lineHeight: 20,
+    color: COLORS.text,
+    fontWeight: "900",
+    textAlign: "center",
+    maxWidth: "100%",
+  },
 
-exampleBinName: {
-  marginTop: 2,
-  fontSize: 12,
-  color: COLORS.muted,
-  fontWeight: "800",
-  textAlign: "center",
-},
+  exampleBinName: {
+    marginTop: 2,
+    fontSize: 12,
+    color: COLORS.muted,
+    fontWeight: "800",
+    textAlign: "center",
+  },
 
-
+  /* ================= ЛИНК НАПАТСТВИЕ ЗА НАЈАВА ================= */
   loginHint: {
     minHeight: 44,
     flexDirection: "row",

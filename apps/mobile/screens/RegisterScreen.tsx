@@ -15,6 +15,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/RegisterScreen.styles";
+import { saveCity } from "../utils/cityStorage"; // 1. Увезена функцијата за локално зачувување
 
 const municipalities = ["Maribor", "Ljubljana", "Kranj", "Koper", "Celje"];
 
@@ -59,12 +60,20 @@ export default function RegisterScreen({ navigation }: any) {
       return;
     }
 
-    if (isSchoolAccount && selectedSchoolRole === "student" && !groupCode.trim()) {
+    if (
+      isSchoolAccount &&
+      selectedSchoolRole === "student" &&
+      !groupCode.trim()
+    ) {
       setError("Prosimo, vnesi kodo skupine.");
       return;
     }
 
-    if (isSchoolAccount && selectedSchoolRole === "teacher" && !schoolName.trim()) {
+    if (
+      isSchoolAccount &&
+      selectedSchoolRole === "teacher" &&
+      !schoolName.trim()
+    ) {
       setError("Prosimo, vnesi ime šole.");
       return;
     }
@@ -76,41 +85,40 @@ export default function RegisterScreen({ navigation }: any) {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email.trim(),
-        password
+        password,
       );
 
       const user = userCredential.user;
       const municipalityId = municipalityToId[municipality] ?? "maribor";
 
+      // Зачувување во Firestore базата
       await setDoc(doc(db, "users", user.uid), {
         name: fullName.trim(),
         email: email.trim().toLowerCase(),
         municipalityId,
         municipalityName: municipality,
-
         role: isSchoolAccount ? selectedSchoolRole : "user",
         accountType: isSchoolAccount ? "school" : "regular",
-
         groupId:
           isSchoolAccount && selectedSchoolRole === "student"
             ? groupCode.trim().toUpperCase()
             : "",
-
         schoolId:
           isSchoolAccount && selectedSchoolRole === "teacher"
             ? schoolName.trim()
             : "",
-
         totalPoints: 0,
         weeklyPoints: 0,
         scanCount: 0,
         quizCompleted: 0,
         streakDays: 0,
         earnedBadges: [],
-
         createdAt: serverTimestamp(),
         lastActiveAt: serverTimestamp(),
       });
+
+      // 2. КЛУЧЕН ЧЕКОР: Го зачувуваме градот и локално на телефонот веднаш по регистрација
+      await saveCity(municipality);
 
       navigation.navigate("Login");
     } catch (err: any) {
@@ -224,7 +232,8 @@ export default function RegisterScreen({ navigation }: any) {
                     <Text
                       style={[
                         styles.municipalityChipText,
-                        municipality === city && styles.municipalityChipTextActive,
+                        municipality === city &&
+                          styles.municipalityChipTextActive,
                       ]}
                     >
                       {city}
