@@ -216,7 +216,7 @@ export default function MapScreen({ route, navigation }: any) {
     <body>
       <div id="map"></div>
       <script>
-        var map = L.map('map', { zoomControl: false }).setView([${currentCoords.lat}, ${currentCoords.lng}], ${currentCoords.zoom || 13});
+        var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([${currentCoords.lat}, ${currentCoords.lng}], ${currentCoords.zoom || 13});
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         var markerGroup = L.layerGroup().addTo(map);
 
