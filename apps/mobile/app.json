@@ -49,6 +49,9 @@
         "projectId": "cbd0db3f-db68-4894-9b1c-999197f5c796"
       }
     },
-    "owner": "ljupka"
+    "owner": "ljupka",
+    "assetBundlePatterns": [
+      "assets/model/*"
+    ]
   }
 }
