@@ -157,14 +157,23 @@ avatarWrap: {
   backgroundColor: COLORS.purpleSoft,
   alignItems: "center",
   justifyContent: "center",
-  marginRight: 13,
   position: "relative",
-  overflow: "visible",
+  overflow: "hidden",
 },
 
 avatar: {
-  width: isSmallPhone ? 78 : 86,
-  height: isSmallPhone ? 78 : 86,
+  width: "100%",
+  height: "100%",
+  borderRadius: isSmallPhone ? 44 : 48,
+},
+
+avatarOuter: {
+  width: isSmallPhone ? 96 : 104,
+  height: isSmallPhone ? 96 : 104,
+  marginRight: 13,
+  position: "relative",
+  alignItems: "center",
+  justifyContent: "center",
 },
 
 profileInfo: {
@@ -788,6 +797,81 @@ emptyNotificationsText: {
   color: COLORS.muted,
   textAlign: "center",
   fontWeight: "600",
+},
+
+metaTextWrap: {
+  flex: 1,
+  minWidth: 0,
+},
+
+unreadMiniDot: {
+  width: 10,
+  height: 10,
+  borderRadius: 5,
+  backgroundColor: COLORS.purple,
+  marginLeft: 8,
+  marginTop: 6,
+},
+
+notificationChevron: {
+  fontSize: 26,
+  color: COLORS.purple,
+  fontWeight: "900",
+  marginLeft: 6,
+  alignSelf: "center",
+},
+
+notificationDetailIcon: {
+  width: 74,
+  height: 74,
+  borderRadius: 37,
+  backgroundColor: COLORS.purpleSoft,
+  alignItems: "center",
+  justifyContent: "center",
+  alignSelf: "center",
+  marginBottom: 14,
+},
+
+notificationDetailEmoji: {
+  fontSize: 36,
+},
+
+notificationDetailTitle: {
+  fontSize: 24,
+  fontWeight: "900",
+  color: COLORS.text,
+  textAlign: "center",
+  marginBottom: 10,
+},
+
+notificationDetailMessage: {
+  fontSize: 15,
+  lineHeight: 22,
+  color: COLORS.muted,
+  fontWeight: "600",
+  textAlign: "center",
+  marginBottom: 12,
+},
+
+notificationDetailTime: {
+  fontSize: 13,
+  color: COLORS.purple,
+  fontWeight: "900",
+  textAlign: "center",
+  marginBottom: 20,
+},
+
+notificationDetailCloseBtn: {
+  marginTop: 10,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 10,
+},
+
+notificationDetailCloseText: {
+  color: COLORS.muted,
+  fontSize: 15,
+  fontWeight: "800",
 }
 
 });

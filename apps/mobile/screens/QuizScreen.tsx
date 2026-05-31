@@ -26,6 +26,7 @@ import { auth, db } from "../firebase/firebase";
 import BottomNavBar from "../components/BottomNavBar";
 import { generateAllQuestions } from "../utils/generateQuestions";
 import { styles as s } from "../styles/QuizScreen.styles";
+import LottieView from "lottie-react-native";
 
 type Question = {
   id: string;
@@ -562,14 +563,15 @@ export default function QuizScreen({ navigation }: any) {
       });
 
       await updateDoc(doc(db, "users", currentUser.uid), {
-        totalPoints: increment(gainedPoints),
-        weeklyPoints: increment(gainedPoints),
-        quizCompleted: increment(1),
-        [`topicProgress.${selectedTopic}.currentLevel`]: newCurrentLevel,
-        [`topicProgress.${selectedTopic}.levelPoints`]:
-          newLevelPointsAfterReset,
-        [`topicProgress.${selectedTopic}.completedLevels`]: newCompletedLevels,
-      });
+  totalPoints: increment(gainedPoints),
+  weeklyPoints: increment(gainedPoints),
+  monthlyPoints: increment(gainedPoints),
+  quizCompleted: increment(1),
+  updatedAt: serverTimestamp(),
+  [`topicProgress.${selectedTopic}.currentLevel`]: newCurrentLevel,
+  [`topicProgress.${selectedTopic}.levelPoints`]: newLevelPointsAfterReset,
+  [`topicProgress.${selectedTopic}.completedLevels`]: newCompletedLevels,
+});
 
       setTotalPoints((previousPoints) => previousPoints + gainedPoints);
     } catch (e) {
@@ -985,6 +987,9 @@ export default function QuizScreen({ navigation }: any) {
   if (currentScreen === "quiz") {
     const topic = TOPICS.find((item) => item.id === selectedTopic)!;
     const currentQuestion = questions[currentQuestionIndex];
+    const answerIsCorrect =
+    selectedAnswerIndex !== null &&
+    selectedAnswerIndex === currentQuestion.correctIndex;
 
     const progressPercent =
       ((currentQuestionIndex + (isAnswered ? 1 : 0)) / questions.length) * 100;
@@ -1140,6 +1145,37 @@ export default function QuizScreen({ navigation }: any) {
               </TouchableOpacity>
             );
           })}
+
+{isAnswered && (
+  <View
+    style={[
+      s.answerFeedbackCard,
+      {
+        borderColor: answerIsCorrect ? "#BBF7D0" : "#FECACA",
+        backgroundColor: answerIsCorrect ? "#F0FDF4" : "#FEF2F2",
+      },
+    ]}
+  >
+    <LottieView
+      key={answerIsCorrect ? "correct" : "wrong"}
+      source={
+        answerIsCorrect
+          ? require("../assets/animations/TacanAnimacija.json")
+          : require("../assets/animations/NetacnoAnimacija.json")
+      }
+      style={s.answerFeedbackAnimation}
+      autoPlay
+      loop
+      resizeMode="contain"
+    />
+
+    <Text style={s.answerFeedbackText}>
+      {answerIsCorrect
+        ? "Super, pravilno si odgovorila. Nadaljuj!"
+        : "Pravilen odgovor je označen zeleno. Zapomni si za naslednjič."}
+    </Text>
+  </View>
+)}
 
           {isAnswered && currentQuestion.hint && (
             <View style={[s.infoBox, { backgroundColor: "#FEF3C7" }]}>
