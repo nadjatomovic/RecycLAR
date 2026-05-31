@@ -9,6 +9,7 @@ import { saveCity, loadCity } from "../utils/cityStorage";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
+import LottieView from "lottie-react-native";
 
 const binsByMunicipality: Record<string, any[]> = {
   Maribor: [
@@ -229,11 +230,13 @@ const DashboardScreen = ({ navigation, route }: any) => {
               {"\n"}takoj preveri, kam spada!
             </Text>
           </View>
-          <Image
-            source={require("../assets/lari-hello.png")}
-            style={styles.mascotImage}
-            resizeMode="contain"
-          />
+         <LottieView
+         source={require("../assets/animations/MahanjeAnimacija.json")}
+         style={styles.mascotImage}
+         autoPlay
+         loop
+         resizeMode="contain"
+         />
         </View>
 
         <TouchableOpacity

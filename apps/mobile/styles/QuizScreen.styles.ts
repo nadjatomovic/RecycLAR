@@ -1326,5 +1326,31 @@ duoConnectorDot: {
   width: 10,
   height: 10,
   borderRadius: 5,
+},
+
+answerFeedbackCard: {
+  marginTop: 8,
+  marginBottom: 18,
+  borderRadius: 24,
+  borderWidth: 1.5,
+  paddingVertical: 10,
+  paddingHorizontal: 14,
+  alignItems: "center",
+},
+
+answerFeedbackAnimation: {
+  width: 155,
+  height: 155,
+  backgroundColor: "transparent",
+  marginBottom: -8,
+},
+
+answerFeedbackText: {
+  marginTop: 0,
+  fontSize: 13,
+  lineHeight: 18,
+  color: COLORS.muted,
+  fontWeight: "700",
+  textAlign: "center",
 }
 });
