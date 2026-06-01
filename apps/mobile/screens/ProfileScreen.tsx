@@ -9,7 +9,6 @@ import {
   Modal,
   TextInput,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Keyboard,
 } from "react-native";
@@ -24,6 +23,7 @@ import {
   query,
   orderBy,
   limit,
+  serverTimestamp,
 } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
@@ -39,6 +39,7 @@ type UserData = {
   schoolId?: string;
   totalPoints?: number;
   weeklyPoints?: number;
+  monthlyPoints?: number;
   scanCount?: number;
   quizCompleted?: number;
   streakDays?: number;
@@ -88,36 +89,12 @@ type NotificationData = {
 };
 
 const avatarOptions = [
-  {
-    key: "fox",
-    label: "Lisica",
-    image: getAvatarAsset("fox"),
-  },
-  {
-    key: "raccoon",
-    label: "Rakun",
-    image: getAvatarAsset("raccoon"),
-  },
-  {
-    key: "hedgehog",
-    label: "Jež",
-    image: getAvatarAsset("hedgehog"),
-  },
-  {
-    key: "turtle",
-    label: "Želva",
-    image: getAvatarAsset("turtle"),
-  },
-  {
-    key: "rabbit",
-    label: "Zajec",
-    image: getAvatarAsset("rabbit"),
-  },
-  {
-    key: "owl",
-    label: "Sova",
-    image: getAvatarAsset("owl"),
-  },
+  { key: "fox", label: "Lisica", image: getAvatarAsset("fox") },
+  { key: "raccoon", label: "Rakun", image: getAvatarAsset("raccoon") },
+  { key: "hedgehog", label: "Jež", image: getAvatarAsset("hedgehog") },
+  { key: "turtle", label: "Želva", image: getAvatarAsset("turtle") },
+  { key: "rabbit", label: "Zajec", image: getAvatarAsset("rabbit") },
+  { key: "owl", label: "Sova", image: getAvatarAsset("owl") },
 ];
 
 const MOCK_CLASSES: GroupData[] = [
@@ -133,7 +110,7 @@ const MOCK_TEACHER_STATS = {
   activeDays: 18,
 };
 
-const MOCK_STUDENT_ACTIVITY = [
+const MOCK_STUDENT_ACTIVITY: ActivityData[] = [
   {
     icon: "♻️",
     iconBg: "#F0FDF4",
@@ -163,7 +140,7 @@ const MOCK_STUDENT_ACTIVITY = [
   },
 ];
 
-const MOCK_TEACHER_ACTIVITY = [
+const MOCK_TEACHER_ACTIVITY: ActivityData[] = [
   {
     icon: "📋",
     iconBg: "#EDE9FE",
@@ -223,7 +200,6 @@ const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
   const scanCount = userData.scanCount ?? 0;
   const quizCompleted = userData.quizCompleted ?? 0;
   const streakDays = userData.streakDays ?? 0;
-  
 
   if (badge.conditionType === "points") {
     return totalPoints >= badge.conditionValue;
@@ -262,20 +238,24 @@ export default function ProfileScreen({ navigation }: any) {
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editedName, setEditedName] = useState("");
+
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
-  const [notificationsModalVisible, setNotificationsModalVisible] = useState(false);
+  const [notificationsModalVisible, setNotificationsModalVisible] =
+    useState(false);
+  const [selectedNotification, setSelectedNotification] =
+    useState<NotificationData | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUid(user.uid);
-        await Promise.all([
-  loadUserData(user.uid),
-  loadBadges(),
-  loadRecentActivities(user.uid),
-  loadNotifications(user.uid),
 
-]);
+        await Promise.all([
+          loadUserData(user.uid),
+          loadBadges(),
+          loadRecentActivities(user.uid),
+          loadNotifications(user.uid),
+        ]);
       } else {
         navigation.navigate("Login");
       }
@@ -323,71 +303,106 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   const loadRecentActivities = async (userId: string) => {
-  try {
-    const activitiesQuery = query(
-      collection(db, "users", userId, "activities"),
-      orderBy("createdAt", "desc"),
-      limit(3)
-    );
+    try {
+      const activitiesQuery = query(
+        collection(db, "users", userId, "activities"),
+        orderBy("createdAt", "desc"),
+        limit(3)
+      );
 
-    const snapshot = await getDocs(activitiesQuery);
-    const loaded: ActivityData[] = [];
+      const snapshot = await getDocs(activitiesQuery);
+      const loaded: ActivityData[] = [];
 
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
 
-      loaded.push({
-        id: docSnap.id,
-        icon: data.icon ?? "♻️",
-        iconBg: data.iconBg ?? "#F0FDF4",
-        title: data.title ?? "Aktivnost",
-        description: data.description ?? "",
-        points: data.points ?? "+0 točk",
-        time: data.time ?? "Pravkar",
-        pointsColor: data.pointsColor ?? "#35A936",
-        createdAt: data.createdAt,
+        loaded.push({
+          id: docSnap.id,
+          icon: data.icon ?? "♻️",
+          iconBg: data.iconBg ?? "#F0FDF4",
+          title: data.title ?? "Aktivnost",
+          description: data.description ?? "",
+          points: data.points ?? "+0 točk",
+          time: data.time ?? "Pravkar",
+          pointsColor: data.pointsColor ?? "#35A936",
+          createdAt: data.createdAt,
+        });
       });
-    });
 
-    setRecentActivities(loaded);
-  } catch (err) {
-    console.log("Error loading activities:", err);
-    setRecentActivities([]);
-  }
-};
+      setRecentActivities(loaded);
+    } catch (err) {
+      console.log("Error loading activities:", err);
+      setRecentActivities([]);
+    }
+  };
 
-const loadNotifications = async (userId: string) => {
-  try {
-    const notificationsQuery = query(
-      collection(db, "users", userId, "notifications"),
-      orderBy("createdAt", "desc"),
-      limit(10)
-    );
+  const loadNotifications = async (userId: string) => {
+    try {
+      const notificationsQuery = query(
+        collection(db, "users", userId, "notifications"),
+        orderBy("createdAt", "desc"),
+        limit(10)
+      );
 
-    const snapshot = await getDocs(notificationsQuery);
-    const loaded: NotificationData[] = [];
+      const snapshot = await getDocs(notificationsQuery);
+      const loaded: NotificationData[] = [];
 
-    snapshot.forEach((docSnap) => {
-      const data = docSnap.data();
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
 
-      loaded.push({
-        id: docSnap.id,
-        title: data.title ?? "Obvestilo",
-        message: data.message ?? "",
-        type: data.type ?? "info",
-        icon: data.icon ?? "🔔",
-        read: data.read ?? false,
-        time: data.time ?? "Pravkar",
-        createdAt: data.createdAt,
+        loaded.push({
+          id: docSnap.id,
+          title: data.title ?? "Obvestilo",
+          message: data.message ?? "",
+          type: data.type ?? "info",
+          icon: data.icon ?? "🔔",
+          read: data.read ?? false,
+          time: data.time ?? "Pravkar",
+          createdAt: data.createdAt,
+        });
       });
-    });
 
-    setNotifications(loaded);
-  } catch (err) {
-    console.log("Error loading notifications:", err);
-    setNotifications([]);
-  }
-};
+      setNotifications(loaded);
+    } catch (err) {
+      console.log("Error loading notifications:", err);
+      setNotifications([]);
+    }
+  };
+
+  const handleOpenNotification = async (notification: NotificationData) => {
+    setSelectedNotification(notification);
+
+    if (!uid || !notification.id || notification.read) {
+      return;
+    }
+
+    try {
+      await updateDoc(
+        doc(db, "users", uid, "notifications", notification.id),
+        {
+          read: true,
+          readAt: serverTimestamp(),
+        }
+      );
+
+      setNotifications((previous) =>
+        previous.map((item) =>
+          item.id === notification.id ? { ...item, read: true } : item
+        )
+      );
+    } catch (error) {
+      console.log("Error marking notification as read:", error);
+    }
+  };
+
+  const handleCloseNotifications = () => {
+    setSelectedNotification(null);
+    setNotificationsModalVisible(false);
+  };
+
+  const handleBackToNotificationsList = () => {
+    setSelectedNotification(null);
+  };
 
   const handleSaveName = async () => {
     if (!uid || !userData) return;
@@ -475,16 +490,16 @@ const loadNotifications = async (userId: string) => {
   }
 
   const commonProps = {
-  userData,
-  badges,
-  recentActivities,
-  navigation,
-  onSignOut: handleSignOut,
-  onOpenAvatar: () => setAvatarModalVisible(true),
-  onOpenEdit: () => setEditModalVisible(true),
-  notifications,
-  onOpenNotifications: () => setNotificationsModalVisible(true),
-};
+    userData,
+    badges,
+    recentActivities,
+    navigation,
+    onSignOut: handleSignOut,
+    onOpenAvatar: () => setAvatarModalVisible(true),
+    onOpenEdit: () => setEditModalVisible(true),
+    notifications,
+    onOpenNotifications: () => setNotificationsModalVisible(true),
+  };
 
   return (
     <>
@@ -508,17 +523,23 @@ const loadNotifications = async (userId: string) => {
         onClose={() => setEditModalVisible(false)}
         onSave={handleSaveName}
       />
+
       <NotificationsModal
-      visible={notificationsModalVisible}
-      notifications={notifications}
-      onClose={() => setNotificationsModalVisible(false)}
+        visible={notificationsModalVisible}
+        notifications={notifications}
+        selectedNotification={selectedNotification}
+        onOpenNotification={handleOpenNotification}
+        onBackToList={handleBackToNotificationsList}
+        onClose={handleCloseNotifications}
       />
     </>
   );
 }
 
 function Header({ notifications = [], onOpenNotifications }: any) {
-  const unreadCount = notifications.filter((item: NotificationData) => !item.read).length;
+  const unreadCount = notifications.filter(
+    (item: NotificationData) => !item.read
+  ).length;
 
   return (
     <View style={styles.header}>
@@ -599,9 +620,9 @@ function StudentProfile({
         contentContainerStyle={styles.scrollContent}
       >
         <Header
-  notifications={notifications}
-  onOpenNotifications={onOpenNotifications}
-/>
+          notifications={notifications}
+          onOpenNotifications={onOpenNotifications}
+        />
 
         <Text style={styles.screenTitle}>Profil ✦</Text>
 
@@ -614,16 +635,20 @@ function StudentProfile({
         <StatsRow stats={stats} />
 
         <BadgesSection
-  badges={badges}
-  userData={userData}
-  onViewAll={() => navigation.navigate("Achievements")}
-/>
+          badges={badges}
+          userData={userData}
+          onViewAll={() => navigation.navigate("Achievements")}
+        />
 
-<ActivityCard
-  title="Zadnja aktivnost"
-  items={recentActivities.length > 0 ? recentActivities : MOCK_STUDENT_ACTIVITY}
-  onViewAll={() => navigation.navigate("ActivityHistory")}
-/>
+        <ActivityCard
+          title="Zadnja aktivnost"
+          items={
+            recentActivities.length > 0
+              ? recentActivities
+              : MOCK_STUDENT_ACTIVITY
+          }
+          onViewAll={() => navigation.navigate("ActivityHistory")}
+        />
 
         <TouchableOpacity
           style={styles.signOutBtn}
@@ -684,9 +709,9 @@ function TeacherProfile({
         contentContainerStyle={styles.scrollContent}
       >
         <Header
-  notifications={notifications}
-  onOpenNotifications={onOpenNotifications}
-/>
+          notifications={notifications}
+          onOpenNotifications={onOpenNotifications}
+        />
 
         <Text style={styles.screenTitle}>Profil učitelja ✦</Text>
 
@@ -702,12 +727,13 @@ function TeacherProfile({
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Moji razredi</Text>
+
             <TouchableOpacity
-  activeOpacity={0.85}
-  onPress={() => navigation.navigate("LeaderBoard")}
->
-  <Text style={styles.viewAll}>Poglej vse ›</Text>
-</TouchableOpacity>
+              activeOpacity={0.85}
+              onPress={() => navigation.navigate("LeaderBoard")}
+            >
+              <Text style={styles.viewAll}>Poglej vse ›</Text>
+            </TouchableOpacity>
           </View>
 
           {MOCK_CLASSES.map((group) => (
@@ -747,16 +773,20 @@ function TeacherProfile({
         </View>
 
         <BadgesSection
-  badges={badges}
-  userData={userData}
-  onViewAll={() => navigation.navigate("Achievements")}
-/>
+          badges={badges}
+          userData={userData}
+          onViewAll={() => navigation.navigate("Achievements")}
+        />
 
-<ActivityCard
-  title="Zadnja aktivnost"
-  items={recentActivities.length > 0 ? recentActivities : MOCK_TEACHER_ACTIVITY}
-  onViewAll={() => navigation.navigate("ActivityHistory")}
-/>
+        <ActivityCard
+          title="Zadnja aktivnost"
+          items={
+            recentActivities.length > 0
+              ? recentActivities
+              : MOCK_TEACHER_ACTIVITY
+          }
+          onViewAll={() => navigation.navigate("ActivityHistory")}
+        />
 
         <TouchableOpacity
           style={styles.signOutBtn}
@@ -775,12 +805,14 @@ function TeacherProfile({
 function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
   return (
     <View style={styles.profileCard}>
-      <View style={styles.avatarWrap}>
-        <Image
-          source={getAvatarImage(userData.avatarKey)}
-          style={styles.avatar}
-          resizeMode="contain"
-        />
+      <View style={styles.avatarOuter}>
+        <View style={styles.avatarWrap}>
+          <Image
+            source={getAvatarImage(userData.avatarKey)}
+            style={styles.avatar}
+            resizeMode="cover"
+          />
+        </View>
 
         <TouchableOpacity
           style={styles.cameraBadge}
@@ -827,11 +859,16 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
           <View style={styles.profileMetaRow}>
             <View style={styles.metaBlock}>
               <Text style={styles.metaEmoji}>📍</Text>
-              <View>
+
+              <View style={styles.metaTextWrap}>
                 <Text style={styles.metaLabel}>Občina</Text>
-               <Text style={styles.metaValue} numberOfLines={1} ellipsizeMode="tail">
-                {formatMunicipality(userData.municipalityId)}
-               </Text>
+                <Text
+                  style={styles.metaValue}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
+                  {formatMunicipality(userData.municipalityId)}
+                </Text>
               </View>
             </View>
 
@@ -839,9 +876,14 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
 
             <View style={styles.metaBlock}>
               <Text style={styles.metaEmoji}>🏫</Text>
-              <View>
+
+              <View style={styles.metaTextWrap}>
                 <Text style={styles.metaLabel}>Skupina</Text>
-                <Text style={styles.metaValue} numberOfLines={1} ellipsizeMode="tail">
+                <Text
+                  style={styles.metaValue}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {userData.groupId || "Ni skupine"}
                 </Text>
               </View>
@@ -945,7 +987,7 @@ function ActivityCard({ title, items, onViewAll }: any) {
         </TouchableOpacity>
       </View>
 
-      {items.map((item: any, index: number) => (
+      {items.map((item: ActivityData, index: number) => (
         <View key={`${item.title}-${index}`}>
           <View style={styles.activityRow}>
             <View
@@ -980,7 +1022,14 @@ function ActivityCard({ title, items, onViewAll }: any) {
   );
 }
 
-function NotificationsModal({ visible, notifications, onClose }: any) {
+function NotificationsModal({
+  visible,
+  notifications,
+  selectedNotification,
+  onOpenNotification,
+  onBackToList,
+  onClose,
+}: any) {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalOverlay}>
@@ -993,52 +1042,110 @@ function NotificationsModal({ visible, notifications, onClose }: any) {
         <View style={styles.modalContent}>
           <View style={styles.modalHandle} />
 
-          <Text style={styles.modalTitle}>Obvestila</Text>
-          <Text style={styles.modalSubtitle}>
-            Tukaj vidiš pomembne novice, dosežke in opomnike.
-          </Text>
-
-          {notifications.length === 0 ? (
-            <View style={styles.emptyNotificationsBox}>
-              <Text style={styles.emptyNotificationsIcon}>🔔</Text>
-              <Text style={styles.emptyNotificationsTitle}>
-                Ni novih obvestil
+          {!selectedNotification ? (
+            <>
+              <Text style={styles.modalTitle}>Obvestila</Text>
+              <Text style={styles.modalSubtitle}>
+                Tukaj vidiš pomembne novice, dosežke in opomnike.
               </Text>
-              <Text style={styles.emptyNotificationsText}>
-                Ko se zgodi kaj pomembnega, se bo prikazalo tukaj.
-              </Text>
-            </View>
-          ) : (
-            <View style={styles.notificationsList}>
-              {notifications.map((item: NotificationData) => (
-                <View
-                  key={item.id ?? item.title}
-                  style={[
-                    styles.notificationItem,
-                    !item.read && styles.notificationItemUnread,
-                  ]}
-                >
-                  <View style={styles.notificationItemIcon}>
-                    <Text style={styles.notificationItemEmoji}>{item.icon}</Text>
-                  </View>
 
-                  <View style={styles.notificationItemContent}>
-                    <Text style={styles.notificationItemTitle}>
-                      {item.title}
-                    </Text>
-                    <Text style={styles.notificationItemMessage}>
-                      {item.message}
-                    </Text>
-                    <Text style={styles.notificationItemTime}>{item.time}</Text>
-                  </View>
+              {notifications.length === 0 ? (
+                <View style={styles.emptyNotificationsBox}>
+                  <Text style={styles.emptyNotificationsIcon}>🔔</Text>
+
+                  <Text style={styles.emptyNotificationsTitle}>
+                    Ni novih obvestil
+                  </Text>
+
+                  <Text style={styles.emptyNotificationsText}>
+                    Ko se zgodi kaj pomembnega, se bo prikazalo tukaj.
+                  </Text>
                 </View>
-              ))}
-            </View>
-          )}
+              ) : (
+                <View style={styles.notificationsList}>
+                  {notifications.map((item: NotificationData) => (
+                    <TouchableOpacity
+                      key={item.id ?? item.title}
+                      activeOpacity={0.85}
+                      onPress={() => onOpenNotification(item)}
+                      style={[
+                        styles.notificationItem,
+                        !item.read && styles.notificationItemUnread,
+                      ]}
+                    >
+                      <View style={styles.notificationItemIcon}>
+                        <Text style={styles.notificationItemEmoji}>
+                          {item.icon}
+                        </Text>
+                      </View>
 
-          <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
-            <Text style={styles.modalCloseText}>Zapri</Text>
-          </TouchableOpacity>
+                      <View style={styles.notificationItemContent}>
+                        <Text
+                          style={styles.notificationItemTitle}
+                          numberOfLines={1}
+                        >
+                          {item.title}
+                        </Text>
+
+                        <Text
+                          style={styles.notificationItemMessage}
+                          numberOfLines={2}
+                        >
+                          {item.message}
+                        </Text>
+
+                        <Text style={styles.notificationItemTime}>
+                          {item.time}
+                        </Text>
+                      </View>
+
+                      {!item.read && <View style={styles.unreadMiniDot} />}
+
+                      <Text style={styles.notificationChevron}>›</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
+                <Text style={styles.modalCloseText}>Zapri</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <View style={styles.notificationDetailIcon}>
+                <Text style={styles.notificationDetailEmoji}>
+                  {selectedNotification.icon}
+                </Text>
+              </View>
+
+              <Text style={styles.notificationDetailTitle}>
+                {selectedNotification.title}
+              </Text>
+
+              <Text style={styles.notificationDetailMessage}>
+                {selectedNotification.message}
+              </Text>
+
+              <Text style={styles.notificationDetailTime}>
+                {selectedNotification.time}
+              </Text>
+
+              <TouchableOpacity
+                style={styles.modalCloseBtn}
+                onPress={onBackToList}
+              >
+                <Text style={styles.modalCloseText}>Nazaj na obvestila</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.notificationDetailCloseBtn}
+                onPress={onClose}
+              >
+                <Text style={styles.notificationDetailCloseText}>Zapri</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       </View>
     </Modal>
@@ -1049,6 +1156,12 @@ function AvatarModal({ visible, selectedKey, onClose, onSelect }: any) {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalOverlay}>
+        <TouchableOpacity
+          style={styles.modalBackdrop}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+
         <View style={styles.modalContent}>
           <View style={styles.modalHandle} />
 
@@ -1071,7 +1184,7 @@ function AvatarModal({ visible, selectedKey, onClose, onSelect }: any) {
                 <Image
                   source={avatar.image}
                   style={styles.avatarOptionImage}
-                  resizeMode="contain"
+                  resizeMode="cover"
                 />
                 <Text style={styles.avatarOptionText}>{avatar.label}</Text>
               </TouchableOpacity>
