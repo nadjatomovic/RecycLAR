@@ -14,9 +14,11 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ExpoAsset from "expo-asset";
 import * as ImageManipulator from "expo-image-manipulator";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
 import { styles as s } from "../styles/ScannerScreen.styles";
+import { collection, getDocs, doc, getDoc, addDoc, serverTimestamp } from "firebase/firestore";
+
+
 
 // ─── TFLite (safe import) ─────────────────────────────────────────────────────
 let useTensorflowModel: any = null;
@@ -165,6 +167,23 @@ const preprocessImage = async (imageUri: string): Promise<Float32Array | null> =
   } catch (e) {
     console.error("Preprocess error:", e);
     return null;
+  }
+};
+
+
+// Save photo for scanner
+
+const saveScanForTraining = async (photoUri: string, predictedClass: string, confidence: number) => {
+  try {
+    await addDoc(collection(db, "training_scans"), {
+      predictedClass,
+      confidence,
+      timestamp: serverTimestamp(),
+      needsReview: confidence < 80,
+    });
+    console.log("✅ Scan shranjen:", predictedClass);
+  } catch (e) {
+    console.log("Training save failed:", e);
   }
 };
 
@@ -339,6 +358,7 @@ const prepareModel = async () => {
         const tfliteResult = await runTFLiteModel(pic.uri);
         if (tfliteResult && tfliteResult.confidence >= 40) {
           await showResult(tfliteResult.className, tfliteResult.confidence);
+          saveScanForTraining(pic.uri, tfliteResult.className, tfliteResult.confidence);
           setLoading(false);
           return;
         }
