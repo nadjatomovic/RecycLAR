@@ -13,6 +13,7 @@ import QuizScreen from "./screens/QuizScreen";
 import LeaderboardScreen from "./screens/LeaderBoardScreen";
 import AchievementsScreen from "./screens/AchievementsScreen";
 import ActivityHistoryScreen from "./screens/ActivityHistoryScreen";
+import EditProfileScreen from "./screens/EditProfileScreen";
 
 export type RootStackParamList = {
   Home: undefined;
@@ -27,6 +28,7 @@ export type RootStackParamList = {
   Leaderboard: undefined;
   Achievements: undefined;
   ActivityHistory: undefined;
+  EditProfile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,6 +47,7 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="BinDetail" component={BinDetailScreen} />
         <Stack.Screen name="Scanner" component={ScannerScreen} />
         <Stack.Screen name="Quiz" component={QuizScreen} />

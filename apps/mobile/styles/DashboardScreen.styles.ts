@@ -79,9 +79,10 @@ export const styles = StyleSheet.create({
   },
 
   placeholderSpacer: {
-    width: 44,
+    width: 44, 
   },
 
+ 
   welcomeSection: {
     marginBottom: 18,
   },
@@ -162,7 +163,7 @@ export const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  /* ================= СТИЛОВИ ЗА НОВИОТ DROPDOWN ИЗБОР ================= */
+
   dropdownContainer: {
     backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
@@ -189,7 +190,7 @@ export const styles = StyleSheet.create({
   },
 
   dropdownItemActive: {
-    backgroundColor: "#F0FDF4", // Нежна зелена позадина за селектираниот град
+    backgroundColor: "#F0FDF4", 
   },
 
   dropdownItemText: {
@@ -209,30 +210,78 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  /* ================= МАСКОТА И ЗБОРУВАЊЕ ================= */
   mascotArea: {
-    height: isSmallPhone ? 142 : 168,
-    marginBottom: 8,
-    position: "relative",
-  },
+  height: isSmallPhone ? 170 : 205,
+  marginBottom: 4,
+  position: "relative",
+},
 
-  speechBubble: {
-    position: "absolute",
-    left: 0,
-    top: isSmallPhone ? 18 : 24,
-    maxWidth: width * 0.54,
-    backgroundColor: COLORS.white,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    borderRadius: 22,
-    zIndex: 2,
+mascotImage: {
+  width: "100%",
+  height: "100%",
+  backgroundColor: "transparent",
+},
 
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 3,
-  },
+speechBubble: {
+  position: "absolute",
+  left: 0,
+  top: isSmallPhone ? 56 : 68,
+  width: width * 0.46,
+  backgroundColor: COLORS.white,
+  paddingHorizontal: 15,
+  paddingVertical: 14,
+  borderRadius: 24,
+  zIndex: 2,
+
+  shadowColor: "#000",
+  shadowOpacity: 0.14,
+  shadowRadius: 18,
+  shadowOffset: { width: 0, height: 10 },
+  elevation: 8,
+},
+
+speechBubbleTail: {
+  position: "absolute",
+  right: -10,
+  top: 34,
+  width: 0,
+  height: 0,
+  borderTopWidth: 10,
+  borderBottomWidth: 10,
+  borderLeftWidth: 14,
+  borderTopColor: "transparent",
+  borderBottomColor: "transparent",
+  borderLeftColor: COLORS.white,
+},
+
+speechBubbleTailShadow: {
+  position: "absolute",
+  right: -12,
+  top: 36,
+  width: 0,
+  height: 0,
+  borderTopWidth: 11,
+  borderBottomWidth: 11,
+  borderLeftWidth: 15,
+  borderTopColor: "transparent",
+  borderBottomColor: "transparent",
+  borderLeftColor: "rgba(0,0,0,0.08)",
+},
+
+
+mascotShadowWrap: {
+  position: "absolute",
+  right: -18,
+  top: isSmallPhone ? -4 : -8,
+  width: isSmallPhone ? 185 : 225,
+  height: isSmallPhone ? 185 : 225,
+
+  shadowColor: "#000",
+  shadowOpacity: 0.10,
+  shadowRadius: 18,
+  shadowOffset: { width: 0, height: 10 },
+  elevation: 6,
+},
 
   speechText: {
     fontSize: 15,
@@ -245,66 +294,115 @@ export const styles = StyleSheet.create({
     color: COLORS.purple,
     fontWeight: "900",
   },
+  
+scanButton: {
+  minHeight: 96,
+  borderRadius: 32,
+  backgroundColor: COLORS.green,
+  flexDirection: "row",
+  alignItems: "center",
+  paddingLeft: 15,
+  paddingRight: 12,
+  paddingVertical: 14,
+  marginBottom: 22,
+  position: "relative",
+  overflow: "hidden",
 
-  mascotImage: {
-    position: "absolute",
-    right: -8,
-    bottom: 0,
-    width: isSmallPhone ? 140 : 170,
-    height: isSmallPhone ? 140 : 170,
-  },
+  shadowColor: COLORS.green,
+  shadowOpacity: 0.35,
+  shadowRadius: 24,
+  shadowOffset: { width: 0, height: 12 },
+  elevation: 9,
+},
 
-  /* ================= КОПЧЕ ЗА СКЕНИРАЊЕ ================= */
-  scanButton: {
-    height: 64,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.green,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    marginBottom: 18,
+ scanGlowCircle: {
+  position: "absolute",
+  right: -38,
+  top: -42,
+  width: 138,
+  height: 138,
+  borderRadius: 69,
+  backgroundColor: "rgba(255,255,255,0.16)",
+},
 
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.24,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
-  },
+scanIconCircle: {
+  width: 62,
+  height: 62,
+  borderRadius: 31,
+  backgroundColor: "rgba(255,255,255,0.22)",
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: 14,
+  borderWidth: 1.5,
+  borderColor: "rgba(255,255,255,0.45)",
+},
 
-  scanCameraIcon: {
-    position: "absolute",
-    left: 22,
-    width: 30,
-    height: 30,
-  },
+scanCameraIcon: {
+  width: 34,
+  height: 34,
+},
 
-  scanButtonText: {
-    color: COLORS.white,
-    fontSize: FONT.button,
-    fontWeight: "900",
-    letterSpacing: 0.1,
-  },
+ scanTextWrap: {
+  flex: 1,
+  paddingRight: 8,
+},
 
-  scanArrowCircle: {
-    position: "absolute",
-    right: 10,
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: COLORS.white,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+scanBadge: {
+  alignSelf: "flex-start",
+  paddingHorizontal: 9,
+  paddingVertical: 4,
+  borderRadius: 999,
+  backgroundColor: "rgba(255,255,255,0.22)",
+  marginBottom: 6,
+},
 
-  scanArrow: {
-    color: COLORS.green,
-    fontSize: 38,
-    lineHeight: 38,
-    marginTop: -3,
-    fontWeight: "800",
-  },
+scanBadgeText: {
+  color: COLORS.white,
+  fontSize: 10,
+  fontWeight: "900",
+  letterSpacing: 0.9,
+},
 
-  /* ================= СЕКЦИИ И КАНТИ ================= */
+scanButtonText: {
+  color: COLORS.white,
+  fontSize: isSmallPhone ? 21 : 23,
+  lineHeight: isSmallPhone ? 25 : 28,
+  fontWeight: "900",
+  letterSpacing: -0.3,
+},
+
+scanButtonSubtext: {
+  marginTop: 3,
+  color: "rgba(255,255,255,0.88)",
+  fontSize: 12,
+  lineHeight: 16,
+  fontWeight: "700",
+},
+
+scanArrowCircle: {
+  width: 48,
+  height: 48,
+  borderRadius: 24,
+  backgroundColor: COLORS.white,
+  alignItems: "center",
+  justifyContent: "center",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.10,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 3,
+},
+
+scanArrow: {
+  color: COLORS.green,
+  fontSize: 40,
+  lineHeight: 40,
+  marginTop: -3,
+  fontWeight: "900",
+},
+
+
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -474,7 +572,6 @@ export const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-  /* ================= ЛИНК НАПАТСТВИЕ ЗА НАЈАВА ================= */
   loginHint: {
     minHeight: 44,
     flexDirection: "row",
