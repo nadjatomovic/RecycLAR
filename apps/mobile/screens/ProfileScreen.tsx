@@ -244,6 +244,9 @@ export default function ProfileScreen({ navigation }: any) {
     useState(false);
   const [selectedNotification, setSelectedNotification] =
     useState<NotificationData | null>(null);
+  const [notificationsTab, setNotificationsTab] = useState<"unread" | "all">(
+  "unread"
+);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -495,10 +498,14 @@ export default function ProfileScreen({ navigation }: any) {
     recentActivities,
     navigation,
     onSignOut: handleSignOut,
-    onOpenAvatar: () => setAvatarModalVisible(true),
-    onOpenEdit: () => setEditModalVisible(true),
+    onOpenAvatar: () => navigation.navigate("EditProfile"),
+    onOpenEdit: () => navigation.navigate("EditProfile"),
     notifications,
-    onOpenNotifications: () => setNotificationsModalVisible(true),
+    onOpenNotifications: () => {
+      setSelectedNotification(null);
+      setNotificationsTab("unread");
+      setNotificationsModalVisible(true);
+    },
   };
 
   return (
@@ -528,6 +535,8 @@ export default function ProfileScreen({ navigation }: any) {
         visible={notificationsModalVisible}
         notifications={notifications}
         selectedNotification={selectedNotification}
+        activeTab={notificationsTab}
+        onChangeTab={setNotificationsTab}
         onOpenNotification={handleOpenNotification}
         onBackToList={handleBackToNotificationsList}
         onClose={handleCloseNotifications}
@@ -1020,16 +1029,23 @@ function ActivityCard({ title, items, onViewAll }: any) {
       ))}
     </View>
   );
-}
-
-function NotificationsModal({
+}function NotificationsModal({
   visible,
   notifications,
   selectedNotification,
+  activeTab,
+  onChangeTab,
   onOpenNotification,
   onBackToList,
   onClose,
 }: any) {
+  const unreadNotifications = notifications.filter(
+    (item: NotificationData) => !item.read
+  );
+
+  const visibleNotifications =
+    activeTab === "unread" ? unreadNotifications : notifications;
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.modalOverlay}>
@@ -1039,31 +1055,91 @@ function NotificationsModal({
           onPress={onClose}
         />
 
-        <View style={styles.modalContent}>
+        <View style={styles.notificationsModalContent}>
           <View style={styles.modalHandle} />
 
           {!selectedNotification ? (
             <>
               <Text style={styles.modalTitle}>Obvestila</Text>
+
               <Text style={styles.modalSubtitle}>
-                Tukaj vidiš pomembne novice, dosežke in opomnike.
+                Spremljaj nove dosežke, kvize, streak in pomembne dogodke.
               </Text>
 
-              {notifications.length === 0 ? (
+              <View style={styles.notificationsTabs}>
+                <TouchableOpacity
+                  style={[
+                    styles.notificationTab,
+                    activeTab === "unread" && styles.notificationTabActive,
+                  ]}
+                  activeOpacity={0.85}
+                  onPress={() => onChangeTab("unread")}
+                >
+                  <Text
+                    style={[
+                      styles.notificationTabText,
+                      activeTab === "unread" &&
+                        styles.notificationTabTextActive,
+                    ]}
+                  >
+                    Nova
+                  </Text>
+
+                  {unreadNotifications.length > 0 && (
+                    <View style={styles.notificationTabBadge}>
+                      <Text style={styles.notificationTabBadgeText}>
+                        {unreadNotifications.length > 9
+                          ? "9+"
+                          : unreadNotifications.length}
+                      </Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.notificationTab,
+                    activeTab === "all" && styles.notificationTabActive,
+                  ]}
+                  activeOpacity={0.85}
+                  onPress={() => onChangeTab("all")}
+                >
+                  <Text
+                    style={[
+                      styles.notificationTabText,
+                      activeTab === "all" && styles.notificationTabTextActive,
+                    ]}
+                  >
+                    Vsa obvestila
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {visibleNotifications.length === 0 ? (
                 <View style={styles.emptyNotificationsBox}>
-                  <Text style={styles.emptyNotificationsIcon}>🔔</Text>
+                  <Text style={styles.emptyNotificationsIcon}>
+                    {activeTab === "unread" ? "🎉" : "🔔"}
+                  </Text>
 
                   <Text style={styles.emptyNotificationsTitle}>
-                    Ni novih obvestil
+                    {activeTab === "unread"
+                      ? "Vse si prebrala!"
+                      : "Ni obvestil"}
                   </Text>
 
                   <Text style={styles.emptyNotificationsText}>
-                    Ko se zgodi kaj pomembnega, se bo prikazalo tukaj.
+                    {activeTab === "unread"
+                      ? "Trenutno nimaš novih obvestil. Ko se zgodi kaj pomembnega, se bo prikazalo tukaj."
+                      : "Ko zaključiš kviz, odkleneš nivo ali dosežeš streak, se bodo obvestila prikazala tukaj."}
                   </Text>
                 </View>
               ) : (
-                <View style={styles.notificationsList}>
-                  {notifications.map((item: NotificationData) => (
+                <ScrollView
+                  style={styles.notificationsScroll}
+                  contentContainerStyle={styles.notificationsScrollContent}
+                  showsVerticalScrollIndicator={false}
+                >
+                  {visibleNotifications.map((item: NotificationData) => (
                     <TouchableOpacity
                       key={item.id ?? item.title}
                       activeOpacity={0.85}
@@ -1080,12 +1156,16 @@ function NotificationsModal({
                       </View>
 
                       <View style={styles.notificationItemContent}>
-                        <Text
-                          style={styles.notificationItemTitle}
-                          numberOfLines={1}
-                        >
-                          {item.title}
-                        </Text>
+                        <View style={styles.notificationTitleRow}>
+                          <Text
+                            style={styles.notificationItemTitle}
+                            numberOfLines={1}
+                          >
+                            {item.title}
+                          </Text>
+
+                          {!item.read && <View style={styles.unreadMiniDot} />}
+                        </View>
 
                         <Text
                           style={styles.notificationItemMessage}
@@ -1099,12 +1179,10 @@ function NotificationsModal({
                         </Text>
                       </View>
 
-                      {!item.read && <View style={styles.unreadMiniDot} />}
-
                       <Text style={styles.notificationChevron}>›</Text>
                     </TouchableOpacity>
                   ))}
-                </View>
+                </ScrollView>
               )}
 
               <TouchableOpacity style={styles.modalCloseBtn} onPress={onClose}>
@@ -1113,6 +1191,14 @@ function NotificationsModal({
             </>
           ) : (
             <>
+              <TouchableOpacity
+                style={styles.notificationBackBtn}
+                activeOpacity={0.85}
+                onPress={onBackToList}
+              >
+                <Text style={styles.notificationBackText}>‹ Nazaj</Text>
+              </TouchableOpacity>
+
               <View style={styles.notificationDetailIcon}>
                 <Text style={styles.notificationDetailEmoji}>
                   {selectedNotification.icon}

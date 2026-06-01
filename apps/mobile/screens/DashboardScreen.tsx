@@ -229,27 +229,47 @@ const DashboardScreen = ({ navigation, route }: any) => {
               <Text style={styles.speechStrong}>Skeniraj odpadek</Text> in
               {"\n"}takoj preveri, kam spada!
             </Text>
+
+            <View style={styles.speechBubbleTailShadow} />
+            <View style={styles.speechBubbleTail} />
           </View>
-         <LottieView
-         source={require("../assets/animations/MahanjeAnimacija.json")}
-         style={styles.mascotImage}
-         autoPlay
-         loop
-         resizeMode="contain"
-         />
+         <View style={styles.mascotShadowWrap}>
+            <LottieView
+              source={require("../assets/animations/MahanjeAnimacija.json")}
+              style={styles.mascotImage}
+              autoPlay
+              loop
+              resizeMode="contain"
+            />
+          </View>
         </View>
 
         <TouchableOpacity
           style={styles.scanButton}
-          activeOpacity={0.9}
+          activeOpacity={0.92}
           onPress={() => navigation.navigate("Scanner")}
         >
-          <Image
-            source={require("../assets/camera-icon.png")}
-            style={styles.scanCameraIcon}
-            resizeMode="contain"
-          />
-          <Text style={styles.scanButtonText}>Začni skeniranje</Text>
+          <View style={styles.scanGlowCircle} />
+
+          <View style={styles.scanIconCircle}>
+            <Image
+              source={require("../assets/camera-icon.png")}
+              style={styles.scanCameraIcon}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View style={styles.scanTextWrap}>
+            <View style={styles.scanBadge}>
+              <Text style={styles.scanBadgeText}>SKENER Z AI-TEHNOLOGIJO</Text>
+            </View>
+
+            <Text style={styles.scanButtonText}>Začni skeniranje</Text>
+            <Text style={styles.scanButtonSubtext}>
+              Fotografiraj odpadek in takoj preveri kam spada
+            </Text>
+          </View>
+
           <View style={styles.scanArrowCircle}>
             <Text style={styles.scanArrow}>›</Text>
           </View>

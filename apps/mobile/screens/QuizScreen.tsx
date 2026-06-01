@@ -8,6 +8,7 @@ import {
   Alert,
   Animated,
   Image,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
@@ -27,6 +28,7 @@ import BottomNavBar from "../components/BottomNavBar";
 import { generateAllQuestions } from "../utils/generateQuestions";
 import { styles as s } from "../styles/QuizScreen.styles";
 import LottieView from "lottie-react-native";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 type Question = {
   id: string;
@@ -187,6 +189,121 @@ const defaultProgress = (): TopicProgress => ({
   completedLevels: [],
 });
 
+
+function AnswerFeedbackOverlay({
+  visible,
+  isCorrect,
+  correctAnswer,
+  points,
+  isLastQuestion,
+  onNext,
+}: {
+  visible: boolean;
+  isCorrect: boolean;
+  correctAnswer: string;
+  points: number;
+  isLastQuestion: boolean;
+  onNext: () => void;
+}) {
+  return (
+    <Modal
+      visible={visible}
+      transparent={false}
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onNext}
+    >
+      <SafeAreaView
+        style={[
+          {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 24,
+            paddingVertical: 24,
+          },
+          { backgroundColor: isCorrect ? "#DCFCE7" : "#FEE2E2" },
+        ]}
+      >
+        {isCorrect && (
+          <ConfettiCannon
+            count={140}
+            origin={{ x: 190, y: -10 }}
+            autoStart
+            fadeOut
+            explosionSpeed={350}
+            fallSpeed={2800}
+          />
+        )}
+
+        <View
+          style={[
+            s.feedbackCard,
+            isCorrect ? s.feedbackCardCorrect : s.feedbackCardWrong,
+          ]}
+        >
+          <LottieView
+            key={isCorrect ? "correct-fullscreen" : "wrong-fullscreen"}
+            source={
+              isCorrect
+                ? require("../assets/animations/TacanAnimacija.json")
+                : require("../assets/animations/NetacnoAnimacija.json")
+            }
+            style={s.feedbackAnimationLarge}
+            autoPlay
+            loop
+            resizeMode="contain"
+          />
+
+          <Text
+            style={[
+              s.feedbackTitle,
+              { color: isCorrect ? "#16A34A" : "#EF4444" },
+            ]}
+          >
+            {isCorrect ? "Bravo!" : "Skoraj!"}
+          </Text>
+
+          <Text style={s.feedbackSubtitle}>
+            {isCorrect
+              ? `Osvojila si +${points} točk.`
+              : `Pravilen odgovor je: ${correctAnswer}`}
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              s.feedbackNextButton,
+              { backgroundColor: isCorrect ? "#22C55E" : "#6B35C9" },
+            ]}
+            activeOpacity={0.9}
+            onPress={onNext}
+          >
+            <Text style={s.feedbackNextButtonText}>
+              {isLastQuestion ? "ZAKLJUČI ✅" : "NASLEDNJE VPRAŠANJE →"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    </Modal>
+  );
+}
+
+
+const getLocalDateKey = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const getYesterdayDateKey = () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  return getLocalDateKey(yesterday);
+};
+
 export default function QuizScreen({ navigation }: any) {
   const currentUser = auth.currentUser;
 
@@ -220,6 +337,7 @@ export default function QuizScreen({ navigation }: any) {
   const [score, setScore] = useState(0);
   const [gainedPoints, setGainedPoints] = useState(0);
   const [levelUnlocked, setLevelUnlocked] = useState(false);
+  const [showFeedbackOverlay, setShowFeedbackOverlay] = useState(false);
 
   const bounceAnim = useRef(new Animated.Value(1)).current;
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -434,6 +552,7 @@ export default function QuizScreen({ navigation }: any) {
       setScore(0);
       setGainedPoints(0);
       setLevelUnlocked(false);
+      setShowFeedbackOverlay(false);
       setCurrentScreen("quiz");
     } catch (e) {
       console.log("Quiz loading error:", e);
@@ -497,9 +616,13 @@ export default function QuizScreen({ navigation }: any) {
         }),
       ]).start();
     }
+
+    setShowFeedbackOverlay(true);
   };
 
   const nextQuestion = async () => {
+    setShowFeedbackOverlay(false);
+
     if (currentQuestionIndex + 1 < questions.length) {
       setCurrentQuestionIndex((previousIndex) => previousIndex + 1);
       setSelectedAnswerIndex(null);
@@ -511,12 +634,117 @@ export default function QuizScreen({ navigation }: any) {
     setCurrentScreen("result");
   };
 
+const updateUserStreak = async (userId: string) => {
+  const userRef = doc(db, "users", userId);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    return null;
+  }
+
+  const data = userSnap.data();
+
+  const lastActiveDate = data.lastActiveDate;
+  const currentStreak = data.streakDays ?? 0;
+
+  const todayKey = getLocalDateKey();
+  const yesterdayKey = getYesterdayDateKey();
+
+  if (lastActiveDate === todayKey) {
+    return null;
+  }
+
+  const newStreak =
+    lastActiveDate === yesterdayKey ? currentStreak + 1 : 1;
+
+  await updateDoc(userRef, {
+    streakDays: newStreak,
+    lastActiveDate: todayKey,
+    updatedAt: serverTimestamp(),
+  });
+
+  return newStreak;
+};
+
+const addUserNotification = async ({
+  title,
+  message,
+  type,
+  icon,
+}: {
+  title: string;
+  message: string;
+  type: string;
+  icon: string;
+}) => {
+  if (!currentUser) return;
+
+  await addDoc(collection(db, "users", currentUser.uid, "notifications"), {
+    title,
+    message,
+    type,
+    icon,
+    read: false,
+    time: "Pravkar",
+    createdAt: serverTimestamp(),
+  });
+};
+
+const addStreakMilestoneNotification = async (streakDays: number) => {
+  const milestones: Record<number, { title: string; message: string; icon: string }> = {
+    3: {
+      title: "Streak se začenja!",
+      message: "Aktivna si 3 dni zapored. Odličen začetek!",
+      icon: "🔥",
+    },
+    7: {
+      title: "Teden dni zapored!",
+      message: "Aktivna si že 7 dni zapored. Tvoj eko streak raste!",
+      icon: "🔥",
+    },
+    14: {
+      title: "Dva tedna aktivnosti!",
+      message: "Že 14 dni zapored skrbiš za svoje eko znanje. Bravo!",
+      icon: "🌱",
+    },
+    30: {
+      title: "Mesec dni streaka!",
+      message: "30 dni zapored! To je že prava eko navada.",
+      icon: "🏆",
+    },
+    100: {
+      title: "100 dni zapored!",
+      message: "Neverjetno — aktivna si 100 dni zapored. Eko legenda v nastajanju!",
+      icon: "💎",
+    },
+    365: {
+      title: "Eno leto eko streaka!",
+      message: "365 dni zapored! To je izjemen dosežek.",
+      icon: "👑",
+    },
+  };
+
+  const milestone = milestones[streakDays];
+
+  if (!milestone) {
+    return;
+  }
+
+  await addUserNotification({
+    title: milestone.title,
+    message: milestone.message,
+    type: `streak_${streakDays}`,
+    icon: milestone.icon,
+  });
+};
+
   const saveResults = async () => {
     if (!currentUser) return;
 
     try {
       const progress = getProgress(selectedTopic);
       const levelObj = LEVELS.find((item) => item.level === selectedLevel)!;
+      const topic = TOPICS.find((item) => item.id === selectedTopic)!;
 
       const newLevelPoints = Math.min(
         progress.levelPoints + gainedPoints,
@@ -572,6 +800,61 @@ export default function QuizScreen({ navigation }: any) {
   [`topicProgress.${selectedTopic}.levelPoints`]: newLevelPointsAfterReset,
   [`topicProgress.${selectedTopic}.completedLevels`]: newCompletedLevels,
 });
+
+const newStreak = await updateUserStreak(currentUser.uid);
+if (newStreak && newStreak > 1) {
+  await addStreakMilestoneNotification(newStreak);
+}
+
+await addDoc(collection(db, "users", currentUser.uid, "activities"), {
+  icon: "❓",
+  iconBg: "#EDE9FE",
+  title: "Zaključen kviz",
+  description: `${topic.label} · Nivo ${selectedLevel}`,
+  points: `+${gainedPoints} točk`,
+  pointsColor: "#35A936",
+  type: "quiz",
+  time: "Pravkar",
+  createdAt: serverTimestamp(),
+});
+
+await addUserNotification({
+  title: "Kviz zaključen!",
+  message: `Zaključila si kviz ${topic.label} · Nivo ${selectedLevel} in osvojila ${gainedPoints} točk.`,
+  type: "quiz",
+  icon: "❓",
+});
+
+if (score === questions.length) {
+  await addUserNotification({
+    title: "Popoln rezultat!",
+    message: `Odgovorila si pravilno na vseh ${questions.length} vprašanj. Odlično!`,
+    type: "perfect_quiz",
+    icon: "🏆",
+  });
+}
+
+if (justCompleted && selectedLevel < 10) {
+  await addUserNotification({
+    title: "Nov nivo odklenjen!",
+    message: `Odklenila si Nivo ${selectedLevel + 1}. Nadaljuj z eko potjo!`,
+    type: "level_unlocked",
+    icon: "🚀",
+  });
+}
+
+if (newStreak && newStreak > 1) {
+  await addStreakMilestoneNotification(newStreak);
+
+  if (![3, 7, 14, 30, 100, 365].includes(newStreak)) {
+    await addUserNotification({
+      title: "Streak se nadaljuje!",
+      message: `Aktivna si že ${newStreak} dni zapored. Bravo!`,
+      type: "streak",
+      icon: "🔥",
+    });
+  }
+}
 
       setTotalPoints((previousPoints) => previousPoints + gainedPoints);
     } catch (e) {
@@ -885,11 +1168,7 @@ export default function QuizScreen({ navigation }: any) {
     const isDone = progress.completedLevels.includes(levelObj.level);
 
     const nodePosition = ZIGZAG[index] ?? { left: 0.5 };
-    const nextNodePosition = ZIGZAG[index + 1] ?? { left: 0.5 };
-
     const leftPercent = `${nodePosition.left * 100}%`;
-    const rotateDeg =
-      nextNodePosition.left > nodePosition.left ? "28deg" : "-28deg";
 
     const progressText = isDone
       ? "Končano"
@@ -1146,38 +1425,7 @@ export default function QuizScreen({ navigation }: any) {
             );
           })}
 
-{isAnswered && (
-  <View
-    style={[
-      s.answerFeedbackCard,
-      {
-        borderColor: answerIsCorrect ? "#BBF7D0" : "#FECACA",
-        backgroundColor: answerIsCorrect ? "#F0FDF4" : "#FEF2F2",
-      },
-    ]}
-  >
-    <LottieView
-      key={answerIsCorrect ? "correct" : "wrong"}
-      source={
-        answerIsCorrect
-          ? require("../assets/animations/TacanAnimacija.json")
-          : require("../assets/animations/NetacnoAnimacija.json")
-      }
-      style={s.answerFeedbackAnimation}
-      autoPlay
-      loop
-      resizeMode="contain"
-    />
-
-    <Text style={s.answerFeedbackText}>
-      {answerIsCorrect
-        ? "Super, pravilno si odgovorila. Nadaljuj!"
-        : "Pravilen odgovor je označen zeleno. Zapomni si za naslednjič."}
-    </Text>
-  </View>
-)}
-
-          {isAnswered && currentQuestion.hint && (
+{isAnswered && currentQuestion.hint && (
             <View style={[s.infoBox, { backgroundColor: "#FEF3C7" }]}>
               <Text style={s.infoIcon}>💡</Text>
               <Text style={[s.infoText, { color: "#92400E" }]}>
@@ -1196,8 +1444,8 @@ export default function QuizScreen({ navigation }: any) {
           )}
         </ScrollView>
 
-        <View style={s.quizBottomAction}>
-          {!isAnswered ? (
+        {!isAnswered && (
+          <View style={s.quizBottomAction}>
             <TouchableOpacity
               style={[
                 s.actionButton,
@@ -1221,20 +1469,17 @@ export default function QuizScreen({ navigation }: any) {
                 POTRDI
               </Text>
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[s.actionButton, { backgroundColor: "#22C55E" }]}
-              onPress={nextQuestion}
-              activeOpacity={0.9}
-            >
-              <Text style={[s.actionButtonText, { color: "#FFFFFF" }]}>
-                {currentQuestionIndex + 1 === questions.length
-                  ? "ZAKLJUČI ✅"
-                  : "NAPREJ →"}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        )}
+
+        <AnswerFeedbackOverlay
+          visible={showFeedbackOverlay}
+          isCorrect={answerIsCorrect}
+          correctAnswer={currentQuestion.answers[currentQuestion.correctIndex]}
+          points={answerIsCorrect ? currentQuestion.points : 0}
+          isLastQuestion={currentQuestionIndex + 1 === questions.length}
+          onNext={nextQuestion}
+        />
       </SafeAreaView>
     );
   }
@@ -1252,7 +1497,6 @@ export default function QuizScreen({ navigation }: any) {
       >
         {levelUnlocked && (
           <View style={s.unlockBanner}>
-            <Text style={s.unlockEmoji}>🎉</Text>
 
             <Text style={s.unlockTitle}>
               Nivo {selectedLevel + 1} odklenjen!

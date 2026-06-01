@@ -872,6 +872,98 @@ notificationDetailCloseText: {
   color: COLORS.muted,
   fontSize: 15,
   fontWeight: "800",
-}
+},
+
+notificationsModalContent: {
+  backgroundColor: COLORS.white,
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
+  paddingHorizontal: 22,
+  paddingTop: 12,
+  paddingBottom: 28,
+  maxHeight: "86%",
+},
+
+notificationsTabs: {
+  flexDirection: "row",
+  backgroundColor: "#F7F7FA",
+  borderRadius: 18,
+  padding: 5,
+  marginTop: 14,
+  marginBottom: 14,
+},
+
+notificationTab: {
+  flex: 1,
+  minHeight: 42,
+  borderRadius: 14,
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "row",
+},
+
+notificationTabActive: {
+  backgroundColor: COLORS.white,
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 2,
+},
+
+notificationTabText: {
+  fontSize: 14,
+  color: COLORS.muted,
+  fontWeight: "800",
+},
+
+notificationTabTextActive: {
+  color: COLORS.purple,
+  fontWeight: "900",
+},
+
+notificationTabBadge: {
+  minWidth: 20,
+  height: 20,
+  borderRadius: 10,
+  backgroundColor: COLORS.purple,
+  alignItems: "center",
+  justifyContent: "center",
+  marginLeft: 7,
+  paddingHorizontal: 5,
+},
+
+notificationTabBadgeText: {
+  color: COLORS.white,
+  fontSize: 10,
+  fontWeight: "900",
+},
+
+notificationsScroll: {
+  maxHeight: 390,
+},
+
+notificationsScrollContent: {
+  paddingBottom: 8,
+},
+
+notificationTitleRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 3,
+},
+
+notificationBackBtn: {
+  alignSelf: "flex-start",
+  paddingVertical: 8,
+  paddingRight: 12,
+  marginBottom: 8,
+},
+
+notificationBackText: {
+  fontSize: 16,
+  color: COLORS.purple,
+  fontWeight: "900",
+},
 
 });

@@ -1352,5 +1352,183 @@ answerFeedbackText: {
   color: COLORS.muted,
   fontWeight: "700",
   textAlign: "center",
-}
+},
+
+  feedbackOverlayRoot: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 22,
+  },
+
+  feedbackBackdrop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  feedbackCard: {
+    width: "100%",
+    borderRadius: 34,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 22,
+    paddingTop: 18,
+    paddingBottom: 22,
+    alignItems: "center",
+    borderWidth: 2,
+
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 10,
+  },
+
+  feedbackCardCorrect: {
+    borderColor: "#86EFAC",
+  },
+
+  feedbackCardWrong: {
+    borderColor: "#FCA5A5",
+  },
+
+  feedbackAnimationLarge: {
+    width: isSmallPhone ? 250 : 300,
+    height: isSmallPhone ? 250 : 300,
+    backgroundColor: "transparent",
+    marginBottom: -8,
+  },
+
+  feedbackTitle: {
+    fontSize: 30,
+    lineHeight: 36,
+    fontWeight: "900",
+    textAlign: "center",
+    letterSpacing: -0.4,
+  },
+
+  feedbackSubtitle: {
+    marginTop: 8,
+    marginBottom: 20,
+    fontSize: 16,
+    lineHeight: 23,
+    color: COLORS.muted,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  feedbackNextButton: {
+    width: "100%",
+    borderRadius: RADIUS.pill,
+    paddingVertical: 17,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  feedbackNextButtonText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: "900",
+    letterSpacing: 0.4,
+  },
+
+  feedbackConfettiLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  feedbackConfetti: {
+    position: "absolute",
+    fontSize: 34,
+    opacity: 0.95,
+  },
+
+  feedbackWrongPatternLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+
+  feedbackWrongPatternText: {
+    position: "absolute",
+    fontSize: 42,
+    fontWeight: "900",
+    color: "rgba(239,68,68,0.18)",
+  },
+
+  resultOverlay: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  zIndex: 999,
+  justifyContent: "center",
+  alignItems: "center",
+  paddingHorizontal: 24,
+},
+
+resultCard: {
+  width: "100%",
+  borderRadius: 32,
+  borderWidth: 3,
+  backgroundColor: "#FFFFFF",
+  paddingHorizontal: 20,
+  paddingTop: 22,
+  paddingBottom: 24,
+  alignItems: "center",
+
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.18,
+  shadowRadius: 22,
+  shadowOffset: { width: 0, height: 12 },
+  elevation: 8,
+},
+
+resultLottie: {
+  width: 260,
+  height: 260,
+  backgroundColor: "transparent",
+  marginBottom: -8,
+},
+
+resultFeedbackTitle: {
+  fontSize: 34,
+  fontWeight: "900",
+  textAlign: "center",
+  letterSpacing: -0.5,
+  marginBottom: 6,
+},
+
+resultFeedbackSubtitle: {
+  fontSize: 17,
+  lineHeight: 24,
+  color: COLORS.muted,
+  fontWeight: "800",
+  textAlign: "center",
+  marginBottom: 24,
+},
+
+resultNextButton: {
+  width: "100%",
+  borderRadius: 999,
+  paddingVertical: 18,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+resultNextButtonText: {
+  color: "#FFFFFF",
+  fontSize: 16,
+  fontWeight: "900",
+  letterSpacing: 0.4,
+},
+
 });
