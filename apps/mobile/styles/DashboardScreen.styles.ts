@@ -104,7 +104,6 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  
   locationCard: {
     minHeight: 96,
     borderRadius: RADIUS.lg,
