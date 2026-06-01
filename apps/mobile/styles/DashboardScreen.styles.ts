@@ -16,7 +16,6 @@ export const styles = StyleSheet.create({
     paddingBottom: 110,
   },
 
-  /* ================= ГОРНА ЛЕНТА (СЕГА ПОДДРЖУВА КОПЧЕ НАЗАД И ЛОГО) ================= */
   topBrandRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -80,10 +79,9 @@ export const styles = StyleSheet.create({
   },
 
   placeholderSpacer: {
-    width: 44, // Служи за перфектно флекс-центрирање на логото во средината
+    width: 44,
   },
 
-  /* ================= ПОЗДРАВЕН ДЕЛ ================= */
   welcomeSection: {
     marginBottom: 18,
   },
@@ -105,7 +103,6 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  /* ================= КАРТИЧКА ЗА ЛОКАЦИЈА ================= */
   locationCard: {
     minHeight: 96,
     borderRadius: RADIUS.lg,
@@ -382,7 +379,6 @@ export const styles = StyleSheet.create({
     fontWeight: "900",
   },
 
-  /* ================= ХИТРИ ПРИМЕРИГРИД ================= */
   examplesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
