@@ -14,7 +14,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ExpoAsset from "expo-asset";
 import * as ImageManipulator from "expo-image-manipulator";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, updateDoc, addDoc, increment, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
 import { styles as s } from "../styles/ScannerScreen.styles";
 
@@ -126,6 +126,60 @@ const getLariTip = async (itemName: string, binName: string): Promise<string | n
     return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? null;
   } catch {
     return null;
+  }
+};
+
+const BADGE_RULES = [
+  { id: "plastika-ne",    check: (count: number, points: number, type: string) => type === "packaging" && count >= 20 },
+  { id: "varuh-planeta",  check: (count: number, points: number, type: string) => count >= 30 },
+  { id: "eko-junak",      check: (count: number, points: number, type: string) => points >= 1000 },
+];
+
+const saveScanToFirestore = async (
+  itemName: string,
+  binType: string,
+  binName: string,
+  municipalityId: string
+) => {
+  const userId = auth.currentUser?.uid;
+  if (!userId) return { newBadges: [] };
+
+  try {
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) return { newBadges: [] };
+
+    const data = userSnap.data();
+    const currentBadges: string[] = data.badges ?? [];
+    const newScanCount = (data.scanCount ?? 0) + 1;
+    const newPoints = (data.ekoPoints ?? 0) + 15;
+
+    // Katere značke so novo odklenjene
+    const newBadges = BADGE_RULES
+      .filter(r => !currentBadges.includes(r.id) && r.check(newScanCount, newPoints, binType))
+      .map(r => r.id);
+
+    // Shrani scan dokument
+    await addDoc(collection(db, "scans"), {
+      userId,
+      itemName,
+      binType,
+      municipalityId,
+      pointsEarned: 15,
+      scannedAt: serverTimestamp(),
+    });
+
+    // Posodobi user atomično
+    await updateDoc(userRef, {
+      scanCount: increment(1),
+      ekoPoints: increment(15),
+      ...(newBadges.length > 0 && { badges: arrayUnion(...newBadges) }),
+    });
+
+    return { newBadges };
+  } catch (e) {
+    console.error("saveScan error:", e);
+    return { newBadges: [] };
   }
 };
 
@@ -323,6 +377,11 @@ const prepareModel = async () => {
     const tip = await getLariTip(displayName, bin.name);
     if (tip) {
       setResult({ item: displayName, bin: { ...bin, tip }, binId, confidence });
+    }
+
+    const { newBadges } = await saveScanToFirestore(displayName, binType, bin.name, municipalityId);
+    if (newBadges.length > 0) {
+      Alert.alert("Nova značka!", `Odklenil si: ${newBadges.join(", ")}`, [{ text: "Super!" }]);
     }
   };
 

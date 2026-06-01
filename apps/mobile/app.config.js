@@ -20,6 +20,9 @@ export default {
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.recyclar.app",
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false
+      },
     },
 
     android: {
