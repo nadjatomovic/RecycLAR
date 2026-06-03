@@ -50,19 +50,30 @@ export const styles = StyleSheet.create({
     marginTop: -4,
   },
 
-  brandLogoWrapper: {
+
+  topBrandIcon: {
+    width: 42,
+    height: 42,
+    marginRight: 8,
+},
+
+logoText: {
+    width: 2000,
+    height: 90,
+    marginTop: -8,
+},
+
+locationIcon: {
+    width: 60,
+    height: 60,
+  },
+
+brandLogoWrapper: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
-  },
-
-  topBrandIcon: {
-    width: 46,
-    height: 46,
-    marginRight: 8,
-  },
-
+},
   topBrandText: {
     fontSize: 28,
     lineHeight: 34,
@@ -130,11 +141,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginRight: 15,
-  },
-
-  locationIcon: {
-    width: 34,
-    height: 34,
   },
 
   locationTextWrap: {
@@ -335,8 +341,13 @@ export const styles = StyleSheet.create({
   },
 
   scanCameraIcon: {
-    width: 34,
-    height: 34,
+    width: 60,
+    height: 60,
+  },
+
+  logoHat: {
+    width: 50,
+    height: 50,
   },
 
   scanTextWrap: {

@@ -429,10 +429,6 @@ export default function BinDetailScreen({ route, navigation }: any) {
           onPress={() => navigation.navigate("Login")}
           activeOpacity={0.85}
         >
-          <Text style={styles.loginHintText}>
-            🎓 Želiš preveriti svoje znanje?{" "}
-            <Text style={styles.loginHintLink}>Prijavi se</Text>
-          </Text>
         </TouchableOpacity>
       </ScrollView>
 

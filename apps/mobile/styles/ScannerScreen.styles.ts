@@ -7,10 +7,94 @@ const isSmallPhone = height < 720;
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8FAF5",
-  },
+    backgroundColor: '#000000',
+},
 
+cameraBox: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 0,
+},
+
+buttonsRow: {
+    position: 'absolute',
+    bottom: 90,
+    left: 20,
+    right: 20,
+    zIndex: 10,
+    flexDirection: 'row',
+    gap: 12,
+},
+
+titleRow: {
+    display: 'none',
+},
+
+statusRow: {
+    position: 'absolute',
+    top: 60,
+    right: 16,
+    zIndex: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+},
+
+camera: {
+    flex: 1,
+},
+
+resultsScroll: {
+    display: 'none',
+},
+
+resultsContent: {
+    display: 'none',
+},
+
+mainBtn: {
+    flex: 1,
+    height: 56,
+    borderRadius: 50,
+    backgroundColor: '#22C55E',
+    justifyContent: 'center',
+    alignItems: 'center',
+},
+
+secondBtn: {
+    flex: 1,
+    height: 56,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+},
+
+secondBtnText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+},
+  // ── Header floats over camera ──────────────────────────────────────────────
   header: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     minHeight: 54,
     flexDirection: "row",
     alignItems: "center",
@@ -18,27 +102,22 @@ export const styles = StyleSheet.create({
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 4 : 8,
     paddingBottom: 8,
+    backgroundColor: "transparent",
   },
 
   backBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: COLORS.white,
+    backgroundColor: "rgba(255,255,255,0.18)",
     justifyContent: "center",
     alignItems: "center",
-
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
   },
 
   backText: {
     fontSize: 36,
     lineHeight: 36,
-    color: COLORS.purple,
+    color: COLORS.white,
     marginTop: -4,
     fontWeight: "700",
   },
@@ -47,6 +126,10 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     letterSpacing: -0.2,
+    color: COLORS.white,
+    textShadowColor: "rgba(0,0,0,0.55)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
 
   headerGreen: {
@@ -54,14 +137,10 @@ export const styles = StyleSheet.create({
   },
 
   headerPurple: {
-    color: COLORS.purple,
+    color: COLORS.white,
   },
 
-  titleRow: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: 2,
-    paddingBottom: 12,
-  },
+  // ── titleRow hidden — camera is fullscreen ─────────────────────────────────
 
   title: {
     fontSize: isSmallPhone ? 24 : 28,
@@ -80,24 +159,8 @@ export const styles = StyleSheet.create({
     fontWeight: "500",
   },
 
-  statusRow: {
-    minHeight: 34,
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: RADIUS.pill,
-    backgroundColor: COLORS.white,
-    alignSelf: "flex-start",
-
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-
+  // ── Status badge floats top-right ──────────────────────────────────────────
+  
   statusDot: {
     fontSize: 12,
     marginRight: 6,
@@ -109,77 +172,16 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  cameraBox: {
-    height: isSmallPhone ? 280 : 320,
-    marginHorizontal: SPACING.lg,
-    borderRadius: 16,
-    overflow: "hidden",
-    position: "relative",
-    backgroundColor: "#000",
-
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-
-  camera: {
-    flex: 1,
-  },
-
   photo: {
     width: "100%",
     height: "100%",
   },
 
-  cornerTL: {
-    position: "absolute",
-    top: 18,
-    left: 18,
-    width: 34,
-    height: 34,
-    borderTopWidth: 4,
-    borderLeftWidth: 4,
-    borderColor: COLORS.green,
-    borderTopLeftRadius: 8,
-  },
-
-  cornerTR: {
-    position: "absolute",
-    top: 18,
-    right: 18,
-    width: 34,
-    height: 34,
-    borderTopWidth: 4,
-    borderRightWidth: 4,
-    borderColor: COLORS.green,
-    borderTopRightRadius: 8,
-  },
-
-  cornerBL: {
-    position: "absolute",
-    bottom: 18,
-    left: 18,
-    width: 34,
-    height: 34,
-    borderBottomWidth: 4,
-    borderLeftWidth: 4,
-    borderColor: COLORS.green,
-    borderBottomLeftRadius: 8,
-  },
-
-  cornerBR: {
-    position: "absolute",
-    bottom: 18,
-    right: 18,
-    width: 34,
-    height: 34,
-    borderBottomWidth: 4,
-    borderRightWidth: 4,
-    borderColor: COLORS.green,
-    borderBottomRightRadius: 8,
-  },
+  // ── Corner brackets — white, 3 px, 24 px ──────────────────────────────────
+cornerTL: { display: 'none' },
+cornerTR: { display: 'none' },
+cornerBL: { display: 'none' },
+cornerBR: { display: 'none' },
 
   goodLight: {
     position: "absolute",
@@ -216,49 +218,43 @@ export const styles = StyleSheet.create({
   },
 
   centerLoader: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 25,
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 18,
   },
 
   loadingBinsText: {
     marginTop: 8,
     fontSize: 14,
-    color: COLORS.muted,
+    color: COLORS.white,
     fontWeight: "700",
   },
 
-  resultsScroll: {
-    flex: 1,
-  },
-
-  resultsContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: 16,
-    paddingBottom: 8,
+  // ── Bottom sheet result ────────────────────────────────────────────────────
+  dragHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#E5E7EB",
+    alignSelf: "center",
+    marginBottom: 12,
   },
 
   resultCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.lg,
-    padding: 18,
     marginBottom: 12,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
   },
 
   resultLabel: {
-    fontSize: 13,
-    color: COLORS.muted,
-    marginBottom: 4,
+    fontSize: 12,
+    color: "#9CA3AF",
+    marginBottom: 2,
     marginTop: 4,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 
   resultItemRow: {
@@ -270,10 +266,10 @@ export const styles = StyleSheet.create({
 
   resultItem: {
     flex: 1,
-    fontSize: 23,
+    fontSize: 22,
     lineHeight: 28,
     fontWeight: "700",
-    color: COLORS.green,
+    color: "#111827",
   },
 
   confidenceBadge: {
@@ -291,9 +287,9 @@ export const styles = StyleSheet.create({
   },
 
   resultBin: {
-    fontSize: 20,
-    lineHeight: 25,
-    fontWeight: "700",
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: "600",
     marginBottom: 5,
   },
 
@@ -324,7 +320,6 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     borderWidth: 1,
     borderColor: COLORS.border,
-
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -365,14 +360,10 @@ export const styles = StyleSheet.create({
   },
 
   tipCard: {
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.lg,
-    padding: 16,
+    backgroundColor: "#F5F3FF",
+    borderRadius: 16,
+    padding: 14,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderLeftWidth: 3,
-    borderLeftColor: COLORS.purple,
   },
 
   tipHeader: {
@@ -384,7 +375,7 @@ export const styles = StyleSheet.create({
   tipTitle: {
     fontSize: 15,
     fontWeight: "700",
-    color: COLORS.purple,
+    color: "#7C3AED",
   },
 
   tipText: {
@@ -394,55 +385,13 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  buttonsRow: {
-    flexDirection: "row",
-    columnGap: 10,
-    paddingHorizontal: SPACING.lg,
-    paddingTop: 10,
-    paddingBottom: 12,
-    marginBottom: 96,
-  },
-
-  mainBtn: {
-    flex: 1,
-    minHeight: 58,
-    backgroundColor: COLORS.green,
-    borderRadius: RADIUS.pill,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    justifyContent: "center",
-
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
+  // ── Floating buttons ───────────────────────────────────────────────────────
 
   mainBtnText: {
     color: COLORS.white,
     fontWeight: "700",
     fontSize: 16,
   },
-
-  secondBtn: {
-    flex: 1,
-    minHeight: 58,
-    backgroundColor: COLORS.white,
-    borderRadius: RADIUS.pill,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: COLORS.purple,
-  },
-
-  secondBtnText: {
-    color: COLORS.purple,
-    fontWeight: "700",
-    fontSize: 16,
-  },
-
   btnDisabled: {
     opacity: 0.5,
   },

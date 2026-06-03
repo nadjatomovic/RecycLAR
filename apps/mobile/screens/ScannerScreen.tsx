@@ -9,7 +9,6 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BottomNavBar from "../components/BottomNavBar";
 import DecorativeBackground from "../components/DecorativeBackground";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system/legacy";
@@ -545,7 +544,6 @@ const prepareModel = async () => {
             <Text style={s.mainBtnText}>← Nazaj na kamero</Text>
           </TouchableOpacity>
         </View>
-        <BottomNavBar navigation={navigation} activeRoute="Scanner" />
       </SafeAreaView>
     );
   }
@@ -554,33 +552,25 @@ const prepareModel = async () => {
   return (
     <SafeAreaView style={s.container}>
       <DecorativeBackground variant="scanner" />
-      <View style={s.header}>
-        <View style={{ width: 40 }} />
-        <Text style={s.headerTitle}>
-          <Text style={s.headerGreen}>Recyc</Text>
-          <Text style={s.headerPurple}>LAR</Text>
-        </Text>
-        <View style={{ width: 40 }} />
-      </View>
 
       <View style={s.titleRow}>
         <Text style={s.title}>Skener ✦</Text>
         <Text style={s.subtitle}>Slikaj odpadek ali skeniraj črtno kodo.</Text>
-        <View style={s.statusRow}>
-          {loadingBins ? (
-            <>
-              <ActivityIndicator size="small" color="#22C55E" />
-              <Text style={s.statusText}>Nalagam pravila za {municipalityName}...</Text>
-            </>
-          ) : (
-            <>
-              <Text style={s.statusDot}>{modelReady ? "🟢" : "🟡"}</Text>
-              <Text style={s.statusText}>
-                {modelReady ? `Model aktiven · ${municipalityName}` : `Nalagam model · ${municipalityName}`}
-              </Text>
-            </>
-          )}
-        </View>
+      </View>
+      <View style={s.statusRow}>
+        {loadingBins ? (
+          <>
+            <ActivityIndicator size="small" color="#22C55E" />
+            <Text style={s.statusText}>Nalagam pravila za {municipalityName}...</Text>
+          </>
+        ) : (
+          <>
+            <Text style={s.statusDot}>{modelReady ? "🟢" : "🟡"}</Text>
+            <Text style={s.statusText}>
+              {modelReady ? `Model aktiven · ${municipalityName}` : `Nalagam model · ${municipalityName}`}
+            </Text>
+          </>
+        )}
       </View>
 
       <View style={s.cameraBox}>
@@ -606,6 +596,7 @@ const prepareModel = async () => {
       </View>
 
       <ScrollView style={s.resultsScroll} contentContainerStyle={s.resultsContent}>
+        {result && !loading && <View style={s.dragHandle} />}
         {result && !loading && (
           <View style={s.resultCard}>
             <Text style={s.resultLabel}>Prepoznano:</Text>
@@ -679,7 +670,6 @@ const prepareModel = async () => {
         )}
       </View>
 
-      <BottomNavBar navigation={navigation} activeRoute="Scanner" />
     </SafeAreaView>
   );
 }

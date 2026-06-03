@@ -15,6 +15,11 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
 
+   logoHat: {
+    width: 120,
+    height: 120,
+  },
+
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 8 : 14,

@@ -868,8 +868,11 @@ if (newStreak && newStreak > 1) {
     return (
       <SafeAreaView style={s.whiteContainer}>
         <View style={s.centeredContent}>
-          <Text style={s.lockedIcon}>🎓</Text>
-
+         <Image
+            source={require("../assets/kapa.png")}
+            style={s.logoHat}
+            resizeMode="contain"
+          />
           <Text style={s.lockedTitle}>Kviz je zaklenjen</Text>
 
           <Text style={s.lockedText}>

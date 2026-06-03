@@ -20,6 +20,21 @@ export const styles = StyleSheet.create({
     paddingBottom: 34,
   },
 
+ header: {
+    alignItems: "center",
+},
+
+logoIcon: {
+    width: isSmallPhone ? 104 : 122,
+    height: isSmallPhone ? 104 : 122,
+    marginBottom: -20,
+},
+
+logoText: {
+    width: isSmallPhone ? 340 : 380,
+    height: isSmallPhone ? 120 : 140,
+    marginTop: -40,
+},
   backButton: {
     width: 44,
     height: 44,
@@ -49,20 +64,12 @@ export const styles = StyleSheet.create({
     marginBottom: isSmallPhone ? 18 : 26,
   },
 
-  logoIcon: {
-    width: isSmallPhone ? 92 : 108,
-    height: isSmallPhone ? 92 : 108,
-    marginBottom: -8,
-  },
 
-  logoText: {
-    width: isSmallPhone ? 170 : 200,
-    height: isSmallPhone ? 48 : 56,
-  },
 
   headerSection: {
     marginBottom: 20,
-  },
+    marginTop: -30,
+},
 
   title: {
     fontSize: isSmallPhone ? 24 : 28,

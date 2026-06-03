@@ -138,7 +138,7 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.backText}>‹</Text>
           </TouchableOpacity>
 
-          <View style={styles.logoSection}>
+          <View style={styles.header}>
             <Image
               source={require("../assets/icon-logo.png")}
               style={styles.logoIcon}

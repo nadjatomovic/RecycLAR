@@ -274,24 +274,6 @@ export default function MapScreen({ route, navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <DecorativeBackground variant="map" />
-      <View style={styles.header}>
-        <View style={styles.brandRow}>
-          <Text style={[styles.brandText, styles.brandGreen]}>Recyc</Text>
-          <Text style={[styles.brandText, styles.brandPurple]}>LAR</Text>
-        </View>
-        <View style={styles.cityPill}>
-          <Text style={styles.cityPillText}>📍 {selectedMunicipality}</Text>
-        </View>
-      </View>
-
-      <View style={styles.titleSection}>
-        <View style={styles.titleTextWrap}>
-          <Text style={styles.mainTitle}>Zemljevid</Text>
-          <Text style={styles.subTitle}>
-            Poišči najbližji EKO otok ali zbirni center.
-          </Text>
-        </View>
-      </View>
 
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>

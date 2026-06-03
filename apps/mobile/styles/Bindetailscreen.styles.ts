@@ -245,15 +245,29 @@ export const styles = StyleSheet.create({
   },
 
   exampleCard: {
-    flex: 1,
-    minHeight: 86,
+    backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    backgroundColor: "#F8F8FB",
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 12,
-    justifyContent: "space-between",
-  },
+    padding: 14,
+    flex: 1,
+    marginHorizontal: 4,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+},
+
+lariBubble: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    flex: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+},
 
   exampleLabel: {
     fontSize: 13,
@@ -277,19 +291,12 @@ export const styles = StyleSheet.create({
   },
 
   lariImg: {
-    width: 84,
-    height: 84,
-    marginRight: 12,
-  },
+    width: 120,
+    height: 140,
+    resizeMode: 'contain',
+},
 
-  lariBubble: {
-    flex: 1,
-    backgroundColor: "#F8F8FB",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    padding: 14,
-  },
+
 
   lariLabel: {
     fontSize: 12,
