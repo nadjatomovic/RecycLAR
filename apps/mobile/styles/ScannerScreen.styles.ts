@@ -10,6 +10,46 @@ export const styles = StyleSheet.create({
     backgroundColor: '#000000',
 },
 
+lariImg: {
+    width: 120,
+    height: 140,
+    resizeMode: 'contain',
+},
+
+tipRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginTop: 12,
+    gap: 8,
+},
+
+tipLari: {
+    width: 90,
+    height: 100,
+    resizeMode: 'contain',
+    flexShrink: 0,
+},
+
+tipCard: {
+    flex: 1,
+    backgroundColor: '#F5F3FF',
+    borderRadius: 16,
+    padding: 14,
+},
+
+tipTitle: {
+    color: '#7C3AED',
+    fontSize: 12,
+    fontWeight: '700',
+    marginBottom: 4,
+},
+
+tipText: {
+    fontSize: 14,
+    color: '#374151',
+    lineHeight: 20,
+},
+
 cameraBox: {
     position: 'absolute',
     top: 0,
@@ -17,16 +57,6 @@ cameraBox: {
     right: 0,
     bottom: 0,
     zIndex: 0,
-},
-
-buttonsRow: {
-    position: 'absolute',
-    bottom: 90,
-    left: 20,
-    right: 20,
-    zIndex: 10,
-    flexDirection: 'row',
-    gap: 12,
 },
 
 titleRow: {
@@ -53,14 +83,6 @@ statusRow: {
 
 camera: {
     flex: 1,
-},
-
-resultsScroll: {
-    display: 'none',
-},
-
-resultsContent: {
-    display: 'none',
 },
 
 mainBtn: {
@@ -182,6 +204,35 @@ cornerTL: { display: 'none' },
 cornerTR: { display: 'none' },
 cornerBL: { display: 'none' },
 cornerBR: { display: 'none' },
+
+
+  resultsScroll: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 20,
+    maxHeight: '60%',
+},
+
+resultsContent: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 120,
+},
+
+buttonsRow: {
+    position: 'absolute',
+    bottom: 40,
+    left: 20,
+    right: 20,
+    zIndex: 30,
+    flexDirection: 'row',
+    gap: 12,
+},
 
   goodLight: {
     position: "absolute",
@@ -359,30 +410,11 @@ cornerBR: { display: 'none' },
     fontWeight: "600",
   },
 
-  tipCard: {
-    backgroundColor: "#F5F3FF",
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 8,
-  },
 
   tipHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 5,
-  },
-
-  tipTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#7C3AED",
-  },
-
-  tipText: {
-    fontSize: 14,
-    color: COLORS.text,
-    lineHeight: 21,
-    fontWeight: "600",
   },
 
   // ── Floating buttons ───────────────────────────────────────────────────────
