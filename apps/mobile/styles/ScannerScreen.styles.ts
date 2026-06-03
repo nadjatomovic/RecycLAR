@@ -29,10 +29,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -45,7 +45,7 @@ export const styles = StyleSheet.create({
 
   headerTitle: {
     fontSize: 24,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: -0.2,
   },
 
@@ -64,9 +64,9 @@ export const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: isSmallPhone ? 31 : 34,
-    lineHeight: isSmallPhone ? 36 : 40,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
     letterSpacing: -0.7,
@@ -93,8 +93,8 @@ export const styles = StyleSheet.create({
 
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
 
@@ -112,16 +112,16 @@ export const styles = StyleSheet.create({
   cameraBox: {
     height: isSmallPhone ? 280 : 320,
     marginHorizontal: SPACING.lg,
-    borderRadius: 28,
+    borderRadius: 16,
     overflow: "hidden",
     position: "relative",
     backgroundColor: "#000",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   camera: {
@@ -185,7 +185,7 @@ export const styles = StyleSheet.create({
     position: "absolute",
     top: 14,
     alignSelf: "center",
-    backgroundColor: "rgba(52, 169, 54, 0.95)",
+    backgroundColor: "rgba(34, 197, 94, 0.95)",
     borderRadius: RADIUS.pill,
     paddingHorizontal: 14,
     paddingVertical: 7,
@@ -194,7 +194,7 @@ export const styles = StyleSheet.create({
   goodLightText: {
     color: COLORS.white,
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   loadingOverlay: {
@@ -212,7 +212,7 @@ export const styles = StyleSheet.create({
     color: COLORS.white,
     marginTop: 10,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   centerLoader: {
@@ -247,10 +247,10 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 7 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   resultLabel: {
@@ -272,7 +272,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     fontSize: 23,
     lineHeight: 28,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.green,
   },
 
@@ -286,14 +286,14 @@ export const styles = StyleSheet.create({
 
   confidenceText: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.green,
   },
 
   resultBin: {
     fontSize: 20,
     lineHeight: 25,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 5,
   },
 
@@ -309,7 +309,7 @@ export const styles = StyleSheet.create({
     alignSelf: "flex-start",
     fontSize: 13,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
     backgroundColor: COLORS.purpleSoft,
     paddingHorizontal: 11,
     paddingVertical: 6,
@@ -326,10 +326,10 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   rulesCol: {
@@ -344,14 +344,14 @@ export const styles = StyleSheet.create({
 
   rulesTitle: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#166534",
     marginBottom: 9,
   },
 
   rulesTitleRed: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#DC2626",
     marginBottom: 9,
   },
@@ -365,12 +365,14 @@ export const styles = StyleSheet.create({
   },
 
   tipCard: {
-    backgroundColor: "#F3EEFF",
+    backgroundColor: COLORS.white,
     borderRadius: RADIUS.lg,
     padding: 16,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#D9C8FF",
+    borderColor: COLORS.border,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.purple,
   },
 
   tipHeader: {
@@ -381,7 +383,7 @@ export const styles = StyleSheet.create({
 
   tipTitle: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.purple,
   },
 
@@ -392,14 +394,14 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
- buttonsRow: {
-  flexDirection: "row",
-  columnGap: 10,
-  paddingHorizontal: SPACING.lg,
-  paddingTop: 10,
-  paddingBottom: 12,
-  marginBottom: 96,
-},
+  buttonsRow: {
+    flexDirection: "row",
+    columnGap: 10,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 10,
+    paddingBottom: 12,
+    marginBottom: 96,
+  },
 
   mainBtn: {
     flex: 1,
@@ -410,16 +412,16 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
 
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 7 },
-    elevation: 4,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   mainBtnText: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
   },
 
@@ -437,7 +439,7 @@ export const styles = StyleSheet.create({
 
   secondBtnText: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
   },
 
@@ -467,33 +469,33 @@ export const styles = StyleSheet.create({
 
   permBtnText: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
   },
 
   loadingBinsRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 8,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
 
-manualContainer: {
-  flex: 1,
-  paddingHorizontal: SPACING.lg,
-  paddingTop: 26,
-},
+  manualContainer: {
+    flex: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingTop: 26,
+  },
 
-manualInput: {
-  minHeight: 56,
-  borderRadius: 18,
-  borderWidth: 1.5,
-  borderColor: COLORS.border,
-  backgroundColor: COLORS.white,
-  paddingHorizontal: 16,
-  fontSize: 16,
-  color: COLORS.text,
-  fontWeight: "700",
-  marginTop: 18,
-  marginBottom: 16,
-}
+  manualInput: {
+    minHeight: 56,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: COLORS.text,
+    fontWeight: "700",
+    marginTop: 18,
+    marginBottom: 16,
+  },
 });

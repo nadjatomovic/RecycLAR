@@ -30,10 +30,10 @@ export const styles = StyleSheet.create({
     marginBottom: isSmallPhone ? 8 : 14,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -65,9 +65,9 @@ export const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: isSmallPhone ? 36 : 42,
-    lineHeight: isSmallPhone ? 42 : 48,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
     letterSpacing: -0.8,
@@ -83,16 +83,16 @@ export const styles = StyleSheet.create({
 
   formCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 30,
+    borderRadius: 16,
     padding: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   inputGroup: {
@@ -102,13 +102,13 @@ export const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 8,
   },
 
   input: {
     minHeight: 58,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: "#F8F8FB",
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -120,7 +120,7 @@ export const styles = StyleSheet.create({
 
   errorBox: {
     backgroundColor: "#FFF4F4",
-    borderRadius: 18,
+    borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderWidth: 1,
@@ -129,7 +129,7 @@ export const styles = StyleSheet.create({
   },
 
   errorText: {
-    color: "#C62828",
+    color: "#EF4444",
     fontSize: 13,
     lineHeight: 19,
     fontWeight: "700",
@@ -145,7 +145,7 @@ export const styles = StyleSheet.create({
   forgotText: {
     color: COLORS.purple,
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   primaryButton: {
@@ -156,11 +156,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
 
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   disabledButton: {
@@ -170,7 +170,7 @@ export const styles = StyleSheet.create({
   primaryButtonText: {
     color: COLORS.white,
     fontSize: FONT.button,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   arrowCircle: {
@@ -189,13 +189,13 @@ export const styles = StyleSheet.create({
     fontSize: 38,
     lineHeight: 38,
     marginTop: -3,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   infoBox: {
     marginTop: 18,
     backgroundColor: COLORS.greenSoft,
-    borderRadius: 24,
+    borderRadius: 16,
     padding: 16,
     flexDirection: "row",
     alignItems: "flex-start",
@@ -231,10 +231,9 @@ export const styles = StyleSheet.create({
 
   switchLink: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
-  /* ================= НОВИ СТИЛОВИ ЗА МОДАЛОТ ================= */
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -251,10 +250,10 @@ export const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
     shadowColor: COLORS.shadow,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
 
   modalHandle: {
@@ -314,7 +313,7 @@ export const styles = StyleSheet.create({
   modalSubmitButton: {
     backgroundColor: COLORS.green,
     width: "100%",
-    borderRadius: 12,
+    borderRadius: RADIUS.pill,
     paddingVertical: 14,
     alignItems: "center",
     justifyContent: "center",

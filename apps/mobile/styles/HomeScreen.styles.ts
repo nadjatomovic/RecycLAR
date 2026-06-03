@@ -36,9 +36,9 @@ export const styles = StyleSheet.create({
 
   tagline: {
     marginTop: 2,
-    fontSize: isSmallPhone ? 27 : 30,
-    lineHeight: isSmallPhone ? 33 : 37,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.purple,
     textAlign: "center",
     letterSpacing: -0.4,
@@ -84,10 +84,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   dropdownLeft: {
@@ -97,9 +97,9 @@ export const styles = StyleSheet.create({
   },
 
   locationIconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: COLORS.purpleSoft,
     justifyContent: "center",
     alignItems: "center",
@@ -121,7 +121,7 @@ export const styles = StyleSheet.create({
   dropdownLabel: {
     fontSize: 21,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   chevron: {
@@ -140,11 +140,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
 
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.28,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 9 },
-    elevation: 6,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   mainButtonIcon: {
@@ -156,7 +156,7 @@ export const styles = StyleSheet.create({
   mainButtonText: {
     color: COLORS.white,
     fontSize: FONT.button,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.2,
   },
 
@@ -199,7 +199,7 @@ export const styles = StyleSheet.create({
   loginButtonText: {
     color: COLORS.purple,
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   bottomInfo: {
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
     color: COLORS.green,
     fontSize: 15,
     marginRight: 7,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   bottomInfoText: {
@@ -231,8 +231,8 @@ export const styles = StyleSheet.create({
 
   modalContent: {
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingHorizontal: 22,
     paddingTop: 12,
     paddingBottom: 34,
@@ -249,7 +249,7 @@ export const styles = StyleSheet.create({
 
   modalTitle: {
     fontSize: 25,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -265,7 +265,7 @@ export const styles = StyleSheet.create({
     minHeight: 56,
     paddingVertical: 14,
     paddingHorizontal: 18,
-    borderRadius: 18,
+    borderRadius: 16,
     marginBottom: 9,
     backgroundColor: "#F7F7FA",
     flexDirection: "row",
@@ -287,12 +287,12 @@ export const styles = StyleSheet.create({
 
   cityTextActive: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   cityCheck: {
     color: COLORS.purple,
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });

@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 6 : 10,
-    paddingBottom: 112,
+    paddingBottom: 34,
   },
 
   loadingBox: {
@@ -46,10 +46,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
   brandText: {
     fontSize: 26,
     lineHeight: 32,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: -0.3,
   },
 
@@ -91,9 +91,9 @@ export const styles = StyleSheet.create({
   },
 
   screenTitle: {
-    fontSize: isSmallPhone ? 35 : 39,
-    lineHeight: isSmallPhone ? 41 : 45,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     letterSpacing: -0.9,
   },
@@ -108,17 +108,17 @@ export const styles = StyleSheet.create({
   },
 
   activityCard: {
-    borderRadius: 28,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 18,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   activityRow: {
@@ -146,7 +146,7 @@ export const styles = StyleSheet.create({
 
   activityTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 3,
   },
@@ -165,7 +165,7 @@ export const styles = StyleSheet.create({
 
   activityPoints: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 3,
   },
 

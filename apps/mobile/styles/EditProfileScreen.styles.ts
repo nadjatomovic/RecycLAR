@@ -51,10 +51,10 @@ export const styles = StyleSheet.create({
     marginRight: 13,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -70,10 +70,10 @@ export const styles = StyleSheet.create({
   },
 
   screenTitle: {
-    fontSize: isSmallPhone ? 32 : 36,
-    lineHeight: isSmallPhone ? 38 : 42,
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: -0.8,
   },
 
@@ -86,7 +86,7 @@ export const styles = StyleSheet.create({
   },
 
   avatarPreviewCard: {
-    borderRadius: 30,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -96,10 +96,10 @@ export const styles = StyleSheet.create({
     marginBottom: 18,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   avatarPreviewCircle: {
@@ -123,7 +123,7 @@ export const styles = StyleSheet.create({
   avatarPreviewTitle: {
     fontSize: 24,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     textAlign: "center",
   },
 
@@ -136,7 +136,7 @@ export const styles = StyleSheet.create({
   },
 
   sectionCard: {
-    borderRadius: 28,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -144,16 +144,16 @@ export const styles = StyleSheet.create({
     marginBottom: 18,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   sectionTitle: {
     fontSize: 22,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 16,
   },
 
@@ -166,7 +166,7 @@ export const styles = StyleSheet.create({
 
   avatarOption: {
     width: "48%",
-    borderRadius: 22,
+    borderRadius: 16,
     backgroundColor: "#F8F8FB",
     borderWidth: 1.5,
     borderColor: COLORS.border,
@@ -190,12 +190,12 @@ export const styles = StyleSheet.create({
   avatarOptionText: {
     fontSize: 14,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   avatarOptionTextActive: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   selectedCheck: {
@@ -213,19 +213,19 @@ export const styles = StyleSheet.create({
   selectedCheckText: {
     color: COLORS.white,
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   inputLabel: {
     fontSize: 13,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 8,
   },
 
   textInput: {
     minHeight: 56,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: COLORS.border,
     backgroundColor: "#F8F8FB",
@@ -246,7 +246,7 @@ export const styles = StyleSheet.create({
   cityOption: {
     width: "48%",
     minHeight: 50,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1.5,
     borderColor: COLORS.border,
     backgroundColor: "#F8F8FB",
@@ -258,24 +258,24 @@ export const styles = StyleSheet.create({
 
   cityOptionActive: {
     borderColor: COLORS.green,
-    backgroundColor: "#F0FDF4",
+    backgroundColor: COLORS.greenSoft,
   },
 
   cityOptionText: {
     fontSize: 15,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   cityOptionTextActive: {
     color: COLORS.green,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   cityCheck: {
     fontSize: 16,
     color: COLORS.green,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   saveButton: {
@@ -286,11 +286,11 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 12,
 
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.26,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   saveButtonDisabled: {
@@ -300,7 +300,7 @@ export const styles = StyleSheet.create({
   saveButtonText: {
     color: COLORS.white,
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   cancelButton: {
@@ -316,6 +316,6 @@ export const styles = StyleSheet.create({
   cancelButtonText: {
     color: COLORS.muted,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });

@@ -862,45 +862,6 @@ if (newStreak && newStreak > 1) {
     }
   };
 
-  const handleGenerateQuestions = () => {
-    Alert.alert(
-      "🤖 Generiraj AI vprašanja",
-      "Gemini bo ustvaril vprašanja za vse nivoje in teme. To lahko traja nekaj minut.",
-      [
-        {
-          text: "Prekliči",
-          style: "cancel",
-        },
-        {
-          text: "Generiraj ✨",
-          onPress: async () => {
-            setGenerating(true);
-
-            try {
-              const result = await generateAllQuestions(
-                (message, current, total) => {
-                  setGenerateProgress(message);
-                  setGenerateCurrent(current);
-                  setGenerateTotal(total);
-                },
-              );
-
-              Alert.alert(
-                "Končano! ✅",
-                `Uspešno: ${result.success}\nNeuspešno: ${result.failed}`,
-              );
-            } catch (e) {
-              console.log("Generate questions error:", e);
-              Alert.alert("Napaka", "Generiranje ni uspelo.");
-            } finally {
-              setGenerating(false);
-              setGenerateProgress("");
-            }
-          },
-        },
-      ],
-    );
-  };
 
   if (!currentUser) {
     return (
@@ -955,45 +916,6 @@ if (newStreak && newStreak > 1) {
               <Text style={s.pointsText}>⭐ {totalPoints}</Text>
             </View>
           </View>
-
-          {userRole === "teacher" && (
-            <TouchableOpacity
-              style={[
-                s.teacherButton,
-                generating ? s.teacherButtonDisabled : s.teacherButtonActive,
-              ]}
-              onPress={handleGenerateQuestions}
-              disabled={generating}
-              activeOpacity={0.85}
-            >
-              {generating ? (
-                <ActivityIndicator size="small" color="#7C3AED" />
-              ) : (
-                <Text style={s.teacherIcon}>🤖</Text>
-              )}
-
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={[
-                    s.teacherTitle,
-                    generating ? s.teacherTitleDisabled : s.teacherTitleActive,
-                  ]}
-                >
-                  {generating ? "Generiram..." : "Generiraj AI vprašanja"}
-                </Text>
-
-                {generating && generateProgress ? (
-                  <Text style={s.teacherProgress} numberOfLines={1}>
-                    {generateProgress} ({generateCurrent}/{generateTotal})
-                  </Text>
-                ) : (
-                  <Text style={s.teacherSub}>
-                    Gemini AI · vprašanja za vse nivoje
-                  </Text>
-                )}
-              </View>
-            </TouchableOpacity>
-          )}
 
           <Text style={s.sectionTitle}>Izberi temo:</Text>
 

@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 4 : 10,
-    paddingBottom: 110,
+    paddingBottom: 88,
   },
 
   topBrandRow: {
@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.04,
     shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
 
@@ -66,7 +66,7 @@ export const styles = StyleSheet.create({
   topBrandText: {
     fontSize: 28,
     lineHeight: 34,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: -0.5,
   },
 
@@ -79,18 +79,17 @@ export const styles = StyleSheet.create({
   },
 
   placeholderSpacer: {
-    width: 44, 
+    width: 44,
   },
 
- 
   welcomeSection: {
     marginBottom: 18,
   },
 
   welcomeTitle: {
-    fontSize: isSmallPhone ? 34 : 38,
-    lineHeight: isSmallPhone ? 39 : 44,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
     letterSpacing: -0.8,
@@ -117,16 +116,16 @@ export const styles = StyleSheet.create({
     marginBottom: 14,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   locationIconBg: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: COLORS.purpleSoft,
     alignItems: "center",
     justifyContent: "center",
@@ -152,17 +151,16 @@ export const styles = StyleSheet.create({
   locationName: {
     fontSize: 27,
     lineHeight: 32,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.purple,
   },
 
   changeLocation: {
     fontSize: 15,
     color: COLORS.purple,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 2,
   },
-
 
   dropdownContainer: {
     backgroundColor: COLORS.white,
@@ -174,10 +172,10 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   dropdownItem: {
@@ -190,7 +188,7 @@ export const styles = StyleSheet.create({
   },
 
   dropdownItemActive: {
-    backgroundColor: "#F0FDF4", 
+    backgroundColor: COLORS.greenSoft,
   },
 
   dropdownItemText: {
@@ -201,87 +199,86 @@ export const styles = StyleSheet.create({
 
   dropdownItemTextActive: {
     color: COLORS.green,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   dropdownCheckmark: {
     fontSize: 16,
     color: COLORS.green,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   mascotArea: {
-  height: isSmallPhone ? 170 : 205,
-  marginBottom: 4,
-  position: "relative",
-},
+    height: isSmallPhone ? 170 : 205,
+    marginBottom: 4,
+    position: "relative",
+  },
 
-mascotImage: {
-  width: "100%",
-  height: "100%",
-  backgroundColor: "transparent",
-},
+  mascotImage: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "transparent",
+  },
 
-speechBubble: {
-  position: "absolute",
-  left: 0,
-  top: isSmallPhone ? 56 : 68,
-  width: width * 0.46,
-  backgroundColor: COLORS.white,
-  paddingHorizontal: 15,
-  paddingVertical: 14,
-  borderRadius: 24,
-  zIndex: 2,
+  speechBubble: {
+    position: "absolute",
+    left: 0,
+    top: isSmallPhone ? 56 : 68,
+    width: width * 0.46,
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    borderRadius: 16,
+    zIndex: 2,
 
-  shadowColor: "#000",
-  shadowOpacity: 0.14,
-  shadowRadius: 18,
-  shadowOffset: { width: 0, height: 10 },
-  elevation: 8,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-speechBubbleTail: {
-  position: "absolute",
-  right: -10,
-  top: 34,
-  width: 0,
-  height: 0,
-  borderTopWidth: 10,
-  borderBottomWidth: 10,
-  borderLeftWidth: 14,
-  borderTopColor: "transparent",
-  borderBottomColor: "transparent",
-  borderLeftColor: COLORS.white,
-},
+  speechBubbleTail: {
+    position: "absolute",
+    right: -10,
+    top: 34,
+    width: 0,
+    height: 0,
+    borderTopWidth: 10,
+    borderBottomWidth: 10,
+    borderLeftWidth: 14,
+    borderTopColor: "transparent",
+    borderBottomColor: "transparent",
+    borderLeftColor: COLORS.white,
+  },
 
-speechBubbleTailShadow: {
-  position: "absolute",
-  right: -12,
-  top: 36,
-  width: 0,
-  height: 0,
-  borderTopWidth: 11,
-  borderBottomWidth: 11,
-  borderLeftWidth: 15,
-  borderTopColor: "transparent",
-  borderBottomColor: "transparent",
-  borderLeftColor: "rgba(0,0,0,0.08)",
-},
+  speechBubbleTailShadow: {
+    position: "absolute",
+    right: -12,
+    top: 36,
+    width: 0,
+    height: 0,
+    borderTopWidth: 11,
+    borderBottomWidth: 11,
+    borderLeftWidth: 15,
+    borderTopColor: "transparent",
+    borderBottomColor: "transparent",
+    borderLeftColor: "rgba(0,0,0,0.08)",
+  },
 
+  mascotShadowWrap: {
+    position: "absolute",
+    right: -18,
+    top: isSmallPhone ? -4 : -8,
+    width: isSmallPhone ? 185 : 225,
+    height: isSmallPhone ? 185 : 225,
 
-mascotShadowWrap: {
-  position: "absolute",
-  right: -18,
-  top: isSmallPhone ? -4 : -8,
-  width: isSmallPhone ? 185 : 225,
-  height: isSmallPhone ? 185 : 225,
-
-  shadowColor: "#000",
-  shadowOpacity: 0.10,
-  shadowRadius: 18,
-  shadowOffset: { width: 0, height: 10 },
-  elevation: 6,
-},
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
   speechText: {
     fontSize: 15,
@@ -292,116 +289,115 @@ mascotShadowWrap: {
 
   speechStrong: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
-  
-scanButton: {
-  minHeight: 96,
-  borderRadius: 32,
-  backgroundColor: COLORS.green,
-  flexDirection: "row",
-  alignItems: "center",
-  paddingLeft: 15,
-  paddingRight: 12,
-  paddingVertical: 14,
-  marginBottom: 22,
-  position: "relative",
-  overflow: "hidden",
 
-  shadowColor: COLORS.green,
-  shadowOpacity: 0.35,
-  shadowRadius: 24,
-  shadowOffset: { width: 0, height: 12 },
-  elevation: 9,
-},
+  scanButton: {
+    minHeight: 96,
+    borderRadius: 16,
+    backgroundColor: COLORS.green,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 15,
+    paddingRight: 12,
+    paddingVertical: 14,
+    marginBottom: 22,
+    position: "relative",
+    overflow: "hidden",
 
- scanGlowCircle: {
-  position: "absolute",
-  right: -38,
-  top: -42,
-  width: 138,
-  height: 138,
-  borderRadius: 69,
-  backgroundColor: "rgba(255,255,255,0.16)",
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-scanIconCircle: {
-  width: 62,
-  height: 62,
-  borderRadius: 31,
-  backgroundColor: "rgba(255,255,255,0.22)",
-  alignItems: "center",
-  justifyContent: "center",
-  marginRight: 14,
-  borderWidth: 1.5,
-  borderColor: "rgba(255,255,255,0.45)",
-},
+  scanGlowCircle: {
+    position: "absolute",
+    right: -38,
+    top: -42,
+    width: 138,
+    height: 138,
+    borderRadius: 69,
+    backgroundColor: "rgba(255,255,255,0.16)",
+  },
 
-scanCameraIcon: {
-  width: 34,
-  height: 34,
-},
+  scanIconCircle: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.45)",
+  },
 
- scanTextWrap: {
-  flex: 1,
-  paddingRight: 8,
-},
+  scanCameraIcon: {
+    width: 34,
+    height: 34,
+  },
 
-scanBadge: {
-  alignSelf: "flex-start",
-  paddingHorizontal: 9,
-  paddingVertical: 4,
-  borderRadius: 999,
-  backgroundColor: "rgba(255,255,255,0.22)",
-  marginBottom: 6,
-},
+  scanTextWrap: {
+    flex: 1,
+    paddingRight: 8,
+  },
 
-scanBadgeText: {
-  color: COLORS.white,
-  fontSize: 10,
-  fontWeight: "900",
-  letterSpacing: 0.9,
-},
+  scanBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.22)",
+    marginBottom: 6,
+  },
 
-scanButtonText: {
-  color: COLORS.white,
-  fontSize: isSmallPhone ? 21 : 23,
-  lineHeight: isSmallPhone ? 25 : 28,
-  fontWeight: "900",
-  letterSpacing: -0.3,
-},
+  scanBadgeText: {
+    color: COLORS.white,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.9,
+  },
 
-scanButtonSubtext: {
-  marginTop: 3,
-  color: "rgba(255,255,255,0.88)",
-  fontSize: 12,
-  lineHeight: 16,
-  fontWeight: "700",
-},
+  scanButtonText: {
+    color: COLORS.white,
+    fontSize: isSmallPhone ? 21 : 23,
+    lineHeight: isSmallPhone ? 25 : 28,
+    fontWeight: "700",
+    letterSpacing: -0.3,
+  },
 
-scanArrowCircle: {
-  width: 48,
-  height: 48,
-  borderRadius: 24,
-  backgroundColor: COLORS.white,
-  alignItems: "center",
-  justifyContent: "center",
+  scanButtonSubtext: {
+    marginTop: 3,
+    color: "rgba(255,255,255,0.88)",
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "700",
+  },
 
-  shadowColor: "#000",
-  shadowOpacity: 0.10,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 3,
-},
+  scanArrowCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
 
-scanArrow: {
-  color: COLORS.green,
-  fontSize: 40,
-  lineHeight: 40,
-  marginTop: -3,
-  fontWeight: "900",
-},
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
+  scanArrow: {
+    color: COLORS.green,
+    fontSize: 40,
+    lineHeight: 40,
+    marginTop: -3,
+    fontWeight: "700",
+  },
 
   sectionHeader: {
     flexDirection: "row",
@@ -412,7 +408,7 @@ scanArrow: {
 
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
@@ -431,7 +427,7 @@ scanArrow: {
   binCard: {
     width: (width - 62) / 5,
     minHeight: 88,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -440,10 +436,10 @@ scanArrow: {
     paddingVertical: 8,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   binImg: {
@@ -455,7 +451,7 @@ scanArrow: {
   binLabel: {
     fontSize: 11,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
     textAlign: "center",
   },
 
@@ -469,12 +465,12 @@ scanArrow: {
 
   allowedText: {
     color: COLORS.green,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   notAllowedText: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   examplesGrid: {
@@ -488,7 +484,7 @@ scanArrow: {
   exampleCard: {
     width: "48%",
     minHeight: 132,
-    borderRadius: 22,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -498,10 +494,10 @@ scanArrow: {
     justifyContent: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   exampleVisualRow: {
@@ -539,7 +535,7 @@ scanArrow: {
     fontSize: 18,
     lineHeight: 20,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   exampleBinImg: {
@@ -550,7 +546,7 @@ scanArrow: {
   exampleTitle: {
     fontSize: 12,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 3,
     textAlign: "center",
   },
@@ -559,7 +555,7 @@ scanArrow: {
     fontSize: 16,
     lineHeight: 20,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     textAlign: "center",
     maxWidth: "100%",
   },
@@ -568,7 +564,7 @@ scanArrow: {
     marginTop: 2,
     fontSize: 12,
     color: COLORS.muted,
-    fontWeight: "800",
+    fontWeight: "700",
     textAlign: "center",
   },
 
@@ -593,6 +589,6 @@ scanArrow: {
 
   loginHintLink: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });

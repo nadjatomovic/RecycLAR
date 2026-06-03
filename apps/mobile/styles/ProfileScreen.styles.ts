@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 6 : 10,
-    paddingBottom: 112,
+    paddingBottom: 88,
   },
 
   loadingBox: {
@@ -46,7 +46,7 @@ export const styles = StyleSheet.create({
 
   loginBtnText: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 15,
   },
 
@@ -69,9 +69,9 @@ export const styles = StyleSheet.create({
   },
 
   brandText: {
-    fontSize: 30,
-    lineHeight: 36,
-    fontWeight: "900",
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: "700",
     letterSpacing: -0.3,
   },
 
@@ -93,10 +93,10 @@ export const styles = StyleSheet.create({
     position: "relative",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   notificationText: {
@@ -104,138 +104,137 @@ export const styles = StyleSheet.create({
   },
 
   notificationDot: {
-  position: "absolute",
-  top: 6,
-  right: 6,
-  minWidth: 17,
-  height: 17,
-  borderRadius: 9,
-  backgroundColor: COLORS.purple,
-  alignItems: "center",
-  justifyContent: "center",
-  paddingHorizontal: 4,
-  borderWidth: 2,
-  borderColor: COLORS.white,
-},
+    position: "absolute",
+    top: 6,
+    right: 6,
+    minWidth: 17,
+    height: 17,
+    borderRadius: 9,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: COLORS.white,
+  },
 
-notificationDotText: {
-  color: COLORS.white,
-  fontSize: 9,
-  fontWeight: "900",
-},
+  notificationDotText: {
+    color: COLORS.white,
+    fontSize: 9,
+    fontWeight: "700",
+  },
 
   screenTitle: {
-    fontSize: isSmallPhone ? 36 : 40,
-    lineHeight: isSmallPhone ? 42 : 46,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 18,
     letterSpacing: -0.9,
   },
 
- profileCard: {
-  borderRadius: 30,
-  backgroundColor: COLORS.white,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  padding: isSmallPhone ? 14 : 16,
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 18,
+  profileCard: {
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: isSmallPhone ? 14 : 16,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 18,
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 18,
-  shadowOffset: { width: 0, height: 8 },
-  elevation: 5,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-avatarWrap: {
-  width: isSmallPhone ? 88 : 96,
-  height: isSmallPhone ? 88 : 96,
-  borderRadius: isSmallPhone ? 44 : 48,
-  backgroundColor: COLORS.purpleSoft,
-  alignItems: "center",
-  justifyContent: "center",
-  position: "relative",
-  overflow: "hidden",
-},
+  avatarWrap: {
+    width: isSmallPhone ? 88 : 96,
+    height: isSmallPhone ? 88 : 96,
+    borderRadius: isSmallPhone ? 44 : 48,
+    backgroundColor: COLORS.purpleSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    overflow: "hidden",
+  },
 
-avatar: {
-  width: "100%",
-  height: "100%",
-  borderRadius: isSmallPhone ? 44 : 48,
-},
+  avatar: {
+    width: "100%",
+    height: "100%",
+    borderRadius: isSmallPhone ? 44 : 48,
+  },
 
-avatarOuter: {
-  width: isSmallPhone ? 96 : 104,
-  height: isSmallPhone ? 96 : 104,
-  marginRight: 13,
-  position: "relative",
-  alignItems: "center",
-  justifyContent: "center",
-},
+  avatarOuter: {
+    width: isSmallPhone ? 96 : 104,
+    height: isSmallPhone ? 96 : 104,
+    marginRight: 13,
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-profileInfo: {
-  flex: 1,
-  minWidth: 0,
-},
+  profileInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
 
-nameRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 14,
-},
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+  },
 
-name: {
-  flex: 1,
-  fontSize: isSmallPhone ? 25 : 28,
-  fontWeight: "900",
-  color: COLORS.text,
-  marginRight: 8,
-  letterSpacing: -0.5,
-},
+  name: {
+    flex: 1,
+    fontSize: isSmallPhone ? 25 : 28,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginRight: 8,
+    letterSpacing: -0.5,
+  },
 
-profileMetaRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  width: "100%",
-},
+  profileMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
 
-metaBlock: {
-  flexDirection: "row",
-  alignItems: "center",
-  flex: 1,
-  minWidth: 0,
-},
+  metaBlock: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    minWidth: 0,
+  },
 
-metaEmoji: {
-  fontSize: 17,
-  marginRight: 5,
-},
+  metaEmoji: {
+    fontSize: 17,
+    marginRight: 5,
+  },
 
-metaLabel: {
-  fontSize: 11,
-  color: COLORS.muted,
-  marginBottom: 2,
-  fontWeight: "700",
-},
+  metaLabel: {
+    fontSize: 11,
+    color: COLORS.muted,
+    marginBottom: 2,
+    fontWeight: "700",
+  },
 
-metaValue: {
-  fontSize: isSmallPhone ? 13 : 14,
-  lineHeight: isSmallPhone ? 17 : 18,
-  color: COLORS.purple,
-  fontWeight: "900",
-  flexShrink: 1,
-},
+  metaValue: {
+    fontSize: isSmallPhone ? 13 : 14,
+    lineHeight: isSmallPhone ? 17 : 18,
+    color: COLORS.purple,
+    fontWeight: "700",
+    flexShrink: 1,
+  },
 
-metaDivider: {
-  width: 1,
-  height: 38,
-  backgroundColor: COLORS.border,
-  marginHorizontal: 7,
-},
-
+  metaDivider: {
+    width: 1,
+    height: 38,
+    backgroundColor: COLORS.border,
+    marginHorizontal: 7,
+  },
 
   teacherMetaRow: {
     flexDirection: "row",
@@ -264,7 +263,7 @@ metaDivider: {
   statCard: {
     width: (width - 62) / 4,
     minHeight: isSmallPhone ? 112 : 122,
-    borderRadius: 22,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -273,17 +272,17 @@ metaDivider: {
     paddingVertical: 10,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   statIconCircle: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#F3F1FB",
+    backgroundColor: COLORS.purpleSoft,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
@@ -303,12 +302,12 @@ metaDivider: {
 
   statValue: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     textAlign: "center",
   },
 
   sectionCard: {
-    borderRadius: 28,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -316,10 +315,10 @@ metaDivider: {
     marginBottom: 18,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   sectionHeader: {
@@ -331,14 +330,14 @@ metaDivider: {
 
   sectionTitle: {
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
   viewAll: {
     fontSize: 14,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   badgesGrid: {
@@ -361,7 +360,7 @@ metaDivider: {
     width: 92,
     height: 92,
     borderRadius: 46,
-    backgroundColor: "#F5F1FF",
+    backgroundColor: COLORS.purpleSoft,
     borderWidth: 2,
     borderColor: "#D8C8F8",
     alignItems: "center",
@@ -395,7 +394,7 @@ metaDivider: {
 
   badgeTitle: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 4,
@@ -434,7 +433,7 @@ metaDivider: {
 
   activityTitle: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 3,
   },
@@ -452,7 +451,7 @@ metaDivider: {
 
   activityPoints: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 3,
   },
 
@@ -487,7 +486,7 @@ metaDivider: {
 
   classCircleText: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   classInfo: {
@@ -496,7 +495,7 @@ metaDivider: {
 
   className: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
@@ -515,7 +514,7 @@ metaDivider: {
   classArrow: {
     fontSize: 22,
     color: COLORS.lightText,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   signOutBtn: {
@@ -531,7 +530,7 @@ metaDivider: {
 
   signOutText: {
     color: "#EF4444",
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 15,
   },
 
@@ -542,14 +541,14 @@ metaDivider: {
   },
 
   modalContent: {
-  backgroundColor: COLORS.white,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  paddingHorizontal: 22,
-  paddingTop: 12,
-  paddingBottom: 34,
-  maxHeight: height * 0.72,
-},
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 34,
+    maxHeight: height * 0.72,
+  },
 
   modalHandle: {
     width: 44,
@@ -561,12 +560,12 @@ metaDivider: {
   },
 
   modalBackdrop: {
-  ...StyleSheet.absoluteFillObject,
-},
+    ...StyleSheet.absoluteFillObject,
+  },
 
   modalTitle: {
     fontSize: 25,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
   },
@@ -578,23 +577,23 @@ metaDivider: {
     lineHeight: 20,
   },
 
- avatarOptionsRow: {
-  flexDirection: "row",
-  flexWrap: "wrap",
-  justifyContent: "space-between",
-  rowGap: 12,
-  marginBottom: 18,
-},
+  avatarOptionsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 12,
+    marginBottom: 18,
+  },
 
   avatarOption: {
-  width: "48%",
-  borderRadius: 22,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  backgroundColor: "#F8F8FB",
-  alignItems: "center",
-  paddingVertical: 16,
-},
+    width: "48%",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: "#F8F8FB",
+    alignItems: "center",
+    paddingVertical: 16,
+  },
 
   avatarOptionActive: {
     borderColor: COLORS.purple,
@@ -610,7 +609,7 @@ metaDivider: {
   avatarOptionText: {
     fontSize: 14,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   modalCloseBtn: {
@@ -625,19 +624,19 @@ metaDivider: {
   modalCloseText: {
     color: COLORS.purple,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   inputLabel: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
   },
 
   textInput: {
     minHeight: 54,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: "#F8F8FB",
@@ -666,7 +665,7 @@ metaDivider: {
   cancelBtnText: {
     color: COLORS.muted,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   saveBtn: {
@@ -681,289 +680,289 @@ metaDivider: {
   saveBtnText: {
     color: COLORS.white,
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
   },
+
   cameraBadge: {
-  position: "absolute",
-  right: -2,
-  bottom: 4,
-  width: 38,
-  height: 38,
-  borderRadius: 19,
-  backgroundColor: COLORS.purple,
-  alignItems: "center",
-  justifyContent: "center",
-  borderWidth: 3,
-  borderColor: COLORS.white,
+    position: "absolute",
+    right: -2,
+    bottom: 4,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: COLORS.white,
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.12,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 4,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-cameraBadgeText: {
-  color: COLORS.white,
-  fontSize: 17,
-  fontWeight: "900",
-},
+  cameraBadgeText: {
+    color: COLORS.white,
+    fontSize: 17,
+    fontWeight: "700",
+  },
 
-editIcon: {
-  fontSize: 24,
-  color: COLORS.purple,
-  fontWeight: "900",
-},
+  editIcon: {
+    fontSize: 24,
+    color: COLORS.purple,
+    fontWeight: "700",
+  },
 
-notificationsList: {
-  marginBottom: 18,
-},
+  notificationsList: {
+    marginBottom: 18,
+  },
 
-notificationItem: {
-  flexDirection: "row",
-  borderRadius: 20,
-  borderWidth: 1,
-  borderColor: COLORS.border,
-  backgroundColor: "#F8F8FB",
-  padding: 12,
-  marginBottom: 10,
-},
+  notificationItem: {
+    flexDirection: "row",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: "#F8F8FB",
+    padding: 12,
+    marginBottom: 10,
+  },
 
-notificationItemUnread: {
-  backgroundColor: "#F3EEFF",
-  borderColor: "#D8C8F8",
-},
+  notificationItemUnread: {
+    backgroundColor: COLORS.purpleSoft,
+    borderColor: "#D8C8F8",
+  },
 
-notificationItemIcon: {
-  width: 42,
-  height: 42,
-  borderRadius: 21,
-  backgroundColor: COLORS.white,
-  alignItems: "center",
-  justifyContent: "center",
-  marginRight: 12,
-},
+  notificationItemIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: COLORS.white,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
 
-notificationItemEmoji: {
-  fontSize: 20,
-},
+  notificationItemEmoji: {
+    fontSize: 20,
+  },
 
-notificationItemContent: {
-  flex: 1,
-},
+  notificationItemContent: {
+    flex: 1,
+  },
 
-notificationItemTitle: {
-  fontSize: 14,
-  fontWeight: "900",
-  color: COLORS.text,
-  marginBottom: 3,
-},
+  notificationItemTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 3,
+  },
 
-notificationItemMessage: {
-  fontSize: 12,
-  lineHeight: 17,
-  color: COLORS.muted,
-  fontWeight: "600",
-  marginBottom: 5,
-},
+  notificationItemMessage: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: COLORS.muted,
+    fontWeight: "600",
+    marginBottom: 5,
+  },
 
-notificationItemTime: {
-  fontSize: 11,
-  color: COLORS.purple,
-  fontWeight: "800",
-},
+  notificationItemTime: {
+    fontSize: 11,
+    color: COLORS.purple,
+    fontWeight: "700",
+  },
 
-emptyNotificationsBox: {
-  alignItems: "center",
-  paddingVertical: 22,
-  marginBottom: 12,
-},
+  emptyNotificationsBox: {
+    alignItems: "center",
+    paddingVertical: 22,
+    marginBottom: 12,
+  },
 
-emptyNotificationsIcon: {
-  fontSize: 34,
-  marginBottom: 8,
-},
+  emptyNotificationsIcon: {
+    fontSize: 34,
+    marginBottom: 8,
+  },
 
-emptyNotificationsTitle: {
-  fontSize: 17,
-  fontWeight: "900",
-  color: COLORS.text,
-  marginBottom: 4,
-},
+  emptyNotificationsTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: COLORS.text,
+    marginBottom: 4,
+  },
 
-emptyNotificationsText: {
-  fontSize: 13,
-  lineHeight: 19,
-  color: COLORS.muted,
-  textAlign: "center",
-  fontWeight: "600",
-},
+  emptyNotificationsText: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: COLORS.muted,
+    textAlign: "center",
+    fontWeight: "600",
+  },
 
-metaTextWrap: {
-  flex: 1,
-  minWidth: 0,
-},
+  metaTextWrap: {
+    flex: 1,
+    minWidth: 0,
+  },
 
-unreadMiniDot: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-  backgroundColor: COLORS.purple,
-  marginLeft: 8,
-  marginTop: 6,
-},
+  unreadMiniDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: COLORS.purple,
+    marginLeft: 8,
+    marginTop: 6,
+  },
 
-notificationChevron: {
-  fontSize: 26,
-  color: COLORS.purple,
-  fontWeight: "900",
-  marginLeft: 6,
-  alignSelf: "center",
-},
+  notificationChevron: {
+    fontSize: 26,
+    color: COLORS.purple,
+    fontWeight: "700",
+    marginLeft: 6,
+    alignSelf: "center",
+  },
 
-notificationDetailIcon: {
-  width: 74,
-  height: 74,
-  borderRadius: 37,
-  backgroundColor: COLORS.purpleSoft,
-  alignItems: "center",
-  justifyContent: "center",
-  alignSelf: "center",
-  marginBottom: 14,
-},
+  notificationDetailIcon: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    backgroundColor: COLORS.purpleSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 14,
+  },
 
-notificationDetailEmoji: {
-  fontSize: 36,
-},
+  notificationDetailEmoji: {
+    fontSize: 36,
+  },
 
-notificationDetailTitle: {
-  fontSize: 24,
-  fontWeight: "900",
-  color: COLORS.text,
-  textAlign: "center",
-  marginBottom: 10,
-},
+  notificationDetailTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: COLORS.text,
+    textAlign: "center",
+    marginBottom: 10,
+  },
 
-notificationDetailMessage: {
-  fontSize: 15,
-  lineHeight: 22,
-  color: COLORS.muted,
-  fontWeight: "600",
-  textAlign: "center",
-  marginBottom: 12,
-},
+  notificationDetailMessage: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: COLORS.muted,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 12,
+  },
 
-notificationDetailTime: {
-  fontSize: 13,
-  color: COLORS.purple,
-  fontWeight: "900",
-  textAlign: "center",
-  marginBottom: 20,
-},
+  notificationDetailTime: {
+    fontSize: 13,
+    color: COLORS.purple,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 20,
+  },
 
-notificationDetailCloseBtn: {
-  marginTop: 10,
-  alignItems: "center",
-  justifyContent: "center",
-  paddingVertical: 10,
-},
+  notificationDetailCloseBtn: {
+    marginTop: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+  },
 
-notificationDetailCloseText: {
-  color: COLORS.muted,
-  fontSize: 15,
-  fontWeight: "800",
-},
+  notificationDetailCloseText: {
+    color: COLORS.muted,
+    fontSize: 15,
+    fontWeight: "700",
+  },
 
-notificationsModalContent: {
-  backgroundColor: COLORS.white,
-  borderTopLeftRadius: 30,
-  borderTopRightRadius: 30,
-  paddingHorizontal: 22,
-  paddingTop: 12,
-  paddingBottom: 28,
-  maxHeight: "86%",
-},
+  notificationsModalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 28,
+    maxHeight: "86%",
+  },
 
-notificationsTabs: {
-  flexDirection: "row",
-  backgroundColor: "#F7F7FA",
-  borderRadius: 18,
-  padding: 5,
-  marginTop: 14,
-  marginBottom: 14,
-},
+  notificationsTabs: {
+    flexDirection: "row",
+    backgroundColor: "#F7F7FA",
+    borderRadius: 16,
+    padding: 5,
+    marginTop: 14,
+    marginBottom: 14,
+  },
 
-notificationTab: {
-  flex: 1,
-  minHeight: 42,
-  borderRadius: 14,
-  alignItems: "center",
-  justifyContent: "center",
-  flexDirection: "row",
-},
+  notificationTab: {
+    flex: 1,
+    minHeight: 42,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+  },
 
-notificationTabActive: {
-  backgroundColor: COLORS.white,
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2,
-},
+  notificationTabActive: {
+    backgroundColor: COLORS.white,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-notificationTabText: {
-  fontSize: 14,
-  color: COLORS.muted,
-  fontWeight: "800",
-},
+  notificationTabText: {
+    fontSize: 14,
+    color: COLORS.muted,
+    fontWeight: "700",
+  },
 
-notificationTabTextActive: {
-  color: COLORS.purple,
-  fontWeight: "900",
-},
+  notificationTabTextActive: {
+    color: COLORS.purple,
+    fontWeight: "700",
+  },
 
-notificationTabBadge: {
-  minWidth: 20,
-  height: 20,
-  borderRadius: 10,
-  backgroundColor: COLORS.purple,
-  alignItems: "center",
-  justifyContent: "center",
-  marginLeft: 7,
-  paddingHorizontal: 5,
-},
+  notificationTabBadge: {
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 7,
+    paddingHorizontal: 5,
+  },
 
-notificationTabBadgeText: {
-  color: COLORS.white,
-  fontSize: 10,
-  fontWeight: "900",
-},
+  notificationTabBadgeText: {
+    color: COLORS.white,
+    fontSize: 10,
+    fontWeight: "700",
+  },
 
-notificationsScroll: {
-  maxHeight: 390,
-},
+  notificationsScroll: {
+    maxHeight: 390,
+  },
 
-notificationsScrollContent: {
-  paddingBottom: 8,
-},
+  notificationsScrollContent: {
+    paddingBottom: 8,
+  },
 
-notificationTitleRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 3,
-},
+  notificationTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 3,
+  },
 
-notificationBackBtn: {
-  alignSelf: "flex-start",
-  paddingVertical: 8,
-  paddingRight: 12,
-  marginBottom: 8,
-},
+  notificationBackBtn: {
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    paddingRight: 12,
+    marginBottom: 8,
+  },
 
-notificationBackText: {
-  fontSize: 16,
-  color: COLORS.purple,
-  fontWeight: "900",
-},
-
+  notificationBackText: {
+    fontSize: 16,
+    color: COLORS.purple,
+    fontWeight: "700",
+  },
 });

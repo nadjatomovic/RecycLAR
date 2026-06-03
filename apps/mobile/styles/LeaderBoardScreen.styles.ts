@@ -14,7 +14,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: 12,
-    paddingBottom: 110,
+    paddingBottom: 88,
   },
 
   // ── Locked state ────────────────────────────────────────────────────────────
@@ -25,12 +25,12 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   lockedIcon: {
-    fontSize: 62,
+    fontSize: 48,
     marginBottom: 16,
   },
   lockedTitle: {
     fontSize: 27,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 10,
@@ -50,15 +50,15 @@ export const styles = StyleSheet.create({
     borderRadius: RADIUS.pill,
     width: "100%",
     alignItems: "center",
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 7 },
-    elevation: 4,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   loginButtonText: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
   },
 
@@ -70,11 +70,11 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 36,
-    fontWeight: "900",
+    fontSize: 28,
+    fontWeight: "700",
     color: COLORS.text,
-    letterSpacing: -0.8,
-    lineHeight: 42,
+    letterSpacing: -0.5,
+    lineHeight: 34,
   },
   subtitle: {
     fontSize: 14,
@@ -84,8 +84,8 @@ export const styles = StyleSheet.create({
     lineHeight: 20,
   },
   subtitleGreen: {
-    color: "#35A936",
-    fontWeight: "800",
+    color: COLORS.green,
+    fontWeight: "700",
   },
   headerTrophy: {
     width: 52,
@@ -108,7 +108,7 @@ export const styles = StyleSheet.create({
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.05,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
   filterBtn: {
@@ -119,20 +119,20 @@ export const styles = StyleSheet.create({
   },
   filterBtnActive: {
     backgroundColor: COLORS.purple,
-    shadowColor: COLORS.purple,
-    shadowOpacity: 0.25,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   filterText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.muted,
   },
   filterTextActive: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   // ── Tab row (Posamezniki / Razredi) ─────────────────────────────────────────
@@ -152,19 +152,19 @@ export const styles = StyleSheet.create({
   tabBtnActive: {
     backgroundColor: COLORS.white,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   tabText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.muted,
   },
   tabTextActive: {
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   // ── Podium ──────────────────────────────────────────────────────────────────
@@ -187,23 +187,23 @@ export const styles = StyleSheet.create({
   },
   podiumCard: {
     width: "100%",
-    borderRadius: 24,
+    borderRadius: 16,
     padding: 14,
     alignItems: "center",
     borderWidth: 1.5,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
     position: "relative",
   },
   podiumCard1: {
     borderColor: "#FDE68A",
-    shadowColor: "#D97706",
-    shadowOpacity: 0.18,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
   },
   podiumCard2: {
     borderColor: "#D1D5DB",
@@ -212,9 +212,9 @@ export const styles = StyleSheet.create({
     borderColor: "#FDDBB4",
   },
   podiumCardMe: {
-    borderColor: "#35A936",
-    shadowColor: "#35A936",
-    shadowOpacity: 0.2,
+    borderColor: COLORS.green,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
   },
   podiumPlaceholder: {
     flex: 0.85,
@@ -238,7 +238,7 @@ export const styles = StyleSheet.create({
   },
   medalRank: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#374151",
   },
 
@@ -255,9 +255,9 @@ export const styles = StyleSheet.create({
     borderWidth: 2.5,
     borderColor: COLORS.white,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 1 },
     elevation: 2,
   },
   podiumAvatarWrap1: {
@@ -269,7 +269,7 @@ export const styles = StyleSheet.create({
   // Name & points
   podiumName: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     textAlign: "center",
     lineHeight: 16,
@@ -280,8 +280,8 @@ export const styles = StyleSheet.create({
   },
   podiumPts: {
     fontSize: 11,
-    fontWeight: "900",
-    color: "#35A936",
+    fontWeight: "700",
+    color: COLORS.green,
   },
   podiumPts1: {
     fontSize: 13,
@@ -295,23 +295,23 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.white,
-    borderRadius: 20,
+    borderRadius: 16,
     paddingVertical: 13,
     paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
     shadowColor: COLORS.shadow,
     shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
     elevation: 2,
     position: "relative",
   },
   rowCardMe: {
-    backgroundColor: "#F0FDF4",
+    backgroundColor: COLORS.greenSoft,
     borderColor: "#86EFAC",
-    shadowColor: "#35A936",
-    shadowOpacity: 0.12,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
   },
 
   // "Ti" green badge
@@ -321,15 +321,15 @@ export const styles = StyleSheet.create({
     top: -1,
     bottom: -1,
     width: 32,
-    backgroundColor: "#35A936",
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20,
+    backgroundColor: COLORS.green,
+    borderTopLeftRadius: 16,
+    borderBottomLeftRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   tiText: {
     fontSize: 10,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.white,
     transform: [{ rotate: "-90deg" }],
     letterSpacing: 0.5,
@@ -338,14 +338,14 @@ export const styles = StyleSheet.create({
   rowRank: {
     width: 26,
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.muted,
     textAlign: "center",
     marginLeft: 4,
   },
   rowRankMe: {
-    color: "#35A936",
-    marginLeft: 36, // offset for "Ti" badge
+    color: COLORS.green,
+    marginLeft: 36,
   },
   rowAvatarWrap: {
     width: 44,
@@ -364,11 +364,11 @@ export const styles = StyleSheet.create({
   },
   rowName: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
   rowNameMe: {
-    color: "#15803D",
+    color: COLORS.greenDark,
   },
   rowSub: {
     fontSize: 11,
@@ -385,17 +385,17 @@ export const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "700",
     color: "#D97706",
   },
   rowPts: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.green,
     marginRight: 4,
   },
   rowPtsMe: {
-    color: "#15803D",
+    color: COLORS.greenDark,
   },
   rowChevron: {
     fontSize: 18,
@@ -412,7 +412,7 @@ export const styles = StyleSheet.create({
   },
   myPositionLabel: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.muted,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -432,7 +432,7 @@ export const styles = StyleSheet.create({
   },
   emptyCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 24,
+    borderRadius: 16,
     padding: 28,
     alignItems: "center",
     borderWidth: 1,
@@ -440,7 +440,7 @@ export const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 6,
   },
@@ -470,7 +470,7 @@ export const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.purple,
   },
 });

@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
 
   brandText: {
     fontSize: 27,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.2,
   },
 
@@ -47,7 +47,7 @@ export const styles = StyleSheet.create({
 
   cityPillText: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 14,
   },
 
@@ -64,9 +64,9 @@ export const styles = StyleSheet.create({
   },
 
   mainTitle: {
-    fontSize: isSmallPhone ? 34 : 38,
-    lineHeight: isSmallPhone ? 39 : 44,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
     letterSpacing: -0.8,
@@ -96,17 +96,17 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   searchIcon: {
     fontSize: 22,
     marginRight: 10,
     color: COLORS.muted,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   searchInput: {
@@ -118,7 +118,7 @@ export const styles = StyleSheet.create({
 
   suggestionsBox: {
     backgroundColor: COLORS.white,
-    borderRadius: 18,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     marginTop: 6,
@@ -126,10 +126,10 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   suggestionItem: {
@@ -172,13 +172,13 @@ export const styles = StyleSheet.create({
 
   chipText: {
     color: COLORS.muted,
-    fontWeight: "800",
+    fontWeight: "700",
     fontSize: 13,
   },
 
   chipTextActive: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   mapWrapper: {
@@ -219,16 +219,16 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.22,
-    shadowRadius: 7,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   markerIcon: {
     fontSize: 17,
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   emptyMapCard: {
@@ -237,17 +237,17 @@ export const styles = StyleSheet.create({
     left: 22,
     right: 22,
     backgroundColor: COLORS.white,
-    borderRadius: 22,
+    borderRadius: 16,
     padding: 16,
     alignItems: "center",
     borderWidth: 1,
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   emptyMapIcon: {
@@ -257,7 +257,7 @@ export const styles = StyleSheet.create({
 
   emptyMapTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
@@ -275,7 +275,7 @@ export const styles = StyleSheet.create({
     left: SPACING.lg,
     right: SPACING.lg,
     backgroundColor: COLORS.white,
-    borderRadius: 26,
+    borderRadius: 16,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -283,10 +283,10 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   infoIconBox: {
@@ -302,7 +302,7 @@ export const styles = StyleSheet.create({
   infoIconText: {
     fontSize: 23,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   infoDetails: {
@@ -313,7 +313,7 @@ export const styles = StyleSheet.create({
   closestTag: {
     color: COLORS.purple,
     fontSize: 11,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 2,
     textTransform: "uppercase",
     letterSpacing: 0.4,
@@ -322,7 +322,7 @@ export const styles = StyleSheet.create({
   locationTitle: {
     fontSize: 17,
     lineHeight: 22,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
@@ -336,7 +336,7 @@ export const styles = StyleSheet.create({
   openStatus: {
     fontSize: 12,
     color: COLORS.green,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 3,
   },
 
@@ -348,16 +348,16 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
 
-    shadowColor: COLORS.purple,
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 6,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   arrowText: {
     color: COLORS.white,
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });

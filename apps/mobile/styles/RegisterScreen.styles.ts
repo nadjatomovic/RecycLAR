@@ -30,10 +30,10 @@ export const styles = StyleSheet.create({
     marginBottom: isSmallPhone ? 8 : 12,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -65,9 +65,9 @@ export const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: isSmallPhone ? 34 : 39,
-    lineHeight: isSmallPhone ? 40 : 45,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 8,
     letterSpacing: -0.8,
@@ -83,16 +83,16 @@ export const styles = StyleSheet.create({
 
   formCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 30,
+    borderRadius: 16,
     padding: 20,
     borderWidth: 1,
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   inputGroup: {
@@ -106,13 +106,13 @@ export const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     color: COLORS.text,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 8,
   },
 
   input: {
     minHeight: 56,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: "#F8F8FB",
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -147,12 +147,12 @@ export const styles = StyleSheet.create({
   municipalityChipText: {
     color: COLORS.muted,
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   municipalityChipTextActive: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   helperText: {
@@ -166,7 +166,7 @@ export const styles = StyleSheet.create({
   schoolToggle: {
     marginTop: 2,
     marginBottom: 16,
-    borderRadius: 24,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: "#F8F8FB",
@@ -189,7 +189,7 @@ export const styles = StyleSheet.create({
 
   schoolToggleTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 3,
   },
@@ -215,7 +215,7 @@ export const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     color: COLORS.purple,
     fontSize: 22,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   schoolToggleIconActive: {
@@ -223,7 +223,7 @@ export const styles = StyleSheet.create({
   },
 
   schoolBox: {
-    borderRadius: 24,
+    borderRadius: 16,
     backgroundColor: "#FBFAFF",
     borderWidth: 1,
     borderColor: "#E7DCF9",
@@ -233,7 +233,7 @@ export const styles = StyleSheet.create({
 
   schoolBoxTitle: {
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 12,
   },
@@ -247,7 +247,7 @@ export const styles = StyleSheet.create({
   roleCard: {
     flex: 1,
     minHeight: 76,
-    borderRadius: 20,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     backgroundColor: COLORS.white,
@@ -269,17 +269,17 @@ export const styles = StyleSheet.create({
   roleText: {
     fontSize: 15,
     color: COLORS.muted,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   roleTextActive: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   errorBox: {
     backgroundColor: "#FFF4F4",
-    borderRadius: 18,
+    borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderWidth: 1,
@@ -288,7 +288,7 @@ export const styles = StyleSheet.create({
   },
 
   errorText: {
-    color: "#C62828",
+    color: "#EF4444",
     fontSize: 13,
     lineHeight: 19,
     fontWeight: "700",
@@ -303,11 +303,11 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
 
-    shadowColor: COLORS.green,
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 5,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   disabledButton: {
@@ -317,7 +317,7 @@ export const styles = StyleSheet.create({
   primaryButtonText: {
     color: COLORS.white,
     fontSize: FONT.button,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   arrowCircle: {
@@ -336,7 +336,7 @@ export const styles = StyleSheet.create({
     fontSize: 38,
     lineHeight: 38,
     marginTop: -3,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 
   switchAuth: {
@@ -354,6 +354,6 @@ export const styles = StyleSheet.create({
 
   switchLink: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });

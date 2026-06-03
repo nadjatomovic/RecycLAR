@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 8 : 14,
-    paddingBottom: 120,
+    paddingBottom: 88,
   },
 
   centeredContent: {
@@ -30,13 +30,13 @@ export const styles = StyleSheet.create({
   },
 
   lockedIcon: {
-    fontSize: 64,
+    fontSize: 48,
     marginBottom: 16,
   },
 
   lockedTitle: {
     fontSize: 26,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 10,
@@ -61,7 +61,7 @@ export const styles = StyleSheet.create({
 
   purpleButtonText: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
   },
 
@@ -80,9 +80,9 @@ export const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: isSmallPhone ? 32 : 36,
-    lineHeight: isSmallPhone ? 38 : 42,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     letterSpacing: -0.8,
   },
@@ -103,12 +103,12 @@ export const styles = StyleSheet.create({
 
   pointsText: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#D97706",
   },
 
   teacherButton: {
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 15,
     flexDirection: "row",
     alignItems: "center",
@@ -130,7 +130,7 @@ export const styles = StyleSheet.create({
   },
 
   teacherTitle: {
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 14,
   },
 
@@ -156,7 +156,7 @@ export const styles = StyleSheet.create({
 
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     marginTop: 22,
     marginBottom: 12,
@@ -164,14 +164,14 @@ export const styles = StyleSheet.create({
 
   topicCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 24,
+    borderRadius: 16,
     marginBottom: 15,
     overflow: "hidden",
     borderWidth: 1,
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   topicStripe: {
@@ -203,13 +203,13 @@ export const styles = StyleSheet.create({
 
   topicLabel: {
     fontSize: 18,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
   topicLevel: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 3,
   },
 
@@ -221,20 +221,20 @@ export const styles = StyleSheet.create({
 
   topicPointsText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   progressTrack: {
-    height: 9,
-    backgroundColor: "#EEF0F4",
-    borderRadius: 999,
+    height: 5,
+    backgroundColor: COLORS.border,
+    borderRadius: 3,
     marginBottom: 7,
     overflow: "hidden",
   },
 
   progressFill: {
-    height: 9,
-    borderRadius: 999,
+    height: 5,
+    borderRadius: 3,
   },
 
   progressInfoRow: {
@@ -271,7 +271,7 @@ export const styles = StyleSheet.create({
   pathBackText: {
     fontSize: 24,
     color: COLORS.muted,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   pathEmojiCircle: {
@@ -289,13 +289,13 @@ export const styles = StyleSheet.create({
 
   pathTitle: {
     fontSize: 17,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
   pathSubtitle: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 2,
   },
 
@@ -308,14 +308,14 @@ export const styles = StyleSheet.create({
 
   pathPointsText: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#D97706",
   },
 
   pathContent: {
     paddingTop: isSmallPhone ? 10 : 16,
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 130,
+    paddingBottom: 100,
   },
 
   levelNode: {
@@ -345,7 +345,7 @@ export const styles = StyleSheet.create({
 
   levelProgressTrack: {
     height: 5,
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor: COLORS.border,
     borderRadius: 3,
     overflow: "hidden",
   },
@@ -377,13 +377,13 @@ export const styles = StyleSheet.create({
 
   levelLabel: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     textAlign: "center",
   },
 
   levelPoints: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 2,
   },
 
@@ -412,20 +412,20 @@ export const styles = StyleSheet.create({
   closeQuizText: {
     fontSize: 22,
     color: COLORS.muted,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   quizProgressTrack: {
     flex: 1,
-    height: 11,
-    backgroundColor: "#EEF0F4",
-    borderRadius: 999,
+    height: 5,
+    backgroundColor: COLORS.border,
+    borderRadius: 3,
     overflow: "hidden",
   },
 
   quizProgressFill: {
-    height: 11,
-    borderRadius: 999,
+    height: 5,
+    borderRadius: 3,
   },
 
   quizPointsPill: {
@@ -438,13 +438,13 @@ export const styles = StyleSheet.create({
 
   quizPointsText: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#D97706",
   },
 
   quizContent: {
     paddingHorizontal: SPACING.lg,
-    paddingBottom: 150,
+    paddingBottom: 110,
   },
 
   quizMetaRow: {
@@ -456,7 +456,7 @@ export const styles = StyleSheet.create({
 
   quizMetaText: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 1,
     marginRight: 8,
@@ -471,12 +471,12 @@ export const styles = StyleSheet.create({
 
   smallBadgeText: {
     fontSize: 10,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   questionText: {
     fontSize: isSmallPhone ? 22 : 24,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     lineHeight: isSmallPhone ? 30 : 33,
     marginBottom: 26,
@@ -485,7 +485,7 @@ export const styles = StyleSheet.create({
 
   answerCard: {
     borderWidth: 2,
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 11,
     flexDirection: "row",
@@ -504,7 +504,7 @@ export const styles = StyleSheet.create({
 
   answerLetter: {
     fontSize: 14,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   answerText: {
@@ -553,7 +553,7 @@ export const styles = StyleSheet.create({
   },
 
   actionButtonText: {
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
     letterSpacing: 0.4,
   },
@@ -561,13 +561,13 @@ export const styles = StyleSheet.create({
   resultContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: 24,
-    paddingBottom: 120,
+    paddingBottom: 88,
     alignItems: "center",
   },
 
   unlockBanner: {
     backgroundColor: "#FEF3C7",
-    borderRadius: 20,
+    borderRadius: 16,
     padding: 16,
     width: "100%",
     marginBottom: 20,
@@ -577,12 +577,12 @@ export const styles = StyleSheet.create({
   },
 
   unlockEmoji: {
-    fontSize: 34,
+    fontSize: 28,
   },
 
   unlockTitle: {
     fontSize: 19,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#D97706",
     textAlign: "center",
   },
@@ -596,13 +596,13 @@ export const styles = StyleSheet.create({
   },
 
   resultEmoji: {
-    fontSize: 78,
+    fontSize: 52,
     marginBottom: 8,
   },
 
   resultTitle: {
-    fontSize: 29,
-    fontWeight: "900",
+    fontSize: 28,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 4,
     letterSpacing: -0.5,
@@ -617,7 +617,7 @@ export const styles = StyleSheet.create({
 
   statsCard: {
     backgroundColor: "#F9FAFB",
-    borderRadius: 24,
+    borderRadius: 16,
     padding: 22,
     width: "100%",
     marginBottom: 20,
@@ -637,7 +637,7 @@ export const styles = StyleSheet.create({
 
   statNumber: {
     fontSize: 32,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
@@ -654,7 +654,7 @@ export const styles = StyleSheet.create({
   },
 
   resultProgressCard: {
-    borderRadius: 18,
+    borderRadius: 16,
     padding: 16,
     width: "100%",
     marginBottom: 24,
@@ -669,25 +669,25 @@ export const styles = StyleSheet.create({
 
   resultProgressTitle: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
   resultProgressPoints: {
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   resultProgressTrack: {
-    height: 9,
-    backgroundColor: "#E5E7EB",
-    borderRadius: 999,
+    height: 5,
+    backgroundColor: COLORS.border,
+    borderRadius: 3,
     overflow: "hidden",
   },
 
   resultProgressFill: {
-    height: 9,
-    borderRadius: 999,
+    height: 5,
+    borderRadius: 3,
   },
 
   resultProgressText: {
@@ -707,7 +707,7 @@ export const styles = StyleSheet.create({
 
   resultPrimaryText: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
   },
 
@@ -724,7 +724,7 @@ export const styles = StyleSheet.create({
 
   resultSecondaryText: {
     color: COLORS.muted,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 15,
   },
 
@@ -738,13 +738,13 @@ export const styles = StyleSheet.create({
   },
 
   resultOutlineText: {
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 15,
   },
 
   pathHeaderCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 26,
+    borderRadius: 16,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -753,10 +753,10 @@ export const styles = StyleSheet.create({
     borderColor: COLORS.border,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   pathHeaderText: {
@@ -765,7 +765,7 @@ export const styles = StyleSheet.create({
 
   pathHeroCard: {
     backgroundColor: COLORS.white,
-    borderRadius: 28,
+    borderRadius: 16,
     borderWidth: 1.5,
     padding: 18,
     marginBottom: 22,
@@ -774,10 +774,10 @@ export const styles = StyleSheet.create({
     overflow: "hidden",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   pathHeroTextWrap: {
@@ -787,7 +787,7 @@ export const styles = StyleSheet.create({
 
   pathHeroOverline: {
     fontSize: 12,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.8,
     marginBottom: 6,
   },
@@ -795,7 +795,7 @@ export const styles = StyleSheet.create({
   pathHeroTitle: {
     fontSize: 23,
     lineHeight: 29,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
     letterSpacing: -0.4,
     marginBottom: 6,
@@ -837,7 +837,7 @@ export const styles = StyleSheet.create({
     width: "82%",
     minHeight: 132,
     backgroundColor: COLORS.white,
-    borderRadius: 26,
+    borderRadius: 16,
     borderWidth: 2,
     borderColor: COLORS.border,
     padding: 14,
@@ -846,10 +846,10 @@ export const styles = StyleSheet.create({
     position: "relative",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 7 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   levelPathCardLocked: {
@@ -871,7 +871,7 @@ export const styles = StyleSheet.create({
 
   levelPathEmoji: {
     fontSize: 27,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.white,
   },
 
@@ -889,7 +889,7 @@ export const styles = StyleSheet.create({
   levelPathNumber: {
     fontSize: 12,
     color: COLORS.lightText,
-    fontWeight: "900",
+    fontWeight: "700",
     marginRight: 7,
     textTransform: "uppercase",
     letterSpacing: 0.4,
@@ -899,7 +899,7 @@ export const styles = StyleSheet.create({
     fontSize: 20,
     lineHeight: 25,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: -0.3,
   },
 
@@ -909,21 +909,21 @@ export const styles = StyleSheet.create({
 
   levelPathReward: {
     fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "700",
     marginTop: 3,
     marginBottom: 8,
   },
 
   levelPathProgressTrack: {
-    height: 7,
-    backgroundColor: "#EEF0F4",
-    borderRadius: 999,
+    height: 5,
+    backgroundColor: COLORS.border,
+    borderRadius: 3,
     overflow: "hidden",
   },
 
   levelPathProgressFill: {
-    height: 7,
-    borderRadius: 999,
+    height: 5,
+    borderRadius: 3,
   },
 
   levelPathProgressText: {
@@ -941,7 +941,7 @@ export const styles = StyleSheet.create({
 
   currentBadgeText: {
     fontSize: 10,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   doneBadge: {
@@ -953,7 +953,7 @@ export const styles = StyleSheet.create({
 
   doneBadgeText: {
     fontSize: 10,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "#16A34A",
   },
 
@@ -988,7 +988,7 @@ export const styles = StyleSheet.create({
 
   leaderboardBanner: {
     backgroundColor: COLORS.white,
-    borderRadius: 22,
+    borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 18,
     flexDirection: "row",
@@ -997,11 +997,11 @@ export const styles = StyleSheet.create({
     marginBottom: 16,
     borderWidth: 1.5,
     borderColor: "#E0D4F7",
-    shadowColor: COLORS.purple,
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 3,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
   leaderboardBannerLeft: {
     flexDirection: "row",
@@ -1014,7 +1014,7 @@ export const styles = StyleSheet.create({
   },
   leaderboardBannerTitle: {
     fontSize: 16,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
   leaderboardBannerSub: {
@@ -1026,333 +1026,334 @@ export const styles = StyleSheet.create({
   leaderboardBannerChevron: {
     fontSize: 24,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
+
   zigzagStep: {
-  width: "100%",
-  alignItems: "center",
-  marginBottom: 0,
-},
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 0,
+  },
 
-zigzagNodeRow: {
-  width: "100%",
-  flexDirection: "row",
-  alignItems: "center",
-},
+  zigzagNodeRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
 
-zigzagNodeRowLeft: {
-  justifyContent: "flex-start",
-},
+  zigzagNodeRowLeft: {
+    justifyContent: "flex-start",
+  },
 
-zigzagNodeRowRight: {
-  justifyContent: "flex-end",
-},
+  zigzagNodeRowRight: {
+    justifyContent: "flex-end",
+  },
 
-levelBubble: {
-  width: "78%",
-  minHeight: 118,
-  borderRadius: 34,
-  backgroundColor: COLORS.white,
-  borderWidth: 2,
-  borderColor: COLORS.border,
-  padding: 13,
-  flexDirection: "row",
-  alignItems: "center",
-  position: "relative",
+  levelBubble: {
+    width: "78%",
+    minHeight: 118,
+    borderRadius: 16,
+    backgroundColor: COLORS.white,
+    borderWidth: 2,
+    borderColor: COLORS.border,
+    padding: 13,
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 14,
-  shadowOffset: { width: 0, height: 7 },
-  elevation: 4,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-levelBubbleDone: {
-  backgroundColor: "#F0FDF4",
-  borderColor: "#BBF7D0",
-},
+  levelBubbleDone: {
+    backgroundColor: "#F0FDF4",
+    borderColor: "#BBF7D0",
+  },
 
-levelBubbleLocked: {
-  backgroundColor: "#F8F8FB",
-  borderColor: "#E5E7EB",
-  shadowOpacity: 0.03,
-},
+  levelBubbleLocked: {
+    backgroundColor: "#F8F8FB",
+    borderColor: "#E5E7EB",
+    shadowOpacity: 0.03,
+  },
 
-levelCircleBig: {
-  width: 74,
-  height: 74,
-  borderRadius: 37,
-  alignItems: "center",
-  justifyContent: "center",
-  marginRight: 13,
-  borderWidth: 4,
-  borderColor: COLORS.white,
-},
+  levelCircleBig: {
+    width: 74,
+    height: 74,
+    borderRadius: 37,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 13,
+    borderWidth: 4,
+    borderColor: COLORS.white,
+  },
 
-levelCircleEmoji: {
-  fontSize: 32,
-  fontWeight: "900",
-  color: COLORS.white,
-},
+  levelCircleEmoji: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: COLORS.white,
+  },
 
-levelBubbleInfo: {
-  flex: 1,
-  minWidth: 0,
-},
+  levelBubbleInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
 
-levelBubbleTop: {
-  flexDirection: "row",
-  alignItems: "center",
-  flexWrap: "wrap",
-  marginBottom: 3,
-},
+  levelBubbleTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginBottom: 3,
+  },
 
-levelBubbleNumber: {
-  fontSize: 12,
-  color: COLORS.lightText,
-  fontWeight: "900",
-  marginRight: 7,
-  letterSpacing: 0.5,
-},
+  levelBubbleNumber: {
+    fontSize: 12,
+    color: COLORS.lightText,
+    fontWeight: "700",
+    marginRight: 7,
+    letterSpacing: 0.5,
+  },
 
-levelDonePill: {
-  paddingHorizontal: 8,
-  paddingVertical: 3,
-  borderRadius: 999,
-  backgroundColor: "#DCFCE7",
-},
+  levelDonePill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+    backgroundColor: "#DCFCE7",
+  },
 
-levelDonePillText: {
-  fontSize: 10,
-  fontWeight: "900",
-  color: "#16A34A",
-},
+  levelDonePillText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#16A34A",
+  },
 
-levelCurrentPill: {
-  paddingHorizontal: 8,
-  paddingVertical: 3,
-  borderRadius: 999,
-},
+  levelCurrentPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 999,
+  },
 
-levelCurrentPillText: {
-  fontSize: 10,
-  fontWeight: "900",
-},
+  levelCurrentPillText: {
+    fontSize: 10,
+    fontWeight: "700",
+  },
 
-levelBubbleTitle: {
-  fontSize: 22,
-  lineHeight: 27,
-  color: COLORS.text,
-  fontWeight: "900",
-  letterSpacing: -0.3,
-},
+  levelBubbleTitle: {
+    fontSize: 22,
+    lineHeight: 27,
+    color: COLORS.text,
+    fontWeight: "700",
+    letterSpacing: -0.3,
+  },
 
-levelBubbleTitleLocked: {
-  color: "#9CA3AF",
-},
+  levelBubbleTitleLocked: {
+    color: "#9CA3AF",
+  },
 
-levelBubbleReward: {
-  fontSize: 13,
-  fontWeight: "800",
-  marginTop: 3,
-  marginBottom: 8,
-},
+  levelBubbleReward: {
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 3,
+    marginBottom: 8,
+  },
 
-levelBubbleProgressTrack: {
-  height: 7,
-  backgroundColor: "#EEF0F4",
-  borderRadius: 999,
-  overflow: "hidden",
-},
+  levelBubbleProgressTrack: {
+    height: 5,
+    backgroundColor: COLORS.border,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
 
-levelBubbleProgressFill: {
-  height: 7,
-  borderRadius: 999,
-},
+  levelBubbleProgressFill: {
+    height: 5,
+    borderRadius: 3,
+  },
 
-levelBubbleProgressText: {
-  fontSize: 11,
-  color: COLORS.muted,
-  fontWeight: "700",
-  marginTop: 5,
-},
+  levelBubbleProgressText: {
+    fontSize: 11,
+    color: COLORS.muted,
+    fontWeight: "700",
+    marginTop: 5,
+  },
 
-zigzagConnectorWrap: {
-  width: "42%",
-  height: 64,
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  marginVertical: -2,
-},
+  zigzagConnectorWrap: {
+    width: "42%",
+    height: 64,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginVertical: -2,
+  },
 
-connectorLeftToRight: {
-  alignSelf: "center",
-  transform: [{ rotate: "26deg" }],
-},
+  connectorLeftToRight: {
+    alignSelf: "center",
+    transform: [{ rotate: "26deg" }],
+  },
 
-connectorRightToLeft: {
-  alignSelf: "center",
-  transform: [{ rotate: "-26deg" }],
-},
+  connectorRightToLeft: {
+    alignSelf: "center",
+    transform: [{ rotate: "-26deg" }],
+  },
 
-zigzagConnectorDot: {
-  width: 8,
-  height: 8,
-  borderRadius: 4,
-},
+  zigzagConnectorDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
 
-zigzagLari: {
-  position: "absolute",
-  width: 54,
-  height: 54,
-  top: -34,
-  zIndex: 10,
-},
+  zigzagLari: {
+    position: "absolute",
+    width: 54,
+    height: 54,
+    top: -34,
+    zIndex: 10,
+  },
 
-zigzagLariRight: {
-  right: -4,
-},
+  zigzagLariRight: {
+    right: -4,
+  },
 
-zigzagLariLeft: {
-  left: -4,
-},
+  zigzagLariLeft: {
+    left: -4,
+  },
 
-duoStep: {
-  width: "100%",
-  minHeight: 190,
-  position: "relative",
-},
+  duoStep: {
+    width: "100%",
+    minHeight: 190,
+    position: "relative",
+  },
 
-duoStepInner: {
-  width: 120,
-  alignItems: "center",
-  position: "absolute",
-  top: 0,
-},
+  duoStepInner: {
+    width: 120,
+    alignItems: "center",
+    position: "absolute",
+    top: 0,
+  },
 
-duoNode: {
-  width: 84,
-  height: 84,
-  borderRadius: 42,
-  backgroundColor: COLORS.white,
-  justifyContent: "center",
-  alignItems: "center",
-  borderWidth: 4,
-  borderColor: "#E5E7EB",
+  duoNode: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: COLORS.white,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: "#E5E7EB",
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.08,
-  shadowRadius: 12,
-  shadowOffset: { width: 0, height: 6 },
-  elevation: 4,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-duoNodeCurrent: {
-  width: 96,
-  height: 96,
-  borderRadius: 48,
-},
+  duoNodeCurrent: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+  },
 
-duoNodeDone: {
-  borderColor: "#86EFAC",
-  backgroundColor: "#F0FDF4",
-},
+  duoNodeDone: {
+    borderColor: "#86EFAC",
+    backgroundColor: "#F0FDF4",
+  },
 
-duoNodeLocked: {
-  backgroundColor: "#F3F4F6",
-  borderColor: "#E5E7EB",
-},
+  duoNodeLocked: {
+    backgroundColor: "#F3F4F6",
+    borderColor: "#E5E7EB",
+  },
 
-duoNodeInner: {
-  width: 64,
-  height: 64,
-  borderRadius: 32,
-  justifyContent: "center",
-  alignItems: "center",
-},
+  duoNodeInner: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-duoNodeEmoji: {
-  fontSize: 30,
-  color: "#FFFFFF",
-  fontWeight: "900",
-},
+  duoNodeEmoji: {
+    fontSize: 30,
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
 
-duoLari: {
-  position: "absolute",
-  width: 48,
-  height: 48,
-  right: -6,
-  top: -20,
-  zIndex: 5,
-},
+  duoLari: {
+    position: "absolute",
+    width: 48,
+    height: 48,
+    right: -6,
+    top: -20,
+    zIndex: 5,
+  },
 
-duoLevelMini: {
-  marginTop: 8,
-  fontSize: 11,
-  fontWeight: "900",
-  color: COLORS.lightText,
-  textTransform: "uppercase",
-  letterSpacing: 0.6,
-  textAlign: "center",
-},
+  duoLevelMini: {
+    marginTop: 8,
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.lightText,
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    textAlign: "center",
+  },
 
-duoLevelTitle: {
-  marginTop: 2,
-  fontSize: 18,
-  fontWeight: "900",
-  color: COLORS.text,
-  textAlign: "center",
-},
+  duoLevelTitle: {
+    marginTop: 2,
+    fontSize: 18,
+    fontWeight: "700",
+    color: COLORS.text,
+    textAlign: "center",
+  },
 
-duoLevelMeta: {
-  marginTop: 2,
-  fontSize: 12,
-  fontWeight: "800",
-  textAlign: "center",
-},
+  duoLevelMeta: {
+    marginTop: 2,
+    fontSize: 12,
+    fontWeight: "700",
+    textAlign: "center",
+  },
 
-duoConnector: {
-  position: "absolute",
-  top: 118,
-  left: "35%",
-  height: 74,
-  width: 120,
-  justifyContent: "space-between",
-  alignItems: "center",
-},
+  duoConnector: {
+    position: "absolute",
+    top: 118,
+    left: "35%",
+    height: 74,
+    width: 120,
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
 
-duoConnectorDot: {
-  width: 10,
-  height: 10,
-  borderRadius: 5,
-},
+  duoConnectorDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
 
-answerFeedbackCard: {
-  marginTop: 8,
-  marginBottom: 18,
-  borderRadius: 24,
-  borderWidth: 1.5,
-  paddingVertical: 10,
-  paddingHorizontal: 14,
-  alignItems: "center",
-},
+  answerFeedbackCard: {
+    marginTop: 8,
+    marginBottom: 18,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: "center",
+  },
 
-answerFeedbackAnimation: {
-  width: 155,
-  height: 155,
-  backgroundColor: "transparent",
-  marginBottom: -8,
-},
+  answerFeedbackAnimation: {
+    width: 155,
+    height: 155,
+    backgroundColor: "transparent",
+    marginBottom: -8,
+  },
 
-answerFeedbackText: {
-  marginTop: 0,
-  fontSize: 13,
-  lineHeight: 18,
-  color: COLORS.muted,
-  fontWeight: "700",
-  textAlign: "center",
-},
+  answerFeedbackText: {
+    marginTop: 0,
+    fontSize: 13,
+    lineHeight: 18,
+    color: COLORS.muted,
+    fontWeight: "700",
+    textAlign: "center",
+  },
 
   feedbackOverlayRoot: {
     flex: 1,
@@ -1371,19 +1372,19 @@ answerFeedbackText: {
 
   feedbackCard: {
     width: "100%",
-    borderRadius: 34,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     paddingHorizontal: 22,
     paddingTop: 18,
     paddingBottom: 22,
     alignItems: "center",
-    borderWidth: 2,
+    borderWidth: 1.5,
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 12 },
-    elevation: 10,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   feedbackCardCorrect: {
@@ -1402,9 +1403,9 @@ answerFeedbackText: {
   },
 
   feedbackTitle: {
-    fontSize: 30,
-    lineHeight: 36,
-    fontWeight: "900",
+    fontSize: 26,
+    lineHeight: 32,
+    fontWeight: "700",
     textAlign: "center",
     letterSpacing: -0.4,
   },
@@ -1430,7 +1431,7 @@ answerFeedbackText: {
   feedbackNextButtonText: {
     color: COLORS.white,
     fontSize: 15,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: 0.4,
   },
 
@@ -1459,76 +1460,75 @@ answerFeedbackText: {
   feedbackWrongPatternText: {
     position: "absolute",
     fontSize: 42,
-    fontWeight: "900",
+    fontWeight: "700",
     color: "rgba(239,68,68,0.18)",
   },
 
   resultOverlay: {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  zIndex: 999,
-  justifyContent: "center",
-  alignItems: "center",
-  paddingHorizontal: 24,
-},
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 999,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
 
-resultCard: {
-  width: "100%",
-  borderRadius: 32,
-  borderWidth: 3,
-  backgroundColor: "#FFFFFF",
-  paddingHorizontal: 20,
-  paddingTop: 22,
-  paddingBottom: 24,
-  alignItems: "center",
+  resultCard: {
+    width: "100%",
+    borderRadius: 16,
+    borderWidth: 3,
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 20,
+    paddingTop: 22,
+    paddingBottom: 24,
+    alignItems: "center",
 
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.18,
-  shadowRadius: 22,
-  shadowOffset: { width: 0, height: 12 },
-  elevation: 8,
-},
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+  },
 
-resultLottie: {
-  width: 260,
-  height: 260,
-  backgroundColor: "transparent",
-  marginBottom: -8,
-},
+  resultLottie: {
+    width: 260,
+    height: 260,
+    backgroundColor: "transparent",
+    marginBottom: -8,
+  },
 
-resultFeedbackTitle: {
-  fontSize: 34,
-  fontWeight: "900",
-  textAlign: "center",
-  letterSpacing: -0.5,
-  marginBottom: 6,
-},
+  resultFeedbackTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    textAlign: "center",
+    letterSpacing: -0.5,
+    marginBottom: 6,
+  },
 
-resultFeedbackSubtitle: {
-  fontSize: 17,
-  lineHeight: 24,
-  color: COLORS.muted,
-  fontWeight: "800",
-  textAlign: "center",
-  marginBottom: 24,
-},
+  resultFeedbackSubtitle: {
+    fontSize: 17,
+    lineHeight: 24,
+    color: COLORS.muted,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 24,
+  },
 
-resultNextButton: {
-  width: "100%",
-  borderRadius: 999,
-  paddingVertical: 18,
-  alignItems: "center",
-  justifyContent: "center",
-},
+  resultNextButton: {
+    width: "100%",
+    borderRadius: 999,
+    paddingVertical: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-resultNextButtonText: {
-  color: "#FFFFFF",
-  fontSize: 16,
-  fontWeight: "900",
-  letterSpacing: 0.4,
-},
-
+  resultNextButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+  },
 });

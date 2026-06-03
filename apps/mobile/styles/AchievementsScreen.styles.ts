@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 6 : 10,
-    paddingBottom: 112,
+    paddingBottom: 34,
   },
 
   loadingBox: {
@@ -46,10 +46,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
   brandText: {
     fontSize: 26,
     lineHeight: 32,
-    fontWeight: "900",
+    fontWeight: "700",
     letterSpacing: -0.3,
   },
 
@@ -91,9 +91,9 @@ export const styles = StyleSheet.create({
   },
 
   screenTitle: {
-    fontSize: isSmallPhone ? 35 : 39,
-    lineHeight: isSmallPhone ? 41 : 45,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 24 : 28,
+    lineHeight: isSmallPhone ? 30 : 34,
+    fontWeight: "700",
     color: COLORS.text,
     marginBottom: 16,
     letterSpacing: -0.9,
@@ -101,7 +101,7 @@ export const styles = StyleSheet.create({
 
   summaryCard: {
     minHeight: 104,
-    borderRadius: 28,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -113,10 +113,10 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.07,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   summaryLabel: {
@@ -127,9 +127,9 @@ export const styles = StyleSheet.create({
   },
 
   summaryValue: {
-    fontSize: 34,
+    fontSize: 26,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   summaryIconCircle: {
@@ -155,7 +155,7 @@ export const styles = StyleSheet.create({
   badgeCard: {
     width: (width - SPACING.lg * 2 - 14) / 2,
     minHeight: 252,
-    borderRadius: 26,
+    borderRadius: 16,
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -163,10 +163,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.06,
-    shadowRadius: 13,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   badgeCardLocked: {
@@ -177,7 +177,7 @@ export const styles = StyleSheet.create({
     width: 106,
     height: 106,
     borderRadius: 53,
-    backgroundColor: "#F5F1FF",
+    backgroundColor: COLORS.purpleSoft,
     borderWidth: 2,
     borderColor: "#D8C8F8",
     alignItems: "center",
@@ -213,7 +213,7 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 19,
     color: COLORS.text,
-    fontWeight: "900",
+    fontWeight: "700",
     textAlign: "center",
     marginBottom: 6,
     minHeight: 38,
@@ -230,9 +230,9 @@ export const styles = StyleSheet.create({
 
   progressTrack: {
     width: "100%",
-    height: 8,
-    borderRadius: 10,
-    backgroundColor: "#ECEAF4",
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: COLORS.border,
     overflow: "hidden",
     marginTop: 10,
     marginBottom: 6,
@@ -246,6 +246,6 @@ export const styles = StyleSheet.create({
   progressText: {
     fontSize: 12,
     color: COLORS.muted,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 });

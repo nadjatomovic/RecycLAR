@@ -1,43 +1,69 @@
 export const COLORS = {
-  green: "#34A936",
-  greenDark: "#238A2E",
-  greenSoft: "#EAF7EA",
+  green: "#22C55E",
+  greenDark: "#16A34A",
+  greenSoft: "#F0FDF4",
 
-  purple: "#6B35C9",
-  purpleDark: "#4E2399",
-  purpleSoft: "#EFE8FF",
+  purple: "#7C3AED",
+  purpleDark: "#5B21B6",
+  purpleSoft: "#F5F3FF",
 
-  text: "#242631",
-  muted: "#777782",
-  lightText: "#9A9AA5",
+  text: "#111827",
+  muted: "#6B7280",
+  lightText: "#9CA3AF",
 
   white: "#FFFFFF",
-  background: "#FFFFFF",
+  background: "#F8FAF5",
   card: "#FFFFFF",
-  border: "#EDEDF3",
+  border: "#F3F4F6",
 
   shadow: "#000000",
+  error: "#EF4444",
+  warning: "#FEF9C3",
 };
 
 export const FONT = {
-  title: 32,
-  subtitle: 22,
+  title: 28,
+  subtitle: 20,
   body: 16,
   small: 13,
-  button: 20,
+  button: 16,
 };
 
 export const RADIUS = {
-  sm: 14,
-  md: 20,
-  lg: 28,
-  pill: 999,
+  sm: 8,
+  md: 16,
+  lg: 16,
+  pill: 50,
 };
 
 export const SPACING = {
   xs: 6,
   sm: 10,
   md: 16,
-  lg: 22,
-  xl: 30,
+  lg: 20,
+  xl: 24,
+};
+
+export const SHADOWS = {
+  card: {
+    shadowColor: "#000" as const,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05 as const,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  strong: {
+    shadowColor: "#000" as const,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08 as const,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  tab: {
+    shadowColor: "#000" as const,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.06 as const,
+    shadowRadius: 12,
+    elevation: 6,
+  },
 };

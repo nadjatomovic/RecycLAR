@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: isSmallPhone ? 4 : 10,
-    paddingBottom: 112,
+    paddingBottom: 34,
   },
 
   header: {
@@ -33,10 +33,10 @@ export const styles = StyleSheet.create({
     alignItems: "center",
 
     shadowColor: COLORS.shadow,
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
 
   backText: {
@@ -87,7 +87,7 @@ export const styles = StyleSheet.create({
   overline: {
     fontSize: 13,
     color: COLORS.muted,
-    fontWeight: "800",
+    fontWeight: "700",
     marginBottom: 6,
     textTransform: "uppercase",
     letterSpacing: 0.6,
@@ -99,9 +99,9 @@ export const styles = StyleSheet.create({
   },
 
   binTitleText: {
-    fontSize: isSmallPhone ? 25 : 29,
-    lineHeight: isSmallPhone ? 31 : 35,
-    fontWeight: "900",
+    fontSize: isSmallPhone ? 22 : 26,
+    lineHeight: isSmallPhone ? 28 : 32,
+    fontWeight: "700",
     marginBottom: 6,
     letterSpacing: -0.4,
   },
@@ -114,7 +114,7 @@ export const styles = StyleSheet.create({
 
   binMunicipalityName: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 
   rulesRow: {
@@ -125,7 +125,7 @@ export const styles = StyleSheet.create({
 
   rulesCard: {
     flex: 1,
-    borderRadius: 22,
+    borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: 13,
     paddingVertical: 14,
@@ -133,13 +133,17 @@ export const styles = StyleSheet.create({
   },
 
   allowedCard: {
-    backgroundColor: "#F4FBF3",
-    borderColor: "#B6E8C2",
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.border,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.green,
   },
 
   notAllowedCard: {
-    backgroundColor: "#FFF4F4",
-    borderColor: "#F5BBBB",
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.border,
+    borderLeftWidth: 3,
+    borderLeftColor: "#EF4444",
   },
 
   rulesCardHeader: {
@@ -152,7 +156,7 @@ export const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#27AE60",
+    backgroundColor: COLORS.green,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 7,
@@ -162,7 +166,7 @@ export const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#E53935",
+    backgroundColor: "#EF4444",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 7,
@@ -170,27 +174,27 @@ export const styles = StyleSheet.create({
 
   allowedIcon: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 14,
   },
 
   notAllowedIcon: {
     color: COLORS.white,
-    fontWeight: "900",
+    fontWeight: "700",
     fontSize: 16,
     marginTop: -1,
   },
 
   allowedTitle: {
     fontSize: 15,
-    fontWeight: "900",
-    color: "#1E7E34",
+    fontWeight: "700",
+    color: COLORS.green,
   },
 
   notAllowedTitle: {
     fontSize: 15,
-    fontWeight: "900",
-    color: "#C62828",
+    fontWeight: "700",
+    color: "#EF4444",
   },
 
   ruleItem: {
@@ -224,7 +228,7 @@ export const styles = StyleSheet.create({
 
   sectionTitle: {
     fontSize: 20,
-    fontWeight: "900",
+    fontWeight: "700",
     color: COLORS.text,
   },
 
@@ -243,7 +247,7 @@ export const styles = StyleSheet.create({
   exampleCard: {
     flex: 1,
     minHeight: 86,
-    borderRadius: 20,
+    borderRadius: 16,
     backgroundColor: "#F8F8FB",
     borderWidth: 1,
     borderColor: COLORS.border,
@@ -254,7 +258,7 @@ export const styles = StyleSheet.create({
   exampleLabel: {
     fontSize: 13,
     lineHeight: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: COLORS.text,
     textAlign: "center",
   },
@@ -262,7 +266,7 @@ export const styles = StyleSheet.create({
   exampleBin: {
     marginTop: 8,
     fontSize: 13,
-    fontWeight: "900",
+    fontWeight: "700",
     textAlign: "center",
   },
 
@@ -281,7 +285,7 @@ export const styles = StyleSheet.create({
   lariBubble: {
     flex: 1,
     backgroundColor: "#F8F8FB",
-    borderRadius: 22,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 14,
@@ -290,7 +294,7 @@ export const styles = StyleSheet.create({
   lariLabel: {
     fontSize: 12,
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
     marginBottom: 4,
     textTransform: "uppercase",
     letterSpacing: 0.4,
@@ -319,6 +323,6 @@ export const styles = StyleSheet.create({
 
   loginHintLink: {
     color: COLORS.purple,
-    fontWeight: "900",
+    fontWeight: "700",
   },
 });
