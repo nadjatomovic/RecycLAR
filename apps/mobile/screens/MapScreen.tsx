@@ -38,13 +38,11 @@ const FILTERS = [
 ];
 
 export default function MapScreen({ route, navigation }: any) {
-  // ── Секогаш земи го градот од AsyncStorage, params се само backup ─────────
   const [selectedMunicipality, setSelectedMunicipality] =
     useState<string>("Maribor");
 
   useFocusEffect(
     useCallback(() => {
-      // AsyncStorage е единствен извор на вистина
       loadCity().then((city) => {
         setSelectedMunicipality(city);
       });
@@ -107,12 +105,9 @@ export default function MapScreen({ route, navigation }: any) {
     fetchLocations();
   }, [selectedMunicipality]);
 
+  // Маркерите се филтрираат САМО според типот
   const filteredLocations = locations.filter((loc) => {
-    const matchesSearch =
-      loc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      loc.address.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = activeFilter === "all" || loc.type === activeFilter;
-    return matchesSearch && matchesFilter;
+    return activeFilter === "all" || loc.type === activeFilter;
   });
 
   const sendMarkersToMap = () => {
@@ -174,7 +169,7 @@ export default function MapScreen({ route, navigation }: any) {
       webViewRef.current.postMessage(
         JSON.stringify({
           center: { lat, lng: lon, zoom: 16 },
-          markers: filteredLocations,
+          markers: filteredLocations, // Ги задржуваме истите маркери
         }),
       );
     }
@@ -196,85 +191,62 @@ export default function MapScreen({ route, navigation }: any) {
   };
 
   const mapHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" crossOrigin="anonymous" />
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" crossOrigin="anonymous"></script>
-      <style>
-        body, html, #map { margin: 0; padding: 0; height: 100%; width: 100%; background: #EFEFF4; }
-        .custom-div-icon {
-          width: 36px !important; height: 36px !important;
-          border-radius: 50%; border: 3px solid white;
-          color: white; font-family: sans-serif; font-weight: bold; font-size: 14px;
-          display: flex; align-items: center; justify-content: center;
-          box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
-        }
-      </style>
-    </head>
-    <body>
-      <div id="map"></div>
-      <script>
-        var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([${currentCoords.lat}, ${currentCoords.lng}], ${currentCoords.zoom || 13});
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        var markerGroup = L.layerGroup().addTo(map);
-
-        function emitReady() {
-          if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MAP_READY" }));
-          } else {
-            setTimeout(emitReady, 100);
-          }
-        }
-        window.onload = function() { emitReady(); };
-
-        function handleReactNativeMessage(e) {
-          try {
-            var data = JSON.parse(e.data);
-            if (!data || data.type === "MAP_READY") return;
-            if (data.center && data.center.lat && data.center.lng) {
-              map.setView([data.center.lat, data.center.lng], data.center.zoom || 14);
-            }
-            markerGroup.clearLayers();
-            if (!data.markers || !Array.isArray(data.markers)) return;
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" crossOrigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js" crossOrigin="anonymous"></script>
+    <style>
+      body, html, #map { margin: 0; padding: 0; height: 100%; width: 100%; background: #EFEFF4; }
+      .custom-icon { background: transparent !important; border: none !important; }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      var map = L.map('map', { zoomControl: false, attributionControl: false }).setView([${currentCoords.lat}, ${currentCoords.lng}], ${currentCoords.zoom || 13});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      var markerGroup = L.layerGroup().addTo(map);
+      
+      function emitReady() {
+        if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MAP_READY" }));
+        else setTimeout(emitReady, 100);
+      }
+      window.onload = function() { emitReady(); };
+      
+      window.addEventListener("message", function(e) {
+        try {
+          var data = JSON.parse(e.data);
+          if (data.type === "MAP_READY") return;
+          if (data.center) map.setView([data.center.lat, data.center.lng], data.center.zoom || 14);
+          markerGroup.clearLayers();
+          if (data.markers) {
             data.markers.forEach(function(loc) {
-              var lat = Number(loc.lat);
-              var lng = Number(loc.lng);
-              if (!lat || !lng || isNaN(lat) || isNaN(lng)) return;
-              var color = "#35A936";
-              var iconText = "♻";
-              if (loc.type === "collection_center") { color = "#F59E0B"; iconText = "Z"; }
-              else if (loc.type === "bio_bin") { color = "#8A5A32"; iconText = "B"; }
-              else if (loc.type === "packaging_bin") { color = "#F2B400"; iconText = "E"; }
-              var customIcon = L.divIcon({
-                className: "",
-                html: '<div style="background-color:' + color + ';width:38px;height:38px;border-radius:19px;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,0.35);">' + iconText + '</div>',
-                iconSize: [38, 38],
-                iconAnchor: [19, 19],
+              var color = loc.type === "collection_center" ? "#F59E0B" : loc.type === "bio_bin" ? "#8A5A32" : loc.type === "packaging_bin" ? "#F2B400" : "#35A936";
+              var iconText = loc.type === "collection_center" ? "Z" : loc.type === "bio_bin" ? "B" : loc.type === "packaging_bin" ? "E" : "♻";
+              var icon = L.divIcon({ 
+                className: 'custom-icon',
+                html: '<div style="background-color:' + color + ';width:38px;height:38px;border-radius:19px;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,0.35);">' + iconText + '</div>', 
+                iconSize: [38, 38], 
+                iconAnchor: [19, 19] 
               });
-              var marker = L.marker([lat, lng], { icon: customIcon }).addTo(markerGroup);
-              marker.on("click", function() {
+              L.marker([loc.lat, loc.lng], { icon: icon }).addTo(markerGroup).on("click", function() {
                 window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MARKER_CLICK", location: loc }));
               });
             });
-            setTimeout(function() { map.invalidateSize(); }, 100);
-          } catch (err) {
-            window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MAP_ERROR", message: String(err) }));
           }
-        }
-        window.addEventListener("message", handleReactNativeMessage);
-        document.addEventListener("message", handleReactNativeMessage);
-      </script>
-    </body>
-    </html>
-  `;
+        } catch(err) {}
+      });
+    </script>
+  </body>
+  </html>
+`;
 
   return (
     <SafeAreaView style={styles.container}>
       <DecorativeBackground variant="map" />
-
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Text style={styles.searchIcon}>⌕</Text>
@@ -289,7 +261,6 @@ export default function MapScreen({ route, navigation }: any) {
             <ActivityIndicator size="small" color="#6B35C9" />
           )}
         </View>
-
         {addressResults.length > 0 && (
           <View
             style={{
@@ -360,35 +331,16 @@ export default function MapScreen({ route, navigation }: any) {
             source={{ html: mapHtml }}
             style={styles.map}
             javaScriptEnabled={true}
-            domStorageEnabled={true}
-            allowFileAccess={true}
-            allowUniversalAccessFromFileURLs={true}
-            mixedContentMode="always"
             onMessage={(event) => {
               try {
                 const res = JSON.parse(event.nativeEvent.data);
-                if (res.type === "MAP_READY") {
-                  setIsMapReady(true);
-                } else if (res.type === "MARKER_CLICK") {
+                if (res.type === "MAP_READY") setIsMapReady(true);
+                else if (res.type === "MARKER_CLICK")
                   setSelectedLocation(res.location);
-                } else if (res.type === "MAP_ERROR") {
-                  console.log("Leaflet map error:", res.message);
-                }
               } catch (e) {}
             }}
           />
         )}
-
-        {!loading && filteredLocations.length === 0 && (
-          <View style={styles.emptyMapCard}>
-            <Text style={styles.emptyMapIcon}>🌱</Text>
-            <Text style={styles.emptyMapTitle}>Ni lokacij</Text>
-            <Text style={styles.emptyMapText}>
-              Za ta filter trenutno ni prikazanih lokacij.
-            </Text>
-          </View>
-        )}
-
         {selectedLocation && (
           <View style={styles.infoCard}>
             <View style={styles.infoIconBox}>
@@ -410,9 +362,6 @@ export default function MapScreen({ route, navigation }: any) {
               <Text style={styles.locationItems} numberOfLines={1}>
                 {selectedLocation.address || "Naslov ni vpisan"}
               </Text>
-              <Text style={styles.openStatus}>
-                Zabojniki: {selectedLocation.items}
-              </Text>
             </View>
             <TouchableOpacity
               style={styles.arrowBtn}
@@ -423,7 +372,6 @@ export default function MapScreen({ route, navigation }: any) {
           </View>
         )}
       </View>
-
       <BottomNavBar navigation={navigation} activeRoute={"Map" as any} />
     </SafeAreaView>
   );

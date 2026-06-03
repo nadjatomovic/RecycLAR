@@ -23,6 +23,7 @@ import {
   query,
   orderBy,
   limit,
+  where,
   serverTimestamp,
 } from "firebase/firestore";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -31,13 +32,16 @@ import { styles } from "../styles/ProfileScreen.styles";
 import DecorativeBackground from "../components/DecorativeBackground";
 import { getBadgeAsset } from "../utils/badgeAssets";
 import { getAvatarAsset } from "../utils/avatarAssets";
+import { getIconAsset } from "../utils/iconAssets";
 
 type UserData = {
   name: string;
   email: string;
   municipalityId: string;
+  municipalityName?: string;
   groupId?: string;
   schoolId?: string;
+  schoolName?: string;
   totalPoints?: number;
   weeklyPoints?: number;
   monthlyPoints?: number;
@@ -97,19 +101,6 @@ const avatarOptions = [
   { key: "rabbit", label: "Zajec", image: getAvatarAsset("rabbit") },
   { key: "owl", label: "Sova", image: getAvatarAsset("owl") },
 ];
-
-const MOCK_CLASSES: GroupData[] = [
-  { id: "7b", name: "7.B razred", totalPoints: 1520, rank: 1 },
-  { id: "6a", name: "6.A razred", totalPoints: 1180, rank: 2 },
-  { id: "8c", name: "8.C razred", totalPoints: 780, rank: 3 },
-];
-
-const MOCK_TEACHER_STATS = {
-  totalClassPoints: 3480,
-  studentCount: 48,
-  quizzesCreated: 12,
-  activeDays: 18,
-};
 
 const MOCK_STUDENT_ACTIVITY: ActivityData[] = [
   {
@@ -201,6 +192,7 @@ const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
   const scanCount = userData.scanCount ?? 0;
   const quizCompleted = userData.quizCompleted ?? 0;
   const streakDays = userData.streakDays ?? 0;
+  const weeklyPoints = userData.weeklyPoints ?? 0;
 
   if (badge.conditionType === "points") {
     return totalPoints >= badge.conditionValue;
@@ -226,6 +218,22 @@ const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
     return scanCount >= badge.conditionValue;
   }
 
+  if (badge.conditionType === "teacher_streak") {
+    return streakDays >= badge.conditionValue || weeklyPoints >= 1000;
+  }
+
+  if (badge.conditionType === "teacher_points") {
+    return totalPoints >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "teacher_quiz_count") {
+    return quizCompleted >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "teacher_waste_categories_scanned") {
+    return scanCount >= badge.conditionValue;
+  }
+
   return false;
 };
 
@@ -234,6 +242,7 @@ export default function ProfileScreen({ navigation }: any) {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [badges, setBadges] = useState<BadgeData[]>([]);
   const [recentActivities, setRecentActivities] = useState<ActivityData[]>([]);
+  const [teacherGroups, setTeacherGroups] = useState<GroupData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [avatarModalVisible, setAvatarModalVisible] = useState(false);
@@ -246,8 +255,8 @@ export default function ProfileScreen({ navigation }: any) {
   const [selectedNotification, setSelectedNotification] =
     useState<NotificationData | null>(null);
   const [notificationsTab, setNotificationsTab] = useState<"unread" | "all">(
-  "unread"
-);
+    "unread",
+  );
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -259,6 +268,7 @@ export default function ProfileScreen({ navigation }: any) {
           loadBadges(),
           loadRecentActivities(user.uid),
           loadNotifications(user.uid),
+          loadTeacherGroups(user.uid),
         ]);
       } else {
         navigation.navigate("Login");
@@ -311,7 +321,7 @@ export default function ProfileScreen({ navigation }: any) {
       const activitiesQuery = query(
         collection(db, "users", userId, "activities"),
         orderBy("createdAt", "desc"),
-        limit(3)
+        limit(3),
       );
 
       const snapshot = await getDocs(activitiesQuery);
@@ -345,7 +355,7 @@ export default function ProfileScreen({ navigation }: any) {
       const notificationsQuery = query(
         collection(db, "users", userId, "notifications"),
         orderBy("createdAt", "desc"),
-        limit(10)
+        limit(10),
       );
 
       const snapshot = await getDocs(notificationsQuery);
@@ -373,6 +383,38 @@ export default function ProfileScreen({ navigation }: any) {
     }
   };
 
+  const loadTeacherGroups = async (userId: string) => {
+    try {
+      const groupsQuery = query(
+        collection(db, "groups"),
+        where("teacherId", "==", userId),
+      );
+
+      const snapshot = await getDocs(groupsQuery);
+      const loaded: GroupData[] = [];
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        loaded.push({
+          id: docSnap.id,
+          name: data.displayName ?? data.name ?? "Razred",
+          totalPoints: data.monthlyPoints ?? data.totalPoints ?? 0,
+        });
+      });
+
+      loaded.sort((a, b) => b.totalPoints - a.totalPoints);
+
+      loaded.forEach((group, index) => {
+        group.rank = index + 1;
+      });
+
+      setTeacherGroups(loaded);
+    } catch (err) {
+      console.log("Error loading teacher groups:", err);
+      setTeacherGroups([]);
+    }
+  };
+
   const handleOpenNotification = async (notification: NotificationData) => {
     setSelectedNotification(notification);
 
@@ -381,18 +423,15 @@ export default function ProfileScreen({ navigation }: any) {
     }
 
     try {
-      await updateDoc(
-        doc(db, "users", uid, "notifications", notification.id),
-        {
-          read: true,
-          readAt: serverTimestamp(),
-        }
-      );
+      await updateDoc(doc(db, "users", uid, "notifications", notification.id), {
+        read: true,
+        readAt: serverTimestamp(),
+      });
 
       setNotifications((previous) =>
         previous.map((item) =>
-          item.id === notification.id ? { ...item, read: true } : item
-        )
+          item.id === notification.id ? { ...item, read: true } : item,
+        ),
       );
     } catch (error) {
       console.log("Error marking notification as read:", error);
@@ -479,7 +518,9 @@ export default function ProfileScreen({ navigation }: any) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingBox}>
-          <Text style={styles.emptyText}>Ni podatkov. Prosimo, prijavi se.</Text>
+          <Text style={styles.emptyText}>
+            Ni podatkov. Prosimo, prijavi se.
+          </Text>
 
           <TouchableOpacity
             style={styles.loginBtn}
@@ -497,6 +538,7 @@ export default function ProfileScreen({ navigation }: any) {
     userData,
     badges,
     recentActivities,
+    teacherGroups,
     navigation,
     onSignOut: handleSignOut,
     onOpenAvatar: () => navigation.navigate("EditProfile"),
@@ -548,7 +590,7 @@ export default function ProfileScreen({ navigation }: any) {
 
 function Header({ notifications = [], onOpenNotifications }: any) {
   const unreadCount = notifications.filter(
-    (item: NotificationData) => !item.read
+    (item: NotificationData) => !item.read,
   ).length;
 
   return (
@@ -571,7 +613,11 @@ function Header({ notifications = [], onOpenNotifications }: any) {
         activeOpacity={0.85}
         onPress={onOpenNotifications}
       >
-        <Text style={styles.notificationText}>🔔</Text>
+        <Image
+          source={getIconAsset("notification")}
+          style={{ width: 46, height: 46 }}
+          resizeMode="contain"
+        />
 
         {unreadCount > 0 && (
           <View style={styles.notificationDot}>
@@ -600,25 +646,25 @@ function StudentProfile({
     {
       label: "Eko točke",
       value: String(userData.totalPoints ?? 0),
-      icon: "🌱",
+      icon: getIconAsset("eco"),
       color: "#35A936",
     },
     {
       label: "Skeniranja",
       value: String(userData.scanCount ?? 0),
-      icon: "⌗",
+      icon: getIconAsset("scan"),
       color: "#6B35C9",
     },
     {
       label: "Pravilni kvizi",
       value: String(userData.quizCompleted ?? 0),
-      icon: "🏆",
+      icon: getIconAsset("quiz"),
       color: "#35A936",
     },
     {
       label: "Streak",
       value: `${userData.streakDays ?? 0} dni`,
-      icon: "🔥",
+      icon: getIconAsset("streak"),
       color: "#6B35C9",
     },
   ];
@@ -679,6 +725,7 @@ function TeacherProfile({
   userData,
   badges,
   recentActivities,
+  teacherGroups,
   navigation,
   onSignOut,
   onOpenAvatar,
@@ -686,29 +733,34 @@ function TeacherProfile({
   notifications,
   onOpenNotifications,
 }: any) {
+  const totalClassPoints = teacherGroups.reduce(
+    (sum: number, g: GroupData) => sum + (g.totalPoints ?? 0),
+    0,
+  );
+
   const teacherStats = [
     {
       label: "Točke razredov",
-      value: String(MOCK_TEACHER_STATS.totalClassPoints),
-      icon: "🏆",
+      value: String(totalClassPoints),
+      icon: getIconAsset("trophy"),
       color: "#35A936",
     },
     {
-      label: "Učenci",
-      value: String(MOCK_TEACHER_STATS.studentCount),
-      icon: "👥",
+      label: "Razredi",
+      value: String(teacherGroups.length),
+      icon: getIconAsset("school"),
       color: "#6B35C9",
     },
     {
       label: "Kvizi",
-      value: String(MOCK_TEACHER_STATS.quizzesCreated),
-      icon: "📋",
+      value: String(userData.quizCompleted ?? 0),
+      icon: getIconAsset("quiz"),
       color: "#35A936",
     },
     {
-      label: "Aktivni dnevi",
-      value: String(MOCK_TEACHER_STATS.activeDays),
-      icon: "📅",
+      label: "Streak",
+      value: `${userData.streakDays ?? 0} dni`,
+      icon: getIconAsset("streak"),
       color: "#6B35C9",
     },
   ];
@@ -742,46 +794,61 @@ function TeacherProfile({
 
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => navigation.navigate("LeaderBoard")}
+              onPress={() => navigation.navigate("Leaderboard")}
             >
               <Text style={styles.viewAll}>Poglej vse ›</Text>
             </TouchableOpacity>
           </View>
 
-          {MOCK_CLASSES.map((group) => (
-            <TouchableOpacity
-              key={group.id}
-              style={styles.classRow}
-              activeOpacity={0.85}
+          {teacherGroups.length === 0 ? (
+            <Text
+              style={{
+                color: "#9CA3AF",
+                fontSize: 14,
+                paddingVertical: 12,
+                fontWeight: "600",
+              }}
             >
-              <View
-                style={[
-                  styles.classCircle,
-                  { backgroundColor: `${getRankColor(group.rank ?? 99)}22` },
-                ]}
+              Ni razredov.
+            </Text>
+          ) : (
+            teacherGroups.map((group: GroupData) => (
+              <TouchableOpacity
+                key={group.id}
+                style={styles.classRow}
+                activeOpacity={0.85}
               >
-                <Text
+                <View
                   style={[
-                    styles.classCircleText,
-                    { color: getRankColor(group.rank ?? 99) },
+                    styles.classCircle,
+                    { backgroundColor: `${getRankColor(group.rank ?? 99)}22` },
                   ]}
                 >
-                  {group.name.split(" ")[0]}
+                  <Text
+                    style={[
+                      styles.classCircleText,
+                      { color: getRankColor(group.rank ?? 99) },
+                    ]}
+                  >
+                    {group.name.split(" ")[0]}
+                  </Text>
+                </View>
+
+                <View style={styles.classInfo}>
+                  <Text style={styles.className}>{group.name}</Text>
+                  <Text style={styles.classPoints}>
+                    {group.totalPoints} točk
+                  </Text>
+                </View>
+
+                <Text style={styles.classMedal}>
+                  {getRankMedal(group.rank ?? 99)}
                 </Text>
-              </View>
 
-              <View style={styles.classInfo}>
-                <Text style={styles.className}>{group.name}</Text>
-                <Text style={styles.classPoints}>{group.totalPoints} točk</Text>
-              </View>
-
-              <Text style={styles.classMedal}>
-                {getRankMedal(group.rank ?? 99)}
-              </Text>
-
-              <Text style={styles.classArrow}>›</Text>
-            </TouchableOpacity>
-          ))}
+                <Text style={styles.classArrow}>›</Text>
+              </TouchableOpacity>
+            ))
+          )}
         </View>
 
         <BadgesSection
@@ -831,7 +898,11 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
           activeOpacity={0.85}
           onPress={onOpenAvatar}
         >
-          <Text style={styles.cameraBadgeText}>📷</Text>
+          <Image
+            source={getIconAsset("scan")}
+            style={{ width: 20, height: 20 }}
+            resizeMode="contain"
+          />
         </TouchableOpacity>
       </View>
 
@@ -856,14 +927,15 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
             <View style={styles.teacherMetaRow}>
               <Text style={styles.teacherMetaEmoji}>📍</Text>
               <Text style={styles.teacherMetaText} numberOfLines={1}>
-                {userData.schoolId || "Ni šole"}
+                {userData.schoolName || userData.schoolId || "Ni šole"}
               </Text>
             </View>
 
             <View style={styles.teacherMetaRow}>
               <Text style={styles.teacherMetaEmoji}>🏫</Text>
               <Text style={styles.teacherMetaText} numberOfLines={1}>
-                {formatMunicipality(userData.municipalityId)}
+                {userData.municipalityName ||
+                  formatMunicipality(userData.municipalityId)}
               </Text>
             </View>
           </>
@@ -879,7 +951,8 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {formatMunicipality(userData.municipalityId)}
+                  {userData.municipalityName ||
+                    formatMunicipality(userData.municipalityId)}
                 </Text>
               </View>
             </View>
@@ -896,7 +969,7 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >
-                  {userData.groupId || "Ni skupine"}
+                  {userData.groupName || userData.groupId || "Ni skupine"}
                 </Text>
               </View>
             </View>
@@ -913,7 +986,11 @@ function StatsRow({ stats }: any) {
       {stats.map((item: any) => (
         <View key={item.label} style={styles.statCard}>
           <View style={styles.statIconCircle}>
-            <Text style={styles.statIcon}>{item.icon}</Text>
+            <Image
+              source={item.icon}
+              style={styles.statIcon}
+              resizeMode="contain"
+            />
           </View>
 
           <Text style={styles.statLabel}>{item.label}</Text>
@@ -928,15 +1005,24 @@ function StatsRow({ stats }: any) {
 }
 
 function BadgesSection({ badges, userData, onViewAll }: any) {
-  const sortedBadges = [...badges].sort((a: BadgeData, b: BadgeData) => {
-    const aUnlocked = isBadgeUnlocked(a, userData);
-    const bUnlocked = isBadgeUnlocked(b, userData);
+  const userRole = userData.role ?? "student";
 
-    if (aUnlocked && !bUnlocked) return -1;
-    if (!aUnlocked && bUnlocked) return 1;
-
-    return (a.order ?? 99) - (b.order ?? 99);
+  const filteredBadges = badges.filter((badge: BadgeData) => {
+    const badgeRole = (badge as any).role ?? "student";
+    return badgeRole === userRole;
   });
+
+  const sortedBadges = [...filteredBadges].sort(
+    (a: BadgeData, b: BadgeData) => {
+      const aUnlocked = isBadgeUnlocked(a, userData);
+      const bUnlocked = isBadgeUnlocked(b, userData);
+
+      if (aUnlocked && !bUnlocked) return -1;
+      if (!aUnlocked && bUnlocked) return 1;
+
+      return (a.order ?? 99) - (b.order ?? 99);
+    },
+  );
 
   const visibleBadges = sortedBadges.slice(0, 3);
 
@@ -1032,7 +1118,9 @@ function ActivityCard({ title, items, onViewAll }: any) {
       ))}
     </View>
   );
-}function NotificationsModal({
+}
+
+function NotificationsModal({
   visible,
   notifications,
   selectedNotification,
@@ -1043,7 +1131,7 @@ function ActivityCard({ title, items, onViewAll }: any) {
   onClose,
 }: any) {
   const unreadNotifications = notifications.filter(
-    (item: NotificationData) => !item.read
+    (item: NotificationData) => !item.read,
   );
 
   const visibleNotifications =

@@ -130,20 +130,25 @@ const DashboardScreen = ({ navigation, route }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <DecorativeBackground variant="home_auth" />
-      
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-
         <View style={styles.topBrandRow}>
-
-        <View style={styles.brandLogoWrapper}>
-          
+          <View style={styles.brandLogoWrapper}>
+            <Image
+              source={require("../assets/icon-logo.png")}
+              style={styles.topBrandIcon}
+              resizeMode="contain"
+            />
+            <Text style={styles.topBrandText}>
+              <Text style={styles.topBrandGreen}>Recyc</Text>
+              <Text style={styles.topBrandPurple}>LAR</Text>
+            </Text>
+          </View>
+          <View style={styles.placeholderSpacer} />
         </View>
-        <View style={styles.placeholderSpacer} />
-      </View>
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>
             {isLoggedIn && userName
@@ -176,7 +181,6 @@ const DashboardScreen = ({ navigation, route }: any) => {
             </Text>
           </View>
         </TouchableOpacity>
-
 
         {isDropdownOpen && (
           <View style={styles.dropdownContainer}>
@@ -219,7 +223,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
             <View style={styles.speechBubbleTailShadow} />
             <View style={styles.speechBubbleTail} />
           </View>
-         <View style={styles.mascotShadowWrap}>
+          <View style={styles.mascotShadowWrap}>
             <LottieView
               source={require("../assets/animations/MahanjeAnimacija.json")}
               style={styles.mascotImage}
@@ -246,7 +250,6 @@ const DashboardScreen = ({ navigation, route }: any) => {
           </View>
 
           <View style={styles.scanTextWrap}>
-
             <Text style={styles.scanButtonText}>Začni skeniranje</Text>
             <Text style={styles.scanButtonSubtext}>
               Fotografiraj odpadek in takoj preveri kam spada
@@ -349,10 +352,10 @@ const DashboardScreen = ({ navigation, route }: any) => {
             onPress={() => navigation.navigate("Login")}
           >
             <Image
-                          source={require("../assets/kapa.png")}
-                          style={styles.logoHat}
-                          resizeMode="contain"
-                        />
+              source={require("../assets/kapa.png")}
+              style={styles.logoHat}
+              resizeMode="contain"
+            />
             <Text style={styles.loginHintText}>
               Želiš preveriti svoje znanje?{" "}
               <Text style={styles.loginHintLink}>Prijavi se</Text>

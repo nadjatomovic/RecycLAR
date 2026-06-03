@@ -289,7 +289,8 @@ export const styles = StyleSheet.create({
   },
 
   statIcon: {
-    fontSize: 22,
+    width: 46,
+    height: 46,
   },
 
   statLabel: {
