@@ -15,7 +15,8 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/RegisterScreen.styles";
-import { saveCity } from "../utils/cityStorage"; // 1. Увезена функцијата за локално зачувување
+import { saveCity } from "../utils/cityStorage";
+import DecorativeBackground from "../components/DecorativeBackground"; // 1. Увезена функцијата за локално зачувување
 
 const municipalities = ["Maribor", "Ljubljana", "Kranj", "Koper", "Celje"];
 
@@ -142,6 +143,7 @@ export default function RegisterScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="default" />
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}

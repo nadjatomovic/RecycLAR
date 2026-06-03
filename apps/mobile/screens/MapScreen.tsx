@@ -16,6 +16,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { styles } from "../styles/MapScreen.styles";
 import BottomNavBar from "../components/BottomNavBar";
+import DecorativeBackground from "../components/DecorativeBackground";
 import { loadCity } from "../utils/cityStorage";
 
 const { width, height } = Dimensions.get("window");
@@ -272,6 +273,7 @@ export default function MapScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="map" />
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <Text style={[styles.brandText, styles.brandGreen]}>Recyc</Text>

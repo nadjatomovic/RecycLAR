@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/HomeScreen.styles";
 import { saveCity, loadCity } from "../utils/cityStorage";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 const municipalities = ["Maribor", "Celje", "Ljubljana", "Kranj", "Koper"];
 
@@ -35,6 +36,7 @@ export default function HomeScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="home_guest" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}

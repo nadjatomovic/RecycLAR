@@ -22,6 +22,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/LoginScreen.styles";
 import { saveCity } from "../utils/cityStorage";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
@@ -119,6 +120,7 @@ export default function LoginScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="default" />
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}

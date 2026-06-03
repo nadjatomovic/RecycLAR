@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { styles } from "../styles/DashboardScreen.styles";
 import BottomNavBar from "../components/BottomNavBar";
+import DecorativeBackground from "../components/DecorativeBackground";
 import { getBinAsset } from "../utils/binAssets";
 import { saveCity, loadCity } from "../utils/cityStorage";
 import { onAuthStateChanged } from "firebase/auth";
@@ -128,6 +129,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="home_auth" />
       {/* ГОРНА ЛЕНТА: Додадено копче за враќање на почетниот HomeScreen */}
       <View style={styles.topBrandRow}>
         <TouchableOpacity

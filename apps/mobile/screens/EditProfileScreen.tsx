@@ -17,6 +17,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/EditProfileScreen.styles";
 import { getAvatarAsset } from "../utils/avatarAssets";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 type UserData = {
   name?: string;
@@ -143,6 +144,7 @@ export default function EditProfileScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="default" />
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === "ios" ? "padding" : undefined}

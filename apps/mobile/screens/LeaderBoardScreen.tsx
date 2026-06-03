@@ -23,6 +23,7 @@ import { auth, db } from "../firebase/firebase";
 import { styles as s } from "../styles/LeaderBoardScreen.styles";
 import { getAvatarAsset } from "../utils/avatarAssets";
 import { loadCity } from "../utils/cityStorage";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -320,6 +321,7 @@ export default function LeaderboardScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={s.container}>
+      <DecorativeBackground variant="leaderboard" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}

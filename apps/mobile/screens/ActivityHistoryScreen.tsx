@@ -14,6 +14,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import BottomNavBar from "../components/BottomNavBar";
 import { styles } from "../styles/ActivityHistoryScreen.styles";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 type ActivityData = {
   id?: string;
@@ -125,6 +126,7 @@ export default function ActivityHistoryScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="default" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}

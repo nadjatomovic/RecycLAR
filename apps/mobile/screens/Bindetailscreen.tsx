@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/Bindetailscreen.styles";
 import { getBinAsset } from "../utils/binAssets";
 import BottomNavBar from "../components/BottomNavBar";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 const BIN_DATA: Record<string, any> = {
   yellow: {
@@ -293,6 +294,7 @@ export default function BinDetailScreen({ route, navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="default" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BottomNavBar from "../components/BottomNavBar";
+import DecorativeBackground from "../components/DecorativeBackground";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ExpoAsset from "expo-asset";
@@ -552,6 +553,7 @@ const prepareModel = async () => {
   // ─── Main camera mode ───────────────────────────────────────────────────────
   return (
     <SafeAreaView style={s.container}>
+      <DecorativeBackground variant="scanner" />
       <View style={s.header}>
         <View style={{ width: 40 }} />
         <Text style={s.headerTitle}>

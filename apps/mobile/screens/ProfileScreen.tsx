@@ -28,6 +28,7 @@ import {
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/ProfileScreen.styles";
+import DecorativeBackground from "../components/DecorativeBackground";
 import { getBadgeAsset } from "../utils/badgeAssets";
 import { getAvatarAsset } from "../utils/avatarAssets";
 
@@ -624,6 +625,7 @@ function StudentProfile({
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="profile" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -713,6 +715,7 @@ function TeacherProfile({
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="profile" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}

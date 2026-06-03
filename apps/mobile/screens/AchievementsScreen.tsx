@@ -15,6 +15,7 @@ import { auth, db } from "../firebase/firebase";
 import { getBadgeAsset } from "../utils/badgeAssets";
 import BottomNavBar from "../components/BottomNavBar";
 import { styles } from "../styles/AchievementsScreen.styles";
+import DecorativeBackground from "../components/DecorativeBackground";
 
 type BadgeData = {
   id: string;
@@ -223,6 +224,7 @@ export default function AchievementsScreen({ navigation }: any) {
 
   return (
     <SafeAreaView style={styles.container}>
+      <DecorativeBackground variant="default" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}

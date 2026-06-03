@@ -25,6 +25,7 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import BottomNavBar from "../components/BottomNavBar";
+import DecorativeBackground from "../components/DecorativeBackground";
 import { generateAllQuestions } from "../utils/generateQuestions";
 import { styles as s } from "../styles/QuizScreen.styles";
 import LottieView from "lottie-react-native";
@@ -902,6 +903,7 @@ if (newStreak && newStreak > 1) {
   if (currentScreen === "topics") {
     return (
       <SafeAreaView style={s.container}>
+        <DecorativeBackground variant="quiz" />
         <ScrollView
           contentContainerStyle={s.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -1413,6 +1415,7 @@ if (newStreak && newStreak > 1) {
 
   return (
     <SafeAreaView style={s.whiteContainer}>
+      <DecorativeBackground variant="result" />
       <ScrollView
         contentContainerStyle={s.resultContent}
         showsVerticalScrollIndicator={false}
