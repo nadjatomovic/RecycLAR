@@ -186,21 +186,23 @@ export default function AchievementsScreen({ navigation }: any) {
     try {
       const snapshot = await getDocs(collection(db, "badges"));
       const loaded: BadgeData[] = [];
-
       snapshot.forEach((docSnap) => {
         loaded.push({
           id: docSnap.id,
           ...(docSnap.data() as Omit<BadgeData, "id">),
         });
       });
-
       if (loaded.length === 0) {
         setBadges(fallbackBadges);
         return;
       }
-
-      loaded.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-      setBadges(loaded);
+      const userRole = (userData as any).role ?? "student";
+      const filtered = loaded.filter((badge: any) => {
+        const badgeRole = badge.role ?? "student";
+        return badgeRole === userRole;
+      });
+      filtered.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+      setBadges(filtered);
     } catch (err) {
       console.log("Error loading badges:", err);
       setBadges(fallbackBadges);
@@ -219,7 +221,7 @@ export default function AchievementsScreen({ navigation }: any) {
   }
 
   const unlockedCount = badges.filter((badge) =>
-    isBadgeUnlocked(badge, userData)
+    isBadgeUnlocked(badge, userData),
   ).length;
 
   return (
@@ -298,9 +300,7 @@ export default function AchievementsScreen({ navigation }: any) {
                 </View>
 
                 <Text style={styles.badgeName}>{badge.name}</Text>
-                <Text style={styles.badgeDescription}>
-                  {badge.description}
-                </Text>
+                <Text style={styles.badgeDescription}>{badge.description}</Text>
 
                 <View style={styles.progressTrack}>
                   <View
