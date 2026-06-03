@@ -569,7 +569,7 @@ export default function ScannerScreen({ navigation }: any) {
 
           <View style={s.tipRow}>
             <Image
-              source={require("../assets/lari-hello.png")}
+              source={require("../assets/Lari2.png")}
               style={s.tipLari}
               resizeMode="contain"
             />
