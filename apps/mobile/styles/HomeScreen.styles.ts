@@ -25,21 +25,21 @@ export const styles = StyleSheet.create({
   mainIcon: {
     width: isSmallPhone ? 104 : 122,
     height: isSmallPhone ? 104 : 122,
-    marginBottom: -8,
-  },
+    marginBottom: -20,
+},
 
-  logoText: {
-    width: isSmallPhone ? 185 : 215,
-    height: isSmallPhone ? 52 : 60,
-    marginTop: -8,
-  },
+logoText: {
+    width: isSmallPhone ? 340 : 380,
+    height: isSmallPhone ? 120 : 140,
+    marginTop: -40,
+},
 
   tagline: {
-    marginTop: 2,
+    marginTop: -34,
     fontSize: isSmallPhone ? 24 : 28,
     lineHeight: isSmallPhone ? 30 : 34,
     fontWeight: "700",
-    color: COLORS.purple,
+    color: "#7C3AED",
     textAlign: "center",
     letterSpacing: -0.4,
   },
@@ -107,8 +107,15 @@ export const styles = StyleSheet.create({
   },
 
   locationIcon: {
-    width: 30,
-    height: 30,
+    width: 60,
+    height: 60,
+  },
+
+  loginIcon: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+    resizeMode: 'contain',
   },
 
   dropdownSmallLabel: {
@@ -155,10 +162,9 @@ export const styles = StyleSheet.create({
 
   mainButtonText: {
     color: COLORS.white,
-    fontSize: FONT.button,
+    fontSize: 20,
     fontWeight: "700",
-    letterSpacing: 0.2,
-  },
+},
 
   arrowCircle: {
     position: "absolute",
@@ -189,11 +195,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
-  },
-
-  loginIcon: {
-    fontSize: 22,
-    marginRight: 10,
   },
 
   loginButtonText: {

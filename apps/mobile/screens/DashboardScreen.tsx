@@ -130,38 +130,24 @@ const DashboardScreen = ({ navigation, route }: any) => {
   return (
     <SafeAreaView style={styles.container}>
       <DecorativeBackground variant="home_auth" />
-      {/* ГОРНА ЛЕНТА: Додадено копче за враќање на почетниот HomeScreen */}
-      <View style={styles.topBrandRow}>
-        <TouchableOpacity
-          style={styles.topBackButton}
-          onPress={() => navigation.navigate("Home")}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.topBackText}>‹</Text>
-        </TouchableOpacity>
-
-        <View style={styles.brandLogoWrapper}>
-          <Image
-            source={require("../assets/icon-logo.png")}
-            style={styles.topBrandIcon}
-            resizeMode="contain"
-          />
-          <Text style={styles.topBrandText}>
-            <Text style={styles.topBrandGreen}>Recyc</Text>
-            <Text style={styles.topBrandPurple}>LAR</Text>
-          </Text>
-        </View>
-        <View style={styles.placeholderSpacer} />
-      </View>
+      
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+
+        <View style={styles.topBrandRow}>
+
+        <View style={styles.brandLogoWrapper}>
+          
+        </View>
+        <View style={styles.placeholderSpacer} />
+      </View>
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeTitle}>
             {isLoggedIn && userName
-              ? `Pozdravljeni, ${userName}! 👋`
+              ? `Pozdravljeni, ${userName}! `
               : "Pozdravljeni!"}
           </Text>
           <Text style={styles.welcomeSub}>
@@ -170,8 +156,6 @@ const DashboardScreen = ({ navigation, route }: any) => {
               : "Pripravljeni ste za hitro ločevanje odpadkov brez prijave."}
           </Text>
         </View>
-
-        {/* КАРТИЧКА ЗА ЛОКАЦИЈА: Сега го отвора/затвора Dropdown-от на клик */}
         <TouchableOpacity
           style={styles.locationCard}
           activeOpacity={0.85}
@@ -179,7 +163,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
         >
           <View style={styles.locationIconBg}>
             <Image
-              source={require("../assets/location-icon.png")}
+              source={require("../assets/mapaIkonica.png")}
               style={styles.locationIcon}
               resizeMode="contain"
             />
@@ -193,7 +177,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
           </View>
         </TouchableOpacity>
 
-        {/* МОДЕРЕН DROPDOWN: Се прикажува веднаш под картичката */}
+
         {isDropdownOpen && (
           <View style={styles.dropdownContainer}>
             {citiesList.map((city) => (
@@ -262,9 +246,6 @@ const DashboardScreen = ({ navigation, route }: any) => {
           </View>
 
           <View style={styles.scanTextWrap}>
-            <View style={styles.scanBadge}>
-              <Text style={styles.scanBadgeText}>SKENER Z AI-TEHNOLOGIJO</Text>
-            </View>
 
             <Text style={styles.scanButtonText}>Začni skeniranje</Text>
             <Text style={styles.scanButtonSubtext}>
@@ -367,7 +348,11 @@ const DashboardScreen = ({ navigation, route }: any) => {
             activeOpacity={0.8}
             onPress={() => navigation.navigate("Login")}
           >
-            <Text style={styles.loginHintIcon}>🎓</Text>
+            <Image
+                          source={require("../assets/kapa.png")}
+                          style={styles.logoHat}
+                          resizeMode="contain"
+                        />
             <Text style={styles.loginHintText}>
               Želiš preveriti svoje znanje?{" "}
               <Text style={styles.loginHintLink}>Prijavi se</Text>

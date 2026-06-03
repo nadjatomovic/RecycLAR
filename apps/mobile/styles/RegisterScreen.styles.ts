@@ -49,20 +49,29 @@ export const styles = StyleSheet.create({
     marginBottom: isSmallPhone ? 14 : 20,
   },
 
-  logoIcon: {
-    width: isSmallPhone ? 82 : 96,
-    height: isSmallPhone ? 82 : 96,
-    marginBottom: -8,
-  },
+ header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+},
 
-  logoText: {
-    width: isSmallPhone ? 160 : 185,
-    height: isSmallPhone ? 44 : 52,
-  },
+logoIcon: {
+    width: isSmallPhone ? 104 : 122,
+    height: isSmallPhone ? 104 : 122,
+    marginBottom: -20,
+},
+
+logoText: {
+    width: isSmallPhone ? 340 : 380,
+    height: isSmallPhone ? 120 : 140,
+    marginTop: -40,
+},
 
   headerSection: {
-    marginBottom: 18,
-  },
+    marginBottom: 20,
+    marginTop: -30,
+},
 
   title: {
     fontSize: isSmallPhone ? 24 : 28,

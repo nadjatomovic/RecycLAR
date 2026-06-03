@@ -19,7 +19,6 @@ export default function HomeScreen({ navigation }: any) {
   const [selectedCity, setSelectedCity] = useState("Maribor");
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Вчитај зачуван град при отворање
   useEffect(() => {
     loadCity().then((city) => setSelectedCity(city));
   }, []);
@@ -74,7 +73,7 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.dropdownLeft}>
             <View style={styles.locationIconCircle}>
               <Image
-                source={require("../assets/location-icon.png")}
+                source={require("../assets/mapaIkonica.png")}
                 style={styles.locationIcon}
                 resizeMode="contain"
               />
@@ -92,11 +91,7 @@ export default function HomeScreen({ navigation }: any) {
           activeOpacity={0.9}
           onPress={handleStart}
         >
-          <Text style={styles.mainButtonIcon}>🌿</Text>
           <Text style={styles.mainButtonText}>Začni</Text>
-          <View style={styles.arrowCircle}>
-            <Text style={styles.arrowText}>›</Text>
-          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -104,16 +99,13 @@ export default function HomeScreen({ navigation }: any) {
           activeOpacity={0.85}
           onPress={() => navigation.navigate("Login")}
         >
-          <Text style={styles.loginIcon}>👤</Text>
           <Text style={styles.loginButtonText}>Prijava</Text>
+          <Image 
+            source={require('../assets/exit.png')} 
+            style={styles.loginIcon} 
+            resizeMode="contain"
+          />
         </TouchableOpacity>
-
-        <View style={styles.bottomInfo}>
-          <Text style={styles.bottomInfoIcon}>✓</Text>
-          <Text style={styles.bottomInfoText}>
-            Lokalna pravila. Pametni nasveti. Boljši svet.
-          </Text>
-        </View>
       </ScrollView>
 
       <Modal visible={modalVisible} transparent animationType="fade">
