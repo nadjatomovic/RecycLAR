@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "icon": "./assets/icon-logo.png",
     "splash": {
       "image": "./assets/icon-logo.png",
@@ -14,7 +15,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.recyclar.app"
+      "bundleIdentifier": "com.recyclar.app",
+      "jsEngine": "hermes"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,6 +26,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.recyclar.app",
+      "jsEngine": "hermes",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
@@ -50,8 +53,6 @@
       }
     },
     "owner": "ljupka",
-    "assetBundlePatterns": [
-      "assets/model/*"
-    ]
+    "assetBundlePatterns": ["assets/model/*"]
   }
 }
