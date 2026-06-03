@@ -18,7 +18,6 @@ import { collection, getDocs, doc, getDoc, updateDoc, addDoc, increment, arrayUn
 import { db, auth } from "../firebase/firebase";
 import { styles as s } from "../styles/ScannerScreen.styles";
 
-// ─── TFLite (safe import) ─────────────────────────────────────────────────────
 let useTensorflowModel: any = null;
 try {
   const tflite = require("react-native-fast-tflite");
@@ -27,7 +26,6 @@ try {
   console.log("TFLite not available");
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 type BinData = {
   name: string;
   color: string;
@@ -40,7 +38,6 @@ type BinData = {
 type BinsMap = Record<string, BinData>;
 type ScanMode = "camera" | "barcode";
 
-// ─── Bin colors ───────────────────────────────────────────────────────────────
 const BIN_COLORS: Record<string, string> = {
   blue: "#2B7DE9",
   yellow: "#F2B400",
@@ -52,7 +49,6 @@ const BIN_COLORS: Record<string, string> = {
   special: "#7C3AED",
 };
 
-// ─── TFLite class names (must match class_mapping.json order) ─────────────────
 const CLASS_NAMES = [
   "biodegradable",
   "cardboard",
@@ -63,7 +59,6 @@ const CLASS_NAMES = [
   "trash",
 ];
 
-// ─── TFLite class → bin type ──────────────────────────────────────────────────
 const CLASS_TO_BIN_TYPE: Record<string, string> = {
   biodegradable: "bio",
   cardboard: "paper",
@@ -74,7 +69,6 @@ const CLASS_TO_BIN_TYPE: Record<string, string> = {
   trash: "mixed",
 };
 
-// ─── Slovenian display names ──────────────────────────────────────────────────
 const CLASS_NAMES_SL: Record<string, string> = {
   biodegradable: "Bio odpadek",
   cardboard: "Karton",
@@ -85,7 +79,6 @@ const CLASS_NAMES_SL: Record<string, string> = {
   trash: "Mešani odpadki",
 };
 
-// ─── Fallback: map item text → bin type ───────────────────────────────────────
 const mapTextToBinType = (item: string): string => {
   const lower = item.toLowerCase();
   if (lower.includes("paper") || lower.includes("papir") || lower.includes("cardboard") || lower.includes("karton")) return "paper";
@@ -95,7 +88,6 @@ const mapTextToBinType = (item: string): string => {
   return "mixed";
 };
 
-// ─── Find bin by type ─────────────────────────────────────────────────────────
 const findBinByType = (bins: BinsMap, binType: string): { binId: string; bin: BinData } => {
   for (const [binId, bin] of Object.entries(bins)) {
     if (bin.type === binType) return { binId, bin };
@@ -104,7 +96,6 @@ const findBinByType = (bins: BinsMap, binType: string): { binId: string; bin: Bi
   return { binId: "mixed", bin: mixed };
 };
 
-// ─── Get Lari tip from Gemini ─────────────────────────────────────────────────
 const getLariTip = async (itemName: string, binName: string): Promise<string | null> => {
   try {
     const res = await fetch(
@@ -130,9 +121,9 @@ const getLariTip = async (itemName: string, binName: string): Promise<string | n
 };
 
 const BADGE_RULES = [
-  { id: "plastika-ne",    check: (count: number, points: number, type: string) => type === "packaging" && count >= 20 },
-  { id: "varuh-planeta",  check: (count: number, points: number, type: string) => count >= 30 },
-  { id: "eko-junak",      check: (count: number, points: number, type: string) => points >= 1000 },
+  { id: "plastika-ne", check: (count: number, points: number, type: string) => type === "packaging" && count >= 20 },
+  { id: "varuh-planeta", check: (count: number, points: number, type: string) => count >= 30 },
+  { id: "eko-junak", check: (count: number, points: number, type: string) => points >= 1000 },
 ];
 
 const saveScanToFirestore = async (
@@ -143,39 +134,25 @@ const saveScanToFirestore = async (
 ) => {
   const userId = auth.currentUser?.uid;
   if (!userId) return { newBadges: [] };
-
   try {
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
     if (!userSnap.exists()) return { newBadges: [] };
-
     const data = userSnap.data();
     const currentBadges: string[] = data.badges ?? [];
     const newScanCount = (data.scanCount ?? 0) + 1;
     const newPoints = (data.ekoPoints ?? 0) + 15;
-
-    // Katere značke so novo odklenjene
     const newBadges = BADGE_RULES
       .filter(r => !currentBadges.includes(r.id) && r.check(newScanCount, newPoints, binType))
       .map(r => r.id);
-
-    // Shrani scan dokument
     await addDoc(collection(db, "scans"), {
-      userId,
-      itemName,
-      binType,
-      municipalityId,
-      pointsEarned: 15,
-      scannedAt: serverTimestamp(),
+      userId, itemName, binType, municipalityId, pointsEarned: 15, scannedAt: serverTimestamp(),
     });
-
-    // Posodobi user atomično
     await updateDoc(userRef, {
       scanCount: increment(1),
       ekoPoints: increment(15),
       ...(newBadges.length > 0 && { badges: arrayUnion(...newBadges) }),
     });
-
     return { newBadges };
   } catch (e) {
     console.error("saveScan error:", e);
@@ -191,30 +168,21 @@ const preprocessImage = async (imageUri: string): Promise<Float32Array | null> =
       { format: ImageManipulator.SaveFormat.JPEG, base64: true, compress: 1.0 }
     );
     if (!resized.base64) return null;
-
     const jpegjs = require("jpeg-js");
-    
     const binaryString = atob(resized.base64);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
-
-    // Dekodiraj JPEG → raw RGBA piksli
     const decoded = jpegjs.decode(bytes, { useTArray: true });
-    console.log("Decoded size:", decoded.width, "x", decoded.height);
-
     const float32Data = new Float32Array(224 * 224 * 3);
     let pixelIndex = 0;
-
-    // decoded.data je RGBA — vzamemo samo RGB
     for (let i = 0; i < 224 * 224; i++) {
       const pos = i * 4;
-      float32Data[pixelIndex++] = (decoded.data[pos] - 127.5) / 127.5;     // R
-      float32Data[pixelIndex++] = (decoded.data[pos + 1] - 127.5) / 127.5; // G
-      float32Data[pixelIndex++] = (decoded.data[pos + 2] - 127.5) / 127.5; // B
+      float32Data[pixelIndex++] = (decoded.data[pos] - 127.5) / 127.5;
+      float32Data[pixelIndex++] = (decoded.data[pos + 1] - 127.5) / 127.5;
+      float32Data[pixelIndex++] = (decoded.data[pos + 2] - 127.5) / 127.5;
     }
-
     return float32Data;
   } catch (e) {
     console.error("Preprocess error:", e);
@@ -222,7 +190,6 @@ const preprocessImage = async (imageUri: string): Promise<Float32Array | null> =
   }
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export default function ScannerScreen({ navigation }: any) {
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<string | null>(null);
@@ -240,46 +207,33 @@ export default function ScannerScreen({ navigation }: any) {
   const [scanMode, setScanMode] = useState<ScanMode>("camera");
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const [modelReady, setModelReady] = useState(false);
-  const [tfliteUri, setTfliteUri] = useState<string | undefined>(undefined);
   const [tfliteModel, setTfliteModel] = useState<any>(null);
   const cameraRef = useRef<any>(null);
-
 
   useEffect(() => {
     prepareModel();
     loadUserAndBins();
-  }, []);   
+  }, []);
 
-  // ─── TFLite hook — always called, undefined until model is ready ───────────
-
-  // ─── Prepare TFLite model ───────────────────────────────────────────────────
-const prepareModel = async () => {
-  try {
-    const { loadTensorflowModel } = require("react-native-fast-tflite");
-    const dest = FileSystem.cacheDirectory + "recyclar_model.tflite";
-
-    const info = await FileSystem.getInfoAsync(dest);
-    if (info.exists) {
-      await FileSystem.deleteAsync(dest);
+  const prepareModel = async () => {
+    try {
+      const { loadTensorflowModel } = require("react-native-fast-tflite");
+      const dest = FileSystem.cacheDirectory + "recyclar_model.tflite";
+      const info = await FileSystem.getInfoAsync(dest);
+      if (info.exists) await FileSystem.deleteAsync(dest);
+      const asset = ExpoAsset.Asset.fromModule(require("../assets/model/recyclar_model.tflite"));
+      await asset.downloadAsync();
+      await FileSystem.copyAsync({ from: asset.localUri!, to: dest });
+      const loaded = await loadTensorflowModel({ url: dest }, []);
+      setTfliteModel(loaded);
+      setModelReady(true);
+      console.log("🟢 TFLite model loaded!");
+    } catch (e) {
+      console.log("Model prep failed:", e);
+      setModelReady(false);
     }
+  };
 
-    const asset = ExpoAsset.Asset.fromModule(
-      require("../assets/model/recyclar_model.tflite")
-    );
-    await asset.downloadAsync();
-    await FileSystem.copyAsync({ from: asset.localUri!, to: dest });
-
-    // ← drugi parameter "delegates" je obvezen v v3!
-    const loaded = await loadTensorflowModel({ url: dest }, []);
-    setTfliteModel(loaded);
-    setModelReady(true);
-    console.log("🟢 TFLite model loaded!");
-  } catch (e) {
-    console.log("Model prep failed:", e);
-    setModelReady(false);
-  }
-};
-  // ─── Load user municipality + bins ─────────────────────────────────────────
   const loadUserAndBins = async () => {
     setLoadingBins(true);
     try {
@@ -293,16 +247,13 @@ const prepareModel = async () => {
           setMunicipalityName(munId.charAt(0).toUpperCase() + munId.slice(1));
         }
       }
-
       const binsSnap = await getDocs(collection(db, "municipalities", munId, "bins"));
       const binsData: BinsMap = {};
       binsSnap.forEach((docSnap) => {
         binsData[docSnap.id] = docSnap.data() as BinData;
       });
-
       if (Object.keys(binsData).length > 0) {
         setBins(binsData);
-        console.log(`🟢 Loaded ${Object.keys(binsData).length} bins for ${munId}`);
       } else {
         setFallbackBins();
       }
@@ -324,68 +275,44 @@ const prepareModel = async () => {
     });
   };
 
-  // ─── Run TFLite model ───────────────────────────────────────────────────────
   const runTFLiteModel = async (imageUri: string) => {
-  if (!tfliteModel) return null;
-  try {
-    const inputData = await preprocessImage(imageUri);
-    if (!inputData) return null;
-    
-    // v3 API zahteva ArrayBuffer
-    const output = await tfliteModel.run([inputData.buffer]);
-    if (!output?.[0]) return null;
-    
-    // output je tudi ArrayBuffer — pretvorimo nazaj
-    const predictions = new Float32Array(output[0]);
-    
-    let maxIndex = 0;
-    let maxValue = predictions[0];
-    for (let i = 1; i < predictions.length; i++) {
-      if (predictions[i] > maxValue) {
-        maxValue = predictions[i];
-        maxIndex = i;
+    if (!tfliteModel) return null;
+    try {
+      const inputData = await preprocessImage(imageUri);
+      if (!inputData) return null;
+      const output = await tfliteModel.run([inputData.buffer]);
+      if (!output?.[0]) return null;
+      const predictions = new Float32Array(output[0]);
+      let maxIndex = 0;
+      let maxValue = predictions[0];
+      for (let i = 1; i < predictions.length; i++) {
+        if (predictions[i] > maxValue) {
+          maxValue = predictions[i];
+          maxIndex = i;
+        }
       }
+      const className = CLASS_NAMES[maxIndex] ?? "trash";
+      const confidence = Math.round(maxValue * 100);
+      return { className, confidence };
+    } catch (e) {
+      console.error("TFLite error:", e);
+      return null;
     }
+  };
 
-    const className = CLASS_NAMES[maxIndex] ?? "trash";
-    const confidence = Math.round(maxValue * 100);
-    console.log(`TFLite: ${className} (${confidence}%)`);
-    return { className, confidence };
-  } catch (e) {
-    console.error("TFLite error:", e);
-    return null;
-  }
-};
-
-  // ─── Show result ────────────────────────────────────────────────────────────
-  const showResult = async (
-    tfliteClass?: string,
-    confidence?: number,
-    fallbackText?: string
-  ) => {
-    const binType = tfliteClass
-      ? CLASS_TO_BIN_TYPE[tfliteClass] ?? "mixed"
-      : mapTextToBinType(fallbackText ?? "");
-
+  const showResult = async (tfliteClass?: string, confidence?: number, fallbackText?: string) => {
+    const binType = tfliteClass ? CLASS_TO_BIN_TYPE[tfliteClass] ?? "mixed" : mapTextToBinType(fallbackText ?? "");
     const { binId, bin } = findBinByType(bins, binType);
-    const displayName = tfliteClass
-      ? CLASS_NAMES_SL[tfliteClass] ?? fallbackText ?? "Odpadek"
-      : fallbackText ?? "Odpadek";
-
+    const displayName = tfliteClass ? CLASS_NAMES_SL[tfliteClass] ?? fallbackText ?? "Odpadek" : fallbackText ?? "Odpadek";
     setResult({ item: displayName, bin, binId, confidence });
-
     const tip = await getLariTip(displayName, bin.name);
-    if (tip) {
-      setResult({ item: displayName, bin: { ...bin, tip }, binId, confidence });
-    }
-
+    if (tip) setResult({ item: displayName, bin: { ...bin, tip }, binId, confidence });
     const { newBadges } = await saveScanToFirestore(displayName, binType, bin.name, municipalityId);
     if (newBadges.length > 0) {
       Alert.alert("Nova značka!", `Odklenil si: ${newBadges.join(", ")}`, [{ text: "Super!" }]);
     }
   };
 
-  // ─── Take picture ───────────────────────────────────────────────────────────
   const takePicture = async () => {
     if (!cameraRef.current) return;
     setLoading(true);
@@ -393,7 +320,6 @@ const prepareModel = async () => {
     try {
       const pic = await cameraRef.current.takePictureAsync({ base64: false, quality: 0.8 });
       setPhoto(pic.uri);
-
       if (modelReady && tfliteModel) {
         const tfliteResult = await runTFLiteModel(pic.uri);
         if (tfliteResult && tfliteResult.confidence >= 40) {
@@ -402,13 +328,10 @@ const prepareModel = async () => {
           return;
         }
       }
-
       setLoading(false);
       Alert.alert(
         "Odpadek posnet!",
-        modelReady
-          ? "Model ni bil prepričan. Poskusi s črtno kodo za boljši rezultat."
-          : "Poskusi s črtno kodo za identifikacijo.",
+        modelReady ? "Model ni bil prepričan. Poskusi s črtno kodo za boljši rezultat." : "Poskusi s črtno kodo za identifikacijo.",
         [
           { text: "Črtna koda", onPress: () => { setPhoto(null); setScanMode("barcode"); setBarcodeScanning(true); } },
           { text: "Prekliči", onPress: () => setPhoto(null), style: "cancel" },
@@ -420,7 +343,6 @@ const prepareModel = async () => {
     }
   };
 
-  // ─── Barcode scan ───────────────────────────────────────────────────────────
   const getBinTypeFromGemini = async (itemName: string, packaging: string): Promise<string> => {
     try {
       const prompt = `Produkt: "${itemName}", Embalaža: "${packaging}". Kateri zabojnik po slovenskih pravilih? SAMO ena beseda: packaging, paper, glass, bio, ali mixed.`;
@@ -450,36 +372,23 @@ const prepareModel = async () => {
     setBarcodeScanning(false);
     setLoading(true);
     setScanMode("camera");
-
     try {
       let itemName = barcode;
       let packaging = "";
-
-      // Najprej poskusi OpenFoodFacts
       try {
-        const res = await fetch(
-          `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`,
-          { signal: AbortSignal.timeout(8000) }
-        );
+        const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`, { signal: AbortSignal.timeout(8000) });
         const data = await res.json();
         if (data.status === 1 && data.product) {
           itemName = data.product.product_name || barcode;
           packaging = data.product.packaging || "";
         }
-      } catch {
-        // OpenFoodFacts ni dosegljiv — nadaljuj z barcode številko
-      }
-
-      // Gemini določi bin
+      } catch {}
       const binType = await getBinTypeFromGemini(itemName, packaging);
       const { binId, bin } = findBinByType(bins, binType);
       const displayName = itemName === barcode ? `Produkt (${barcode})` : itemName;
-
       setResult({ item: displayName, bin, binId });
-
       const tip = await getLariTip(displayName, bin.name);
       if (tip) setResult({ item: displayName, bin: { ...bin, tip }, binId });
-
     } catch (e) {
       console.log("Barcode error:", e);
       Alert.alert("Napaka", "Skeniranje ni uspelo.");
@@ -507,56 +416,87 @@ const prepareModel = async () => {
     );
   }
 
-  // ─── Barcode mode ───────────────────────────────────────────────────────────
   if (scanMode === "barcode") {
     return (
       <SafeAreaView style={s.container}>
-        <View style={s.header}>
-          <TouchableOpacity onPress={() => setScanMode("camera")} style={s.backBtn}>
-            <Text style={s.backText}>‹</Text>
-          </TouchableOpacity>
-          <Text style={s.headerTitle}>
-            <Text style={s.headerGreen}>Skeniraj</Text>
-            <Text style={s.headerPurple}> črtno kodo</Text>
-          </Text>
-          <View style={{ width: 40 }} />
-        </View>
         <View style={s.cameraBox}>
           <CameraView
             style={s.camera}
             facing="back"
             onBarcodeScanned={barcodeScanning ? handleBarcodeScan : undefined}
           />
-          <View style={s.cornerTL} /><View style={s.cornerTR} />
-          <View style={s.cornerBL} /><View style={s.cornerBR} />
-          <View style={s.goodLight}>
-            <Text style={s.goodLightText}>Usmeri na črtno kodo</Text>
-          </View>
         </View>
+
+        <View style={s.statusRow}>
+          <Text style={s.statusDot}>📷</Text>
+          <Text style={s.statusText}>Usmeri na črtno kodo</Text>
+        </View>
+
         {loading && (
-          <View style={s.centerLoader}>
+          <View style={s.loadingOverlay}>
             <ActivityIndicator size="large" color="#22C55E" />
-            <Text style={s.loadingBinsText}>Iščem produkt...</Text>
+            <Text style={s.loadingText}>Iščem produkt...</Text>
           </View>
         )}
+
+        {result && !loading && (
+          <ScrollView style={s.resultsScroll} contentContainerStyle={s.resultsContent}>
+            <View style={s.dragHandle} />
+            <View style={s.resultCard}>
+              <Text style={s.resultLabel}>Prepoznano:</Text>
+              <View style={s.resultItemRow}>
+                <Text style={s.resultItem}>{result.item}</Text>
+              </View>
+              <Text style={s.resultLabel}>Odloži v:</Text>
+              <Text style={[s.resultBin, { color: BIN_COLORS[result.binId] ?? "#1F2937" }]}>
+                ● {result.bin.name}
+              </Text>
+              <Text style={s.resultDesc}>{result.bin.description}</Text>
+              <Text style={s.municipalityBadge}>📍 {municipalityName}</Text>
+            </View>
+            <View style={s.rulesCard}>
+              <View style={s.rulesCol}>
+                <Text style={s.rulesTitle}>✅ Dovoljeno</Text>
+                {(result.bin.allowed ?? []).slice(0, 5).map((item, i) => (
+                  <Text key={i} style={s.rulesItem}>• {item}</Text>
+                ))}
+              </View>
+              <View style={s.rulesDivider} />
+              <View style={s.rulesCol}>
+                <Text style={s.rulesTitleRed}>❌ Ni dovoljeno</Text>
+                {(result.bin.notAllowed ?? []).slice(0, 5).map((item, i) => (
+                  <Text key={i} style={s.rulesItem}>• {item}</Text>
+                ))}
+              </View>
+            </View>
+            <View style={s.tipCard}>
+              <View style={s.tipHeader}>
+                <Text style={s.tipTitle}>Lari nasvet ✦</Text>
+              </View>
+              <Text style={s.tipText}>{result.bin.tip}</Text>
+            </View>
+          </ScrollView>
+        )}
+
         <View style={s.buttonsRow}>
-          <TouchableOpacity style={s.mainBtn} onPress={() => setScanMode("camera")}>
-            <Text style={s.mainBtnText}>← Nazaj na kamero</Text>
-          </TouchableOpacity>
+          {!result ? (
+            <TouchableOpacity style={s.mainBtn} onPress={() => setScanMode("camera")}>
+              <Text style={s.mainBtnText}>← Nazaj na kamero</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={s.mainBtn} onPress={resetScan}>
+              <Text style={s.mainBtnText}>Skeniraj znova</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </SafeAreaView>
     );
   }
 
-  // ─── Main camera mode ───────────────────────────────────────────────────────
   return (
     <SafeAreaView style={s.container}>
       <DecorativeBackground variant="scanner" />
 
-      <View style={s.titleRow}>
-        <Text style={s.title}>Skener ✦</Text>
-        <Text style={s.subtitle}>Slikaj odpadek ali skeniraj črtno kodo.</Text>
-      </View>
       <View style={s.statusRow}>
         {loadingBins ? (
           <>
@@ -575,11 +515,7 @@ const prepareModel = async () => {
 
       <View style={s.cameraBox}>
         {!photo ? (
-          <>
-            <CameraView ref={cameraRef} style={s.camera} facing="back" />
-            <View style={s.cornerTL} /><View style={s.cornerTR} />
-            <View style={s.cornerBL} /><View style={s.cornerBR} />
-          </>
+          <CameraView ref={cameraRef} style={s.camera} facing="back" />
         ) : (
           <>
             <Image source={{ uri: photo }} style={s.photo} />
@@ -595,9 +531,9 @@ const prepareModel = async () => {
         )}
       </View>
 
-      <ScrollView style={s.resultsScroll} contentContainerStyle={s.resultsContent}>
-        {result && !loading && <View style={s.dragHandle} />}
-        {result && !loading && (
+      {result && !loading && (
+        <ScrollView style={s.resultsScroll} contentContainerStyle={s.resultsContent}>
+          <View style={s.dragHandle} />
           <View style={s.resultCard}>
             <Text style={s.resultLabel}>Prepoznano:</Text>
             <View style={s.resultItemRow}>
@@ -615,9 +551,6 @@ const prepareModel = async () => {
             <Text style={s.resultDesc}>{result.bin.description}</Text>
             <Text style={s.municipalityBadge}>📍 {municipalityName}</Text>
           </View>
-        )}
-
-        {result && !loading && (
           <View style={s.rulesCard}>
             <View style={s.rulesCol}>
               <Text style={s.rulesTitle}>✅ Dovoljeno</Text>
@@ -633,17 +566,20 @@ const prepareModel = async () => {
               ))}
             </View>
           </View>
-        )}
 
-        {result && !loading && (
-          <View style={s.tipCard}>
-            <View style={s.tipHeader}>
-              <Text style={s.tipTitle}>Lari nasvet ✦</Text>
+          <View style={s.tipRow}>
+            <Image
+              source={require("../assets/lari-hello.png")}
+              style={s.tipLari}
+              resizeMode="contain"
+            />
+            <View style={s.tipCard}>
+              <Text style={s.tipTitle}>Lari nasvet</Text>
+              <Text style={s.tipText}>{result.bin.tip}</Text>
             </View>
-            <Text style={s.tipText}>{result.bin.tip}</Text>
           </View>
-        )}
-      </ScrollView>
+        </ScrollView>
+      )}
 
       <View style={s.buttonsRow}>
         {!result ? (
@@ -669,7 +605,6 @@ const prepareModel = async () => {
           </TouchableOpacity>
         )}
       </View>
-
     </SafeAreaView>
   );
 }
