@@ -67,6 +67,13 @@ type GroupData = {
   id: string;
   name: string;
   totalPoints: number;
+  weeklyPoints?: number;
+  monthlyPoints?: number;
+  scanCount?: number;
+  quizCompleted?: number;
+  memberCount?: number;
+  schoolName?: string;
+  inviteCode?: string;
   rank?: number;
 };
 
@@ -185,14 +192,75 @@ const getAvatarImage = (avatarKey?: string) => {
   return getAvatarAsset(avatarKey ?? "fox");
 };
 
-const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
+const getTeacherBadgeProgress = (badge: BadgeData, groups: GroupData[]) => {
+  const totalClassPoints = groups.reduce(
+    (sum, group) => sum + (group.totalPoints ?? 0),
+    0,
+  );
+
+  const bestWeeklyPoints = groups.reduce(
+    (best, group) => Math.max(best, group.weeklyPoints ?? 0),
+    0,
+  );
+
+  const totalQuizCompleted = groups.reduce(
+    (sum, group) => sum + (group.quizCompleted ?? 0),
+    0,
+  );
+
+  const bestRank = groups.reduce(
+    (best, group) => Math.min(best, group.rank ?? 999),
+    999,
+  );
+
+  const totalScanCount = groups.reduce(
+    (sum, group) => sum + (group.scanCount ?? 0),
+    0,
+  );
+
+  if (badge.conditionType === "teacher_total_class_points") {
+    return totalClassPoints;
+  }
+
+  if (badge.conditionType === "teacher_best_weekly_class_points") {
+    return bestWeeklyPoints;
+  }
+
+  if (badge.conditionType === "teacher_total_quiz_completed") {
+    return totalQuizCompleted;
+  }
+
+  if (badge.conditionType === "teacher_class_top_rank") {
+    return bestRank <= badge.conditionValue ? badge.conditionValue : 0;
+  }
+
+  if (badge.conditionType === "teacher_total_scan_count") {
+    return totalScanCount;
+  }
+
+  if (badge.conditionType === "teacher_waste_categories_scanned") {
+    return totalScanCount >= badge.conditionValue ? badge.conditionValue : 0;
+  }
+
+  return 0;
+};
+
+const isBadgeUnlocked = (
+  badge: BadgeData,
+  userData: UserData,
+  teacherGroups: GroupData[] = [],
+) => {
   if (userData.earnedBadges?.includes(badge.id)) return true;
+
+  if (userData.role === "teacher") {
+    const progress = getTeacherBadgeProgress(badge, teacherGroups);
+    return progress >= badge.conditionValue;
+  }
 
   const totalPoints = userData.totalPoints ?? 0;
   const scanCount = userData.scanCount ?? 0;
   const quizCompleted = userData.quizCompleted ?? 0;
   const streakDays = userData.streakDays ?? 0;
-  const weeklyPoints = userData.weeklyPoints ?? 0;
 
   if (badge.conditionType === "points") {
     return totalPoints >= badge.conditionValue;
@@ -215,22 +283,6 @@ const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
     badge.conditionType === "paper_scans" ||
     badge.conditionType === "glass_scans"
   ) {
-    return scanCount >= badge.conditionValue;
-  }
-
-  if (badge.conditionType === "teacher_streak") {
-    return streakDays >= badge.conditionValue || weeklyPoints >= 1000;
-  }
-
-  if (badge.conditionType === "teacher_points") {
-    return totalPoints >= badge.conditionValue;
-  }
-
-  if (badge.conditionType === "teacher_quiz_count") {
-    return quizCompleted >= badge.conditionValue;
-  }
-
-  if (badge.conditionType === "teacher_waste_categories_scanned") {
     return scanCount >= badge.conditionValue;
   }
 
@@ -384,36 +436,44 @@ export default function ProfileScreen({ navigation }: any) {
   };
 
   const loadTeacherGroups = async (userId: string) => {
-    try {
-      const groupsQuery = query(
-        collection(db, "groups"),
-        where("teacherId", "==", userId),
-      );
+  try {
+    const groupsQuery = query(
+      collection(db, "groups"),
+      where("teacherId", "==", userId),
+    );
 
-      const snapshot = await getDocs(groupsQuery);
-      const loaded: GroupData[] = [];
+    const snapshot = await getDocs(groupsQuery);
+    const loaded: GroupData[] = [];
 
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        loaded.push({
-          id: docSnap.id,
-          name: data.displayName ?? data.name ?? "Razred",
-          totalPoints: data.monthlyPoints ?? data.totalPoints ?? 0,
-        });
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+
+      loaded.push({
+        id: docSnap.id,
+        name: data.name ?? data.displayName ?? "Razred",
+        totalPoints: data.totalPoints ?? 0,
+        weeklyPoints: data.weeklyPoints ?? 0,
+        monthlyPoints: data.monthlyPoints ?? 0,
+        scanCount: data.scanCount ?? 0,
+        quizCompleted: data.quizCompleted ?? 0,
+        memberCount: data.memberCount ?? 0,
+        schoolName: data.schoolName ?? "",
+        inviteCode: data.inviteCode ?? "",
       });
+    });
 
-      loaded.sort((a, b) => b.totalPoints - a.totalPoints);
+    loaded.sort((a, b) => b.totalPoints - a.totalPoints);
 
-      loaded.forEach((group, index) => {
-        group.rank = index + 1;
-      });
+    loaded.forEach((group, index) => {
+      group.rank = index + 1;
+    });
 
-      setTeacherGroups(loaded);
-    } catch (err) {
-      console.log("Error loading teacher groups:", err);
-      setTeacherGroups([]);
-    }
-  };
+    setTeacherGroups(loaded);
+  } catch (err) {
+    console.log("Error loading teacher groups:", err);
+    setTeacherGroups([]);
+  }
+};
 
   const handleOpenNotification = async (notification: NotificationData) => {
     setSelectedNotification(notification);
@@ -721,6 +781,14 @@ function StudentProfile({
   );
 }
 
+const formatTeacherGroups = (groups: GroupData[]) => {
+  if (!groups || groups.length === 0) {
+    return "Ni razredov";
+  }
+
+  return groups.map((group) => group.name).join(", ");
+};
+
 function TeacherProfile({
   userData,
   badges,
@@ -728,13 +796,22 @@ function TeacherProfile({
   teacherGroups,
   navigation,
   onSignOut,
-  onOpenAvatar,
   onOpenEdit,
   notifications,
   onOpenNotifications,
 }: any) {
   const totalClassPoints = teacherGroups.reduce(
-    (sum: number, g: GroupData) => sum + (g.totalPoints ?? 0),
+    (sum: number, group: GroupData) => sum + (group.totalPoints ?? 0),
+    0,
+  );
+
+  const totalStudents = teacherGroups.reduce(
+    (sum: number, group: GroupData) => sum + (group.memberCount ?? 0),
+    0,
+  );
+
+  const totalQuizzes = teacherGroups.reduce(
+    (sum: number, group: GroupData) => sum + (group.quizCompleted ?? 0),
     0,
   );
 
@@ -752,15 +829,15 @@ function TeacherProfile({
       color: "#6B35C9",
     },
     {
-      label: "Kvizi",
-      value: String(userData.quizCompleted ?? 0),
-      icon: getIconAsset("quiz"),
+      label: "Učenci",
+      value: String(totalStudents),
+      icon: getIconAsset("teacherStudents"),
       color: "#35A936",
     },
     {
-      label: "Streak",
-      value: `${userData.streakDays ?? 0} dni`,
-      icon: getIconAsset("streak"),
+      label: "Kvizi",
+      value: String(totalQuizzes),
+      icon: getIconAsset("quiz"),
       color: "#6B35C9",
     },
   ];
@@ -768,6 +845,7 @@ function TeacherProfile({
   return (
     <SafeAreaView style={styles.container}>
       <DecorativeBackground variant="profile" />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -779,11 +857,10 @@ function TeacherProfile({
 
         <Text style={styles.screenTitle}>Profil učitelja ✦</Text>
 
-        <ProfileCard
+        <TeacherProfileCard
           userData={userData}
-          onOpenAvatar={onOpenAvatar}
+          teacherGroups={teacherGroups}
           onOpenEdit={onOpenEdit}
-          teacher
         />
 
         <StatsRow stats={teacherStats} />
@@ -794,29 +871,28 @@ function TeacherProfile({
 
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => navigation.navigate("Leaderboard")}
+              onPress={() => navigation.navigate("TeacherClasses")}
             >
               <Text style={styles.viewAll}>Poglej vse ›</Text>
             </TouchableOpacity>
           </View>
 
           {teacherGroups.length === 0 ? (
-            <Text
-              style={{
-                color: "#9CA3AF",
-                fontSize: 14,
-                paddingVertical: 12,
-                fontWeight: "600",
-              }}
-            >
-              Ni razredov.
-            </Text>
+            <Text style={styles.emptyClassText}>Ni razredov.</Text>
           ) : (
-            teacherGroups.map((group: GroupData) => (
+            teacherGroups.slice(0, 4).map((group: GroupData) => (
               <TouchableOpacity
                 key={group.id}
                 style={styles.classRow}
                 activeOpacity={0.85}
+                onPress={() =>
+                  navigation.navigate("TeacherClassDetail", {
+                    groupId: group.id,
+                    groupName: group.name,
+                    schoolName: group.schoolName || userData.schoolName,
+                    inviteCode: group.inviteCode,
+                  })
+                }
               >
                 <View
                   style={[
@@ -830,15 +906,21 @@ function TeacherProfile({
                       { color: getRankColor(group.rank ?? 99) },
                     ]}
                   >
-                    {group.name.split(" ")[0]}
+                    {group.name}
                   </Text>
                 </View>
 
                 <View style={styles.classInfo}>
                   <Text style={styles.className}>{group.name}</Text>
                   <Text style={styles.classPoints}>
-                    {group.totalPoints} točk
-                  </Text>
+                      {group.memberCount ?? 0} učencev · {group.totalPoints ?? 0} točk
+                    </Text>
+
+                    {!!group.inviteCode && (
+                      <Text style={styles.classInviteCode}>
+                        Koda: {group.inviteCode}
+                      </Text>
+                    )}
                 </View>
 
                 <Text style={styles.classMedal}>
@@ -854,6 +936,7 @@ function TeacherProfile({
         <BadgesSection
           badges={badges}
           userData={userData}
+          teacherGroups={teacherGroups}
           onViewAll={() => navigation.navigate("Achievements")}
         />
 
@@ -878,6 +961,80 @@ function TeacherProfile({
 
       <BottomNavBar navigation={navigation} activeRoute="Profile" />
     </SafeAreaView>
+  );
+}
+
+function TeacherProfileCard({ userData, teacherGroups, onOpenEdit }: any) {
+  return (
+    <View style={styles.teacherProfileCard}>
+      <View style={styles.teacherAvatarOuter}>
+        <View style={styles.teacherAvatarWrap}>
+          <Image
+            source={getIconAsset("teacherProfile")}
+            style={styles.teacherAvatarImage}
+            resizeMode="cover"
+          />
+        </View>
+      </View>
+
+      <View style={styles.profileInfo}>
+        <View style={styles.nameRow}>
+          <Text style={styles.name} numberOfLines={1}>
+            {userData.name || "Učitelj"}
+          </Text>
+
+          <TouchableOpacity activeOpacity={0.8} onPress={onOpenEdit}>
+            <Text style={styles.editIcon}>✎</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.teacherInfoLine}>
+          <Image
+            source={getIconAsset("school")}
+            style={styles.teacherInfoIcon}
+            resizeMode="contain"
+          />
+
+          <View style={styles.teacherInfoTextWrap}>
+            <Text style={styles.teacherInfoLabel}>Šola</Text>
+            <Text style={styles.teacherInfoValue} numberOfLines={1}>
+              {userData.schoolName || userData.schoolId || "Ni izbrane šole"}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.teacherInfoLine}>
+          <Image
+            source={getIconAsset("teacherStudents")}
+            style={styles.teacherInfoIcon}
+            resizeMode="contain"
+          />
+
+          <View style={styles.teacherInfoTextWrap}>
+            <Text style={styles.teacherInfoLabel}>Razredi</Text>
+            <Text style={styles.teacherInfoValue} numberOfLines={2}>
+              {formatTeacherGroups(teacherGroups)}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.teacherInfoLine}>
+          <Image
+            source={getIconAsset("location")}
+            style={styles.teacherInfoIcon}
+            resizeMode="contain"
+          />
+
+          <View style={styles.teacherInfoTextWrap}>
+            <Text style={styles.teacherInfoLabel}>Občina</Text>
+            <Text style={styles.teacherInfoValue} numberOfLines={1}>
+              {userData.municipalityName ||
+                formatMunicipality(userData.municipalityId)}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -988,7 +1145,10 @@ function StatsRow({ stats }: any) {
           <View style={styles.statIconCircle}>
             <Image
               source={item.icon}
-              style={styles.statIcon}
+              style={[
+                styles.statIcon,
+                item.label === "Učenci" && styles.statIconLarge,
+              ]}
               resizeMode="contain"
             />
           </View>
@@ -1004,7 +1164,7 @@ function StatsRow({ stats }: any) {
   );
 }
 
-function BadgesSection({ badges, userData, onViewAll }: any) {
+function BadgesSection({ badges, userData, teacherGroups = [], onViewAll }: any) {
   const userRole = userData.role ?? "student";
 
   const filteredBadges = badges.filter((badge: BadgeData) => {
@@ -1014,8 +1174,8 @@ function BadgesSection({ badges, userData, onViewAll }: any) {
 
   const sortedBadges = [...filteredBadges].sort(
     (a: BadgeData, b: BadgeData) => {
-      const aUnlocked = isBadgeUnlocked(a, userData);
-      const bUnlocked = isBadgeUnlocked(b, userData);
+      const aUnlocked = isBadgeUnlocked(a, userData, teacherGroups);
+      const bUnlocked = isBadgeUnlocked(b, userData, teacherGroups);
 
       if (aUnlocked && !bUnlocked) return -1;
       if (!aUnlocked && bUnlocked) return 1;
@@ -1038,7 +1198,7 @@ function BadgesSection({ badges, userData, onViewAll }: any) {
 
       <View style={styles.badgesGrid}>
         {visibleBadges.map((badge: BadgeData) => {
-          const unlocked = isBadgeUnlocked(badge, userData);
+          const unlocked = isBadgeUnlocked(badge, userData, teacherGroups);
 
           return (
             <View

@@ -318,4 +318,33 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+
+  teacherPreviewInfo: {
+  width: "100%",
+  marginTop: 16,
+  paddingTop: 14,
+  borderTopWidth: 1,
+  borderTopColor: COLORS.border,
+  gap: 10,
+},
+
+teacherPreviewRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+teacherPreviewIcon: {
+  width: 28,
+  height: 28,
+  marginRight: 8,
+},
+
+teacherPreviewText: {
+  maxWidth: "82%",
+  fontSize: 14,
+  color: COLORS.text,
+  fontWeight: "700",
+  textAlign: "center",
+},
 });

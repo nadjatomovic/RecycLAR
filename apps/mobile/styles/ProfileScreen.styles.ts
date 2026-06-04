@@ -966,4 +966,120 @@ export const styles = StyleSheet.create({
     color: COLORS.purple,
     fontWeight: "700",
   },
+
+teacherProfileCard: {
+  borderRadius: 20,
+  backgroundColor: COLORS.white,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  padding: isSmallPhone ? 14 : 16,
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 18,
+
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 1 },
+  elevation: 2,
+},
+
+teacherIconOuter: {
+  width: isSmallPhone ? 96 : 104,
+  height: isSmallPhone ? 96 : 104,
+  marginRight: 13,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+teacherIconCircle: {
+  width: isSmallPhone ? 88 : 96,
+  height: isSmallPhone ? 88 : 96,
+  borderRadius: isSmallPhone ? 44 : 48,
+  backgroundColor: COLORS.purpleSoft,
+  alignItems: "center",
+  justifyContent: "center",
+  overflow: "hidden",
+},
+
+teacherIconImage: {
+  width: 70,
+  height: 70,
+},
+
+teacherInfoLine: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 8,
+},
+
+teacherInfoIcon: {
+  width: 34,
+  height: 34,
+  marginRight: 10,
+},
+
+teacherInfoTextWrap: {
+  flex: 1,
+  minWidth: 0,
+},
+
+teacherInfoLabel: {
+  fontSize: 12,
+  color: COLORS.muted,
+  fontWeight: "700",
+  marginBottom: 1,
+},
+
+teacherInfoValue: {
+  fontSize: isSmallPhone ? 14 : 15,
+  lineHeight: isSmallPhone ? 18 : 20,
+  color: COLORS.text,
+  fontWeight: "700",
+},
+emptyClassText: {
+  color: "#9CA3AF",
+  fontSize: 14,
+  paddingVertical: 12,
+  fontWeight: "600",
+},
+
+teacherAvatarOuter: {
+  width: isSmallPhone ? 104 : 112,
+  height: isSmallPhone ? 104 : 112,
+  marginRight: 14,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
+teacherAvatarWrap: {
+  width: isSmallPhone ? 96 : 104,
+  height: isSmallPhone ? 96 : 104,
+  borderRadius: isSmallPhone ? 48 : 52,
+  backgroundColor: COLORS.purpleSoft,
+  alignItems: "center",
+  justifyContent: "center",
+  overflow: "hidden",
+  borderWidth: 3,
+  borderColor: "#D8C8F8",
+},
+
+teacherAvatarImage: {
+  width: "100%",
+  height: "100%",
+  borderRadius: isSmallPhone ? 48 : 52,
+},
+
+statIconLarge: {
+  width: 58,
+  height: 58,
+},
+
+classInviteCode: {
+  marginTop: 3,
+  fontSize: 12,
+  color: COLORS.purple,
+  fontWeight: "700",
+},
+
 });

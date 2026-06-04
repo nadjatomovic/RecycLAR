@@ -8,6 +8,9 @@ export const iconAssets: Record<string, any> = {
   trophy: require("../assets/trophy.png"),
   school: require("../assets/school.png"),
   streak: require("../assets/streak.png"),
+
+  teacherProfile: require("../assets/profilnaUcitelj.png"),
+  teacherStudents: require("../assets/ucenici.png"),
 };
 
 export function getIconAsset(iconKey?: string) {

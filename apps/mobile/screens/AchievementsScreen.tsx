@@ -8,7 +8,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { auth, db } from "../firebase/firebase";
@@ -33,6 +40,20 @@ type UserData = {
   quizCompleted?: number;
   streakDays?: number;
   earnedBadges?: string[];
+  role?: string;
+};
+
+type GroupData = {
+  id: string;
+  name: string;
+  totalPoints: number;
+  weeklyPoints?: number;
+  monthlyPoints?: number;
+  scanCount?: number;
+  quizCompleted?: number;
+  memberCount?: number;
+  schoolName?: string;
+  rank?: number;
 };
 
 const fallbackBadges: BadgeData[] = [
@@ -110,9 +131,17 @@ const fallbackBadges: BadgeData[] = [
   },
 ];
 
-const getProgressValue = (badge: BadgeData, userData: UserData) => {
+const getProgressValue = (
+  badge: BadgeData,
+  userData: UserData,
+  teacherGroups: GroupData[] = [],
+) => {
   if (userData.earnedBadges?.includes(badge.id)) {
     return badge.conditionValue;
+  }
+
+  if (userData.role === "teacher") {
+    return getTeacherBadgeProgress(badge, teacherGroups);
   }
 
   if (badge.conditionType === "points") {
@@ -142,72 +171,185 @@ const getProgressValue = (badge: BadgeData, userData: UserData) => {
   return 0;
 };
 
-const isBadgeUnlocked = (badge: BadgeData, userData: UserData) => {
+const isBadgeUnlocked = (
+  badge: BadgeData,
+  userData: UserData,
+  teacherGroups: GroupData[] = [],
+) => {
   if (userData.earnedBadges?.includes(badge.id)) {
     return true;
   }
 
-  const progress = getProgressValue(badge, userData);
+  const progress = getProgressValue(badge, userData, teacherGroups);
   return progress >= badge.conditionValue;
+};
+
+const getTeacherBadgeProgress = (badge: BadgeData, groups: GroupData[]) => {
+  const totalClassPoints = groups.reduce(
+    (sum, group) => sum + (group.totalPoints ?? 0),
+    0,
+  );
+
+  const bestWeeklyPoints = groups.reduce(
+    (best, group) => Math.max(best, group.weeklyPoints ?? 0),
+    0,
+  );
+
+  const totalQuizCompleted = groups.reduce(
+    (sum, group) => sum + (group.quizCompleted ?? 0),
+    0,
+  );
+
+  const bestRank = groups.reduce(
+    (best, group) => Math.min(best, group.rank ?? 999),
+    999,
+  );
+
+  const totalScanCount = groups.reduce(
+    (sum, group) => sum + (group.scanCount ?? 0),
+    0,
+  );
+
+  if (badge.conditionType === "teacher_total_class_points") {
+    return totalClassPoints;
+  }
+
+  if (badge.conditionType === "teacher_best_weekly_class_points") {
+    return bestWeeklyPoints;
+  }
+
+  if (badge.conditionType === "teacher_total_quiz_completed") {
+    return totalQuizCompleted;
+  }
+
+  if (badge.conditionType === "teacher_class_top_rank") {
+    return bestRank <= badge.conditionValue ? badge.conditionValue : 0;
+  }
+
+  if (badge.conditionType === "teacher_total_scan_count") {
+    return totalScanCount;
+  }
+
+  if (badge.conditionType === "teacher_waste_categories_scanned") {
+    return totalScanCount >= badge.conditionValue ? badge.conditionValue : 0;
+  }
+
+  return 0;
 };
 
 export default function AchievementsScreen({ navigation }: any) {
   const [badges, setBadges] = useState<BadgeData[]>([]);
   const [userData, setUserData] = useState<UserData>({});
+  const [teacherGroups, setTeacherGroups] = useState<GroupData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        navigation.navigate("Login");
-        return;
-      }
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      navigation.navigate("Login");
+      return;
+    }
 
-      await Promise.all([loadUserData(user.uid), loadBadges()]);
-      setLoading(false);
+    const loadedUserData = await loadUserData(user.uid);
+
+    if (loadedUserData?.role === "teacher") {
+      await loadTeacherGroups(user.uid);
+    }
+
+    await loadBadges(loadedUserData?.role ?? "student");
+
+    setLoading(false);
+  });
+
+  return unsubscribe;
+}, []);
+
+const loadUserData = async (uid: string) => {
+  try {
+    const userDoc = await getDoc(doc(db, "users", uid));
+
+    if (userDoc.exists()) {
+      const data = userDoc.data() as UserData;
+      setUserData(data);
+      return data;
+    }
+  } catch (err) {
+    console.log("Error loading user data:", err);
+  }
+
+  return {};
+};
+
+const loadBadges = async (role: string) => {
+  try {
+    const snapshot = await getDocs(collection(db, "badges"));
+    const loaded: BadgeData[] = [];
+
+    snapshot.forEach((docSnap) => {
+      loaded.push({
+        id: docSnap.id,
+        ...(docSnap.data() as Omit<BadgeData, "id">),
+      });
     });
 
-    return unsubscribe;
-  }, []);
-
-  const loadUserData = async (uid: string) => {
-    try {
-      const userDoc = await getDoc(doc(db, "users", uid));
-
-      if (userDoc.exists()) {
-        setUserData(userDoc.data() as UserData);
-      }
-    } catch (err) {
-      console.log("Error loading user data:", err);
-    }
-  };
-
-  const loadBadges = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, "badges"));
-      const loaded: BadgeData[] = [];
-      snapshot.forEach((docSnap) => {
-        loaded.push({
-          id: docSnap.id,
-          ...(docSnap.data() as Omit<BadgeData, "id">),
-        });
-      });
-      if (loaded.length === 0) {
-        setBadges(fallbackBadges);
-        return;
-      }
-      const userRole = (userData as any).role ?? "student";
-      const filtered = loaded.filter((badge: any) => {
-        const badgeRole = badge.role ?? "student";
-        return badgeRole === userRole;
-      });
-      filtered.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
-      setBadges(filtered);
-    } catch (err) {
-      console.log("Error loading badges:", err);
+    if (loaded.length === 0) {
       setBadges(fallbackBadges);
+      return;
     }
-  };
+
+    const filtered = loaded.filter((badge: any) => {
+      const badgeRole = badge.role ?? "student";
+      return badgeRole === role;
+    });
+
+    filtered.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    setBadges(filtered);
+  } catch (err) {
+    console.log("Error loading badges:", err);
+    setBadges(fallbackBadges);
+  }
+};
+
+const loadTeacherGroups = async (uid: string) => {
+  try {
+    const groupsQuery = query(
+      collection(db, "groups"),
+      where("teacherId", "==", uid),
+    );
+
+    const snapshot = await getDocs(groupsQuery);
+    const loaded: GroupData[] = [];
+
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+
+      loaded.push({
+        id: docSnap.id,
+        name: data.name ?? data.displayName ?? "Razred",
+        totalPoints: data.totalPoints ?? 0,
+        weeklyPoints: data.weeklyPoints ?? 0,
+        monthlyPoints: data.monthlyPoints ?? 0,
+        scanCount: data.scanCount ?? 0,
+        quizCompleted: data.quizCompleted ?? 0,
+        memberCount: data.memberCount ?? 0,
+        schoolName: data.schoolName ?? "",
+      });
+    });
+
+    loaded.sort((a, b) => b.totalPoints - a.totalPoints);
+
+    loaded.forEach((group, index) => {
+      group.rank = index + 1;
+    });
+
+    setTeacherGroups(loaded);
+    return loaded;
+  } catch (err) {
+    console.log("Error loading teacher groups in achievements:", err);
+    setTeacherGroups([]);
+    return [];
+  }
+};
 
   if (loading) {
     return (
@@ -220,9 +362,9 @@ export default function AchievementsScreen({ navigation }: any) {
     );
   }
 
-  const unlockedCount = badges.filter((badge) =>
-    isBadgeUnlocked(badge, userData),
-  ).length;
+const unlockedCount = badges.filter((badge) =>
+  isBadgeUnlocked(badge, userData, teacherGroups),
+).length;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -273,8 +415,8 @@ export default function AchievementsScreen({ navigation }: any) {
 
         <View style={styles.badgesGrid}>
           {badges.map((badge) => {
-            const unlocked = isBadgeUnlocked(badge, userData);
-            const progress = getProgressValue(badge, userData);
+            const unlocked = isBadgeUnlocked(badge, userData, teacherGroups);
+            const progress = getProgressValue(badge, userData, teacherGroups);
             const percent = Math.min(progress / badge.conditionValue, 1);
 
             return (

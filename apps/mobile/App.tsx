@@ -14,6 +14,8 @@ import LeaderboardScreen from "./screens/LeaderBoardScreen";
 import AchievementsScreen from "./screens/AchievementsScreen";
 import ActivityHistoryScreen from "./screens/ActivityHistoryScreen";
 import EditProfileScreen from "./screens/EditProfileScreen";
+import TeacherClassDetailScreen from "./screens/TeacherClassDetailScreen";
+import TeacherClassesScreen from "./screens/TeacherClassesScreen";
 
 export type RootStackParamList = {
   Home: undefined;
@@ -29,6 +31,13 @@ export type RootStackParamList = {
   Achievements: undefined;
   ActivityHistory: undefined;
   EditProfile: undefined;
+  TeacherClasses: undefined;
+  TeacherClassDetail: {
+  groupId: string;
+  groupName: string;
+  schoolName?: string;
+  inviteCode?: string;
+};
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -54,6 +63,8 @@ export default function App() {
         <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
         <Stack.Screen name="Achievements" component={AchievementsScreen} />
         <Stack.Screen name="ActivityHistory" component={ActivityHistoryScreen} />
+        <Stack.Screen name="TeacherClasses" component={TeacherClassesScreen} />
+        <Stack.Screen name="TeacherClassDetail" component={TeacherClassDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

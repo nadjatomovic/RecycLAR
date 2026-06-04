@@ -17,16 +17,20 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/EditProfileScreen.styles";
 import { getAvatarAsset } from "../utils/avatarAssets";
+import { getIconAsset } from "../utils/iconAssets";
 import DecorativeBackground from "../components/DecorativeBackground";
+
 
 type UserData = {
   name?: string;
   email?: string;
   municipalityId?: string;
+  municipalityName?: string;
   avatarKey?: string;
   role?: string;
   groupId?: string;
   schoolId?: string;
+  schoolName?: string;
 };
 
 const avatarOptions = [
@@ -97,39 +101,47 @@ export default function EditProfileScreen({ navigation }: any) {
     }
   };
 
-  const handleSave = async () => {
-    if (!uid) return;
+  const isTeacher = userData?.role === "teacher";
 
-    const cleanName = name.trim();
+const handleSave = async () => {
+  if (!uid) return;
 
-    if (!cleanName) {
-      Alert.alert("Napaka", "Ime ne sme biti prazno.");
-      return;
+  const cleanName = name.trim();
+
+  if (!cleanName) {
+    Alert.alert("Napaka", "Ime ne sme biti prazno.");
+    return;
+  }
+
+  try {
+    setSaving(true);
+
+    const updateData: any = {
+      name: cleanName,
+      municipalityId: selectedMunicipality.toLowerCase(),
+      municipalityName: selectedMunicipality,
+      updatedAt: serverTimestamp(),
+    };
+
+    if (!isTeacher) {
+      updateData.avatarKey = selectedAvatar;
     }
 
-    try {
-      setSaving(true);
+    await updateDoc(doc(db, "users", uid), updateData);
 
-      await updateDoc(doc(db, "users", uid), {
-        name: cleanName,
-        avatarKey: selectedAvatar,
-        municipalityId: selectedMunicipality,
-        updatedAt: serverTimestamp(),
-      });
-
-      Alert.alert("Shranjeno", "Profil je uspešno posodobljen.", [
-        {
-          text: "V redu",
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-    } catch (error) {
-      console.log("Edit profile save error:", error);
-      Alert.alert("Napaka", "Sprememb ni bilo mogoče shraniti.");
-    } finally {
-      setSaving(false);
-    }
-  };
+    Alert.alert("Shranjeno", "Profil je uspešno posodobljen.", [
+      {
+        text: "V redu",
+        onPress: () => navigation.goBack(),
+      },
+    ]);
+  } catch (error) {
+    console.log("Edit profile save error:", error);
+    Alert.alert("Napaka", "Sprememb ni bilo mogoče shraniti.");
+  } finally {
+    setSaving(false);
+  }
+};
 
   if (loading) {
     return (
@@ -164,72 +176,102 @@ export default function EditProfileScreen({ navigation }: any) {
 
             <View style={styles.headerTextWrap}>
               <Text style={styles.screenTitle}>Uredi profil</Text>
-              <Text style={styles.screenSubtitle}>
-                Posodobi avatar, ime in občino.
-              </Text>
             </View>
           </View>
 
-          <View style={styles.avatarPreviewCard}>
-            <View style={styles.avatarPreviewCircle}>
-              <Image
-                source={getAvatarAsset(selectedAvatar)}
-                style={styles.avatarPreviewImage}
-                resizeMode="cover"
-              />
-            </View>
+         <View style={styles.avatarPreviewCard}>
+  <View style={styles.avatarPreviewCircle}>
+    <Image
+      source={
+        isTeacher
+          ? getIconAsset("teacherProfile")
+          : getAvatarAsset(selectedAvatar)
+      }
+      style={styles.avatarPreviewImage}
+      resizeMode="cover"
+    />
+  </View>
 
-            <Text style={styles.avatarPreviewTitle}>
-              {name.trim() || "Uporabnik"}
+  <Text style={styles.avatarPreviewTitle}>
+    {name.trim() || (isTeacher ? "Učitelj" : "Uporabnik")}
+  </Text>
+
+  <Text style={styles.avatarPreviewSub}>
+    {userData?.email ?? "Brez e-pošte"}
+  </Text>
+
+  {isTeacher && (
+    <View style={styles.teacherPreviewInfo}>
+      <View style={styles.teacherPreviewRow}>
+        <Image
+          source={getIconAsset("school")}
+          style={styles.teacherPreviewIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.teacherPreviewText} numberOfLines={1}>
+          {userData?.schoolName || userData?.schoolId || "Ni izbrane šole"}
+        </Text>
+      </View>
+
+      <View style={styles.teacherPreviewRow}>
+        <Image
+          source={getIconAsset("location")}
+          style={styles.teacherPreviewIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.teacherPreviewText} numberOfLines={1}>
+          {userData?.municipalityName ||
+            normalizeMunicipality(userData?.municipalityId)}
+        </Text>
+      </View>
+    </View>
+  )}
+</View>
+
+         {!isTeacher && (
+  <View style={styles.sectionCard}>
+    <Text style={styles.sectionTitle}>Izberi avatar</Text>
+
+    <View style={styles.avatarGrid}>
+      {avatarOptions.map((avatar) => {
+        const active = selectedAvatar === avatar.key;
+
+        return (
+          <TouchableOpacity
+            key={avatar.key}
+            style={[
+              styles.avatarOption,
+              active && styles.avatarOptionActive,
+            ]}
+            activeOpacity={0.85}
+            onPress={() => setSelectedAvatar(avatar.key)}
+          >
+            <Image
+              source={avatar.image}
+              style={styles.avatarOptionImage}
+              resizeMode="cover"
+            />
+
+            <Text
+              style={[
+                styles.avatarOptionText,
+                active && styles.avatarOptionTextActive,
+              ]}
+            >
+              {avatar.label}
             </Text>
 
-            <Text style={styles.avatarPreviewSub}>
-              {userData?.email ?? "Brez e-pošte"}
-            </Text>
-          </View>
-
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionTitle}>Izberi avatar</Text>
-
-            <View style={styles.avatarGrid}>
-              {avatarOptions.map((avatar) => {
-                const active = selectedAvatar === avatar.key;
-
-                return (
-                  <TouchableOpacity
-                    key={avatar.key}
-                    style={[
-                      styles.avatarOption,
-                      active && styles.avatarOptionActive,
-                    ]}
-                    activeOpacity={0.85}
-                    onPress={() => setSelectedAvatar(avatar.key)}
-                  >
-                    <Image
-                      source={avatar.image}
-                      style={styles.avatarOptionImage}
-                      resizeMode="cover"
-                    />
-
-                    <Text
-                      style={[
-                        styles.avatarOptionText,
-                        active && styles.avatarOptionTextActive,
-                      ]}
-                    >
-                      {avatar.label}
-                    </Text>
-
-                    {active && (
-                      <View style={styles.selectedCheck}>
-                        <Text style={styles.selectedCheckText}>✓</Text>
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
+            {active && (
+              <View style={styles.selectedCheck}>
+                <Text style={styles.selectedCheckText}>✓</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  </View>
+)}
 
           <View style={styles.sectionCard}>
             <Text style={styles.sectionTitle}>Podatki</Text>
