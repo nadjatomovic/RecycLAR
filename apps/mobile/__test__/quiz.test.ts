@@ -1,6 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
 
-// Simulacija strukture iz tvojega QuizScreen
 type TopicProgress = {
   currentLevel: number;
   levelPoints: number;
