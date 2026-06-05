@@ -2,7 +2,6 @@ import { StyleSheet } from "react-native";
 import { COLORS, RADIUS, SPACING } from "../utils/theme";
 
 export const styles = StyleSheet.create({
-  // ── Layout ──────────────────────────────────────────────────────────────────
   container: {
     flex: 1,
     backgroundColor: "#F8FAF5",
@@ -17,7 +16,6 @@ export const styles = StyleSheet.create({
     paddingBottom: 88,
   },
 
-  // ── Locked state ────────────────────────────────────────────────────────────
   lockedContent: {
     flex: 1,
     justifyContent: "center",
@@ -62,7 +60,6 @@ export const styles = StyleSheet.create({
     fontSize: 16,
   },
 
-  // ── Header ──────────────────────────────────────────────────────────────────
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -96,7 +93,6 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // ── Filter row (Tedensko / Mesečno / Vsi časi) ──────────────────────────────
   filterRow: {
     flexDirection: "row",
     backgroundColor: COLORS.white,
@@ -137,7 +133,6 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  // ── Tab row (Posamezniki / Razredi) ─────────────────────────────────────────
   tabRow: {
     flexDirection: "row",
     backgroundColor: "#EEF0F4",
@@ -167,61 +162,60 @@ export const styles = StyleSheet.create({
     color: COLORS.muted,
   },
 
-  // ── Podium ──────────────────────────────────────────────────────────────────
-podiumRow: {
-  flexDirection: "row",
-  alignItems: "flex-start",
-  justifyContent: "center",
-  marginBottom: 20,
-  minHeight: 250,
-  paddingTop: 42,
-},
+  podiumRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "center",
+    marginBottom: 20,
+    minHeight: 250,
+    paddingTop: 42,
+  },
 
-podiumCenter: {
-  flex: 1,
-  alignItems: "center",
-  zIndex: 2,
-  marginTop: 0,
-},
+  podiumCenter: {
+    flex: 1,
+    alignItems: "center",
+    zIndex: 2,
+    marginTop: 0,
+  },
 
-podiumSide: {
-  flex: 0.85,
-  alignItems: "center",
-  marginTop: 42,
-},
+  podiumSide: {
+    flex: 0.85,
+    alignItems: "center",
+    marginTop: 42,
+  },
 
-podiumCard: {
-  width: "100%",
-  height: 178,
-  borderRadius: 16,
-  padding: 14,
-  alignItems: "center",
-  justifyContent: "flex-start",
-  borderWidth: 1.5,
-  borderColor: COLORS.border,
-  backgroundColor: COLORS.white,
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.05,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 1 },
-  elevation: 2,
-  position: "relative",
-},
+  podiumCard: {
+    width: "100%",
+    height: 178,
+    borderRadius: 16,
+    padding: 14,
+    alignItems: "center",
+    justifyContent: "flex-start",
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.white,
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
+    position: "relative",
+  },
 
   podiumCard1: {
-  height: 200,
-  borderColor: "#FDE68A",
-  shadowColor: COLORS.shadow,
-  shadowOpacity: 0.05,
-},
+    height: 200,
+    borderColor: "#FDE68A",
+    shadowColor: COLORS.shadow,
+    shadowOpacity: 0.05,
+  },
 
-podiumCard2: {
-  borderColor: "#D1D5DB",
-},
+  podiumCard2: {
+    borderColor: "#D1D5DB",
+  },
 
-podiumCard3: {
-  borderColor: "#FDDBB4",
-},
+  podiumCard3: {
+    borderColor: "#FDDBB4",
+  },
   podiumCardMe: {
     borderColor: COLORS.green,
     shadowColor: COLORS.shadow,
@@ -231,7 +225,6 @@ podiumCard3: {
     flex: 0.85,
   },
 
-  // Medal badge
   medalBadge: {
     position: "absolute",
     top: -14,
@@ -253,7 +246,6 @@ podiumCard3: {
     color: "#374151",
   },
 
-  // Avatar
   podiumAvatarWrap: {
     width: 62,
     height: 62,
@@ -277,30 +269,28 @@ podiumCard3: {
     borderRadius: 37,
   },
 
-  // Name & points
- podiumName: {
-  fontSize: 12,
-  fontWeight: "700",
-  color: COLORS.text,
-  textAlign: "center",
-  lineHeight: 16,
-  marginBottom: 4,
-  minHeight: 38,
-},
+  podiumName: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: COLORS.text,
+    textAlign: "center",
+    lineHeight: 16,
+    marginBottom: 4,
+    minHeight: 38,
+  },
   podiumName1: {
     fontSize: 14,
   },
- podiumPts: {
-  fontSize: 11,
-  fontWeight: "700",
-  color: COLORS.green,
-  marginTop: "auto",
-},
+  podiumPts: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: COLORS.green,
+    marginTop: "auto",
+  },
   podiumPts1: {
     fontSize: 13,
   },
 
-  // ── Row list ─────────────────────────────────────────────────────────────────
   listSection: {
     gap: 10,
   },
@@ -327,7 +317,6 @@ podiumCard3: {
     shadowOpacity: 0.05,
   },
 
-  // "Ti" green badge
   tiLabel: {
     position: "absolute",
     left: -1,
@@ -416,7 +405,6 @@ podiumCard3: {
     fontWeight: "700",
   },
 
-  // ── My position pinned ───────────────────────────────────────────────────────
   myPositionWrap: {
     marginTop: 16,
     borderTopWidth: 1,
@@ -432,7 +420,6 @@ podiumCard3: {
     marginBottom: 8,
   },
 
-  // ── Loading / empty ──────────────────────────────────────────────────────────
   loadingBox: {
     paddingVertical: 60,
     alignItems: "center",
@@ -465,7 +452,6 @@ podiumCard3: {
     fontWeight: "600",
   },
 
-  // ── Footer ───────────────────────────────────────────────────────────────────
   updatedAt: {
     textAlign: "center",
     fontSize: 11,
@@ -490,34 +476,34 @@ podiumCard3: {
   },
 
   locationIcon: {
-  width: 20,
-  height: 20,
-  marginRight: 6,
-},
+    width: 20,
+    height: 20,
+    marginRight: 6,
+  },
 
-filterIcon: {
-  width: 20,
-  height: 20,
-  marginRight: 6,
-},
+  filterIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 6,
+  },
 
-filterIconActive: {
-  opacity: 1,
-},
+  filterIconActive: {
+    opacity: 1,
+  },
 
-tabIcon: {
-  width: 24,
-  height: 24,
-  marginRight: 8,
-},
+  tabIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 8,
+  },
 
-tabTextActive: {
-  color: COLORS.text,
-},
+  tabTextActive: {
+    color: COLORS.text,
+  },
 
-lockedImage: {
-  width: 74,
-  height: 74,
-  marginBottom: 12,
-},
+  lockedImage: {
+    width: 74,
+    height: 74,
+    marginBottom: 12,
+  },
 });

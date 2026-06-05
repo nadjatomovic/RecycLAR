@@ -105,7 +105,6 @@ export default function MapScreen({ route, navigation }: any) {
     fetchLocations();
   }, [selectedMunicipality]);
 
-  // Маркерите се филтрираат САМО според типот
   const filteredLocations = locations.filter((loc) => {
     return activeFilter === "all" || loc.type === activeFilter;
   });
@@ -169,7 +168,7 @@ export default function MapScreen({ route, navigation }: any) {
       webViewRef.current.postMessage(
         JSON.stringify({
           center: { lat, lng: lon, zoom: 16 },
-          markers: filteredLocations, // Ги задржуваме истите маркери
+          markers: filteredLocations,
         }),
       );
     }
@@ -407,8 +406,7 @@ export default function MapScreen({ route, navigation }: any) {
                   setTimeout(() => {
                     sendMarkersToMap();
                   }, 300);
-                }
-                else if (res.type === "MARKER_CLICK")
+                } else if (res.type === "MARKER_CLICK")
                   setSelectedLocation(res.location);
               } catch (e) {}
             }}

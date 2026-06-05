@@ -111,7 +111,7 @@ export default function LeaderboardScreen({ navigation }: any) {
 
       loadCity().then((city) => {
         setMyMunicipality(city.charAt(0).toUpperCase() + city.slice(1));
-        setCityLoaded(true); // Обележуваме дека градот е вчитан
+        setCityLoaded(true);
       });
 
       getDoc(doc(db, "users", currentUser.uid)).then((snap) => {
@@ -124,121 +124,118 @@ export default function LeaderboardScreen({ navigation }: any) {
   );
 
   useEffect(() => {
-    // Вчитуваме само ако градот е веќе сетиран во state-от
     if (currentUser && cityLoaded) {
       if (activeTab === "razredi") loadSchools();
       else loadUsers();
     }
   }, [activeTab, currentUser, myMunicipality, cityLoaded]);
 
-const loadSchools = async () => {
-  setLoading(true);
+  const loadSchools = async () => {
+    setLoading(true);
 
-  try {
-    const municipalityId = (myMunicipality || "Maribor")
-      .toLowerCase()
-      .trim();
+    try {
+      const municipalityId = (myMunicipality || "Maribor").toLowerCase().trim();
 
-    const snap = await getDocs(collection(db, "groups"));
+      const snap = await getDocs(collection(db, "groups"));
 
-    const list: SchoolItem[] = [];
+      const list: SchoolItem[] = [];
 
-    snap.forEach((d) => {
-      const data = d.data();
+      snap.forEach((d) => {
+        const data = d.data();
 
-      const groupMunicipality = (data.municipalityId ?? "")
-        .toString()
-        .toLowerCase()
-        .trim();
+        const groupMunicipality = (data.municipalityId ?? "")
+          .toString()
+          .toLowerCase()
+          .trim();
 
-      if (groupMunicipality !== municipalityId) {
-        return;
-      }
+        if (groupMunicipality !== municipalityId) {
+          return;
+        }
 
-      const schoolName = data.schoolName ?? data.schoolId ?? "";
+        const schoolName = data.schoolName ?? data.schoolId ?? "";
 
-      list.push({
-        id: d.id,
-        name: data.name ?? d.id,
-        displayName:
-          data.displayName ??
-          (schoolName ? `${data.name ?? d.id} · ${schoolName}` : data.name ?? d.id),
-        schoolName,
-        weeklyPoints: Number(data.weeklyPoints ?? 0),
-        monthlyPoints: Number(data.monthlyPoints ?? 0),
-        totalPoints: Number(data.totalPoints ?? 0),
-        streakDays: Number(data.streakDays ?? 0),
+        list.push({
+          id: d.id,
+          name: data.name ?? d.id,
+          displayName:
+            data.displayName ??
+            (schoolName
+              ? `${data.name ?? d.id} · ${schoolName}`
+              : (data.name ?? d.id)),
+          schoolName,
+          weeklyPoints: Number(data.weeklyPoints ?? 0),
+          monthlyPoints: Number(data.monthlyPoints ?? 0),
+          totalPoints: Number(data.totalPoints ?? 0),
+          streakDays: Number(data.streakDays ?? 0),
+        });
       });
-    });
 
-    setSchools(list);
-  } catch (e) {
-    console.log("loadSchools error:", e);
-    setSchools([]);
-  } finally {
-    setLoading(false);
-  }
-};
+      setSchools(list);
+    } catch (e) {
+      console.log("loadSchools error:", e);
+      setSchools([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadUsers = async () => {
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    const municipalityId = (myMunicipality || "Maribor")
-      .toLowerCase()
-      .trim();
+    try {
+      const municipalityId = (myMunicipality || "Maribor").toLowerCase().trim();
 
-    const snap = await getDocs(collection(db, "users"));
+      const snap = await getDocs(collection(db, "users"));
 
-    const list: UserItem[] = [];
+      const list: UserItem[] = [];
 
-    snap.forEach((d) => {
-      const data = d.data();
+      snap.forEach((d) => {
+        const data = d.data();
 
-      const userMunicipality = (data.municipalityId ?? "")
-        .toString()
-        .toLowerCase()
-        .trim();
+        const userMunicipality = (data.municipalityId ?? "")
+          .toString()
+          .toLowerCase()
+          .trim();
 
-      if (userMunicipality !== municipalityId) {
-        return;
-      }
+        if (userMunicipality !== municipalityId) {
+          return;
+        }
 
-      if (data.role === "teacher") {
-        return;
-      }
-      if (data.role !== "student") {
-        return;
-      }
+        if (data.role === "teacher") {
+          return;
+        }
+        if (data.role !== "student") {
+          return;
+        }
 
-      if (!data.groupId || data.groupId.trim() === "") {
-        return;
-      }
+        if (!data.groupId || data.groupId.trim() === "") {
+          return;
+        }
 
-      list.push({
-        id: d.id,
-        name:
-          data.displayName ??
-          data.name ??
-          data.email?.split("@")[0] ??
-          "Učenec",
-        weeklyPoints: Number(data.weeklyPoints ?? 0),
-        monthlyPoints: Number(data.monthlyPoints ?? 0),
-        totalPoints: Number(data.totalPoints ?? 0),
-        streakDays: Number(data.streakDays ?? 0),
-        avatarKey: data.avatarKey,
-        schoolName: data.schoolName,
+        list.push({
+          id: d.id,
+          name:
+            data.displayName ??
+            data.name ??
+            data.email?.split("@")[0] ??
+            "Učenec",
+          weeklyPoints: Number(data.weeklyPoints ?? 0),
+          monthlyPoints: Number(data.monthlyPoints ?? 0),
+          totalPoints: Number(data.totalPoints ?? 0),
+          streakDays: Number(data.streakDays ?? 0),
+          avatarKey: data.avatarKey,
+          schoolName: data.schoolName,
+        });
       });
-    });
 
-    setUsers(list);
-  } catch (e) {
-    console.log("loadUsers error:", e);
-    setUsers([]);
-  } finally {
-    setLoading(false);
-  }
-};
+      setUsers(list);
+    } catch (e) {
+      console.log("loadUsers error:", e);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const rawList = activeTab === "razredi" ? schools : users;
   const sortedList = [...rawList].sort(
@@ -430,50 +427,47 @@ const loadSchools = async () => {
             />
 
             <Text
-              style={[
-                s.tabText,
-                activeTab === "razredi" && s.tabTextActive,
-              ]}
+              style={[s.tabText, activeTab === "razredi" && s.tabTextActive]}
             >
               Razredi
             </Text>
           </TouchableOpacity>
         </View>
-        
+
         {loading ? (
-  <View style={s.loadingBox}>
-    <ActivityIndicator size="large" color="#35A936" />
-    <Text style={s.loadingText}>Nalagam lestvico...</Text>
-  </View>
-) : sortedList.length === 0 ? (
-  <View style={s.emptyCard}>
-    <Text style={{ fontSize: 42, marginBottom: 8 }}>🌱</Text>
-    <Text style={s.emptyTitle}>Lestvica je prazna</Text>
-    <Text style={s.emptyText}>
-      Za izbrano občino ni podatkov za prikaz.
-    </Text>
-  </View>
-) : (
-  <>
-    <View style={s.podiumRow}>
-      <View style={s.podiumSide}>
-        {renderPodiumCard(top3[1], 2, 1)}
-      </View>
+          <View style={s.loadingBox}>
+            <ActivityIndicator size="large" color="#35A936" />
+            <Text style={s.loadingText}>Nalagam lestvico...</Text>
+          </View>
+        ) : sortedList.length === 0 ? (
+          <View style={s.emptyCard}>
+            <Text style={{ fontSize: 42, marginBottom: 8 }}>🌱</Text>
+            <Text style={s.emptyTitle}>Lestvica je prazna</Text>
+            <Text style={s.emptyText}>
+              Za izbrano občino ni podatkov za prikaz.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View style={s.podiumRow}>
+              <View style={s.podiumSide}>
+                {renderPodiumCard(top3[1], 2, 1)}
+              </View>
 
-      <View style={s.podiumCenter}>
-        {renderPodiumCard(top3[0], 1, 0)}
-      </View>
+              <View style={s.podiumCenter}>
+                {renderPodiumCard(top3[0], 1, 0)}
+              </View>
 
-      <View style={s.podiumSide}>
-        {renderPodiumCard(top3[2], 3, 2)}
-      </View>
-    </View>
+              <View style={s.podiumSide}>
+                {renderPodiumCard(top3[2], 3, 2)}
+              </View>
+            </View>
 
-    <View style={s.listSection}>
-      {rest.map((item, i) => renderRow(item, i + 4, i))}
-    </View>
-  </>
-)}
+            <View style={s.listSection}>
+              {rest.map((item, i) => renderRow(item, i + 4, i))}
+            </View>
+          </>
+        )}
       </ScrollView>
       <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
     </SafeAreaView>

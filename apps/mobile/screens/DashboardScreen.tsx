@@ -81,7 +81,7 @@ const DashboardScreen = ({ navigation, route }: any) => {
   const [selectedCity, setSelectedCity] = useState<string>("Maribor");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState<string>("Eko Junak");
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // Состојба за dropdown менито
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const citiesList = Object.keys(binsByMunicipality);
 

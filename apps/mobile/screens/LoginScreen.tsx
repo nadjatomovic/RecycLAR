@@ -179,7 +179,7 @@ export default function LoginScreen({ navigation }: any) {
               />
             </View>
 
-           <View style={styles.inputGroup}>
+            <View style={styles.inputGroup}>
               <Text style={styles.label}>Geslo</Text>
 
               <View style={styles.passwordInputWrap}>
@@ -269,7 +269,6 @@ export default function LoginScreen({ navigation }: any) {
         </ScrollView>
       </KeyboardAvoidingView>
 
-      {/* ================= MODAL ЗА ЗАБОРАВЕНА ЛОЗИНКА ================= */}
       <Modal visible={forgotModalVisible} transparent animationType="fade">
         <Pressable
           style={styles.modalOverlay}
