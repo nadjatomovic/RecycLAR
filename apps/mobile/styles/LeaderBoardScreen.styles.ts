@@ -116,6 +116,8 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: RADIUS.pill,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   filterBtnActive: {
     backgroundColor: COLORS.purple,
@@ -147,7 +149,9 @@ export const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 11,
     borderRadius: RADIUS.pill,
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   tabBtnActive: {
     backgroundColor: COLORS.white,
@@ -162,55 +166,62 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.muted,
   },
-  tabTextActive: {
-    color: COLORS.text,
-    fontWeight: "700",
-  },
 
   // ── Podium ──────────────────────────────────────────────────────────────────
-  podiumRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "center",
-    marginBottom: 20,
-    minHeight: 240,
-  },
-  podiumCenter: {
-    flex: 1,
-    alignItems: "center",
-    zIndex: 2,
-  },
-  podiumSide: {
-    flex: 0.85,
-    alignItems: "center",
-    marginTop: 30,
-  },
-  podiumCard: {
-    width: "100%",
-    borderRadius: 16,
-    padding: 14,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-    position: "relative",
-  },
+podiumRow: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  justifyContent: "center",
+  marginBottom: 20,
+  minHeight: 250,
+  paddingTop: 42,
+},
+
+podiumCenter: {
+  flex: 1,
+  alignItems: "center",
+  zIndex: 2,
+  marginTop: 0,
+},
+
+podiumSide: {
+  flex: 0.85,
+  alignItems: "center",
+  marginTop: 42,
+},
+
+podiumCard: {
+  width: "100%",
+  height: 178,
+  borderRadius: 16,
+  padding: 14,
+  alignItems: "center",
+  justifyContent: "flex-start",
+  borderWidth: 1.5,
+  borderColor: COLORS.border,
+  backgroundColor: COLORS.white,
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 1 },
+  elevation: 2,
+  position: "relative",
+},
+
   podiumCard1: {
-    borderColor: "#FDE68A",
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-  },
-  podiumCard2: {
-    borderColor: "#D1D5DB",
-  },
-  podiumCard3: {
-    borderColor: "#FDDBB4",
-  },
+  height: 200,
+  borderColor: "#FDE68A",
+  shadowColor: COLORS.shadow,
+  shadowOpacity: 0.05,
+},
+
+podiumCard2: {
+  borderColor: "#D1D5DB",
+},
+
+podiumCard3: {
+  borderColor: "#FDDBB4",
+},
   podiumCardMe: {
     borderColor: COLORS.green,
     shadowColor: COLORS.shadow,
@@ -267,22 +278,24 @@ export const styles = StyleSheet.create({
   },
 
   // Name & points
-  podiumName: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: COLORS.text,
-    textAlign: "center",
-    lineHeight: 16,
-    marginBottom: 4,
-  },
+ podiumName: {
+  fontSize: 12,
+  fontWeight: "700",
+  color: COLORS.text,
+  textAlign: "center",
+  lineHeight: 16,
+  marginBottom: 4,
+  minHeight: 38,
+},
   podiumName1: {
     fontSize: 14,
   },
-  podiumPts: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: COLORS.green,
-  },
+ podiumPts: {
+  fontSize: 11,
+  fontWeight: "700",
+  color: COLORS.green,
+  marginTop: "auto",
+},
   podiumPts1: {
     fontSize: 13,
   },
@@ -467,10 +480,44 @@ export const styles = StyleSheet.create({
     borderRadius: RADIUS.pill,
     borderWidth: 1,
     borderColor: "#E0D4F7",
+    flexDirection: "row",
+    alignItems: "center",
   },
   locationText: {
     fontSize: 13,
     fontWeight: "700",
     color: COLORS.purple,
   },
+
+  locationIcon: {
+  width: 20,
+  height: 20,
+  marginRight: 6,
+},
+
+filterIcon: {
+  width: 20,
+  height: 20,
+  marginRight: 6,
+},
+
+filterIconActive: {
+  opacity: 1,
+},
+
+tabIcon: {
+  width: 24,
+  height: 24,
+  marginRight: 8,
+},
+
+tabTextActive: {
+  color: COLORS.text,
+},
+
+lockedImage: {
+  width: 74,
+  height: 74,
+  marginBottom: 12,
+},
 });

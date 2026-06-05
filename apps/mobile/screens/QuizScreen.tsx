@@ -316,6 +316,7 @@ export default function QuizScreen({ navigation }: any) {
 
   const [totalPoints, setTotalPoints] = useState(0);
   const [userRole, setUserRole] = useState("student");
+  const [userGroupId, setUserGroupId] = useState("");
 
   const [topicProgress, setTopicProgress] = useState<
     Record<string, TopicProgress>
@@ -358,6 +359,7 @@ export default function QuizScreen({ navigation }: any) {
 
         setTotalPoints(data.totalPoints ?? 0);
         setUserRole(data.role ?? "student");
+        setUserGroupId(data.groupId ?? "");
 
         if (data.topicProgress) {
           setTopicProgress(data.topicProgress);
@@ -740,128 +742,148 @@ const addStreakMilestoneNotification = async (streakDays: number) => {
 };
 
   const saveResults = async () => {
-    if (!currentUser) return;
+  if (!currentUser) return;
 
-    try {
-      const progress = getProgress(selectedTopic);
-      const levelObj = LEVELS.find((item) => item.level === selectedLevel)!;
-      const topic = TOPICS.find((item) => item.id === selectedTopic)!;
+  try {
+    const userRef = doc(db, "users", currentUser.uid);
+    const userSnap = await getDoc(userRef);
+    const currentUserData = userSnap.exists() ? userSnap.data() : null;
 
-      const newLevelPoints = Math.min(
-        progress.levelPoints + gainedPoints,
-        levelObj.pointsToUnlock,
-      );
+    const progress = getProgress(selectedTopic);
+    const levelObj = LEVELS.find((item) => item.level === selectedLevel)!;
+    const topic = TOPICS.find((item) => item.id === selectedTopic)!;
 
-      const justCompleted =
-        newLevelPoints >= levelObj.pointsToUnlock && selectedLevel < 10;
+    const newLevelPoints = Math.min(
+      progress.levelPoints + gainedPoints,
+      levelObj.pointsToUnlock,
+    );
 
-      let newCurrentLevel = progress.currentLevel;
-      let newLevelPointsAfterReset = newLevelPoints;
-      const newCompletedLevels = [...progress.completedLevels];
+    const justCompleted =
+      newLevelPoints >= levelObj.pointsToUnlock && selectedLevel < 10;
 
-      if (justCompleted) {
-        if (!newCompletedLevels.includes(selectedLevel)) {
-          newCompletedLevels.push(selectedLevel);
-        }
+    let newCurrentLevel = progress.currentLevel;
+    let newLevelPointsAfterReset = newLevelPoints;
+    const newCompletedLevels = [...progress.completedLevels];
 
-        newCurrentLevel = selectedLevel + 1;
-        newLevelPointsAfterReset = 0;
-        setLevelUnlocked(true);
+    if (justCompleted) {
+      if (!newCompletedLevels.includes(selectedLevel)) {
+        newCompletedLevels.push(selectedLevel);
       }
 
-      const newProgress: TopicProgress = {
-        currentLevel: newCurrentLevel,
-        levelPoints: newLevelPointsAfterReset,
-        completedLevels: newCompletedLevels,
-      };
-
-      setTopicProgress((previousProgress) => ({
-        ...previousProgress,
-        [selectedTopic]: newProgress,
-      }));
-
-      await addDoc(collection(db, "quizResults"), {
-        userId: currentUser.uid,
-        topic: selectedTopic,
-        level: selectedLevel,
-        levelLabel: levelObj.label,
-        score,
-        totalQuestions: questions.length,
-        pointsGained: gainedPoints,
-        createdAt: serverTimestamp(),
-      });
-
-      await updateDoc(doc(db, "users", currentUser.uid), {
-  totalPoints: increment(gainedPoints),
-  weeklyPoints: increment(gainedPoints),
-  monthlyPoints: increment(gainedPoints),
-  quizCompleted: increment(1),
-  updatedAt: serverTimestamp(),
-  [`topicProgress.${selectedTopic}.currentLevel`]: newCurrentLevel,
-  [`topicProgress.${selectedTopic}.levelPoints`]: newLevelPointsAfterReset,
-  [`topicProgress.${selectedTopic}.completedLevels`]: newCompletedLevels,
-});
-
-const newStreak = await updateUserStreak(currentUser.uid);
-if (newStreak && newStreak > 1) {
-  await addStreakMilestoneNotification(newStreak);
-}
-
-await addDoc(collection(db, "users", currentUser.uid, "activities"), {
-  icon: "❓",
-  iconBg: "#EDE9FE",
-  title: "Zaključen kviz",
-  description: `${topic.label} · Nivo ${selectedLevel}`,
-  points: `+${gainedPoints} točk`,
-  pointsColor: "#35A936",
-  type: "quiz",
-  time: "Pravkar",
-  createdAt: serverTimestamp(),
-});
-
-await addUserNotification({
-  title: "Kviz zaključen!",
-  message: `Zaključila si kviz ${topic.label} · Nivo ${selectedLevel} in osvojila ${gainedPoints} točk.`,
-  type: "quiz",
-  icon: "❓",
-});
-
-if (score === questions.length) {
-  await addUserNotification({
-    title: "Popoln rezultat!",
-    message: `Odgovorila si pravilno na vseh ${questions.length} vprašanj. Odlično!`,
-    type: "perfect_quiz",
-    icon: "🏆",
-  });
-}
-
-if (justCompleted && selectedLevel < 10) {
-  await addUserNotification({
-    title: "Nov nivo odklenjen!",
-    message: `Odklenila si Nivo ${selectedLevel + 1}. Nadaljuj z eko potjo!`,
-    type: "level_unlocked",
-    icon: "🚀",
-  });
-}
-
-if (newStreak && newStreak > 1) {
-  await addStreakMilestoneNotification(newStreak);
-
-  if (![3, 7, 14, 30, 100, 365].includes(newStreak)) {
-    await addUserNotification({
-      title: "Streak se nadaljuje!",
-      message: `Aktivna si že ${newStreak} dni zapored. Bravo!`,
-      type: "streak",
-      icon: "🔥",
-    });
-  }
-}
-
-      setTotalPoints((previousPoints) => previousPoints + gainedPoints);
-    } catch (e) {
-      console.log("Save quiz result error:", e);
+      newCurrentLevel = selectedLevel + 1;
+      newLevelPointsAfterReset = 0;
+      setLevelUnlocked(true);
     }
-  };
+
+    const newProgress: TopicProgress = {
+      currentLevel: newCurrentLevel,
+      levelPoints: newLevelPointsAfterReset,
+      completedLevels: newCompletedLevels,
+    };
+
+    setTopicProgress((previousProgress) => ({
+      ...previousProgress,
+      [selectedTopic]: newProgress,
+    }));
+
+    await addDoc(collection(db, "quizResults"), {
+      userId: currentUser.uid,
+      topic: selectedTopic,
+      level: selectedLevel,
+      levelLabel: levelObj.label,
+      score,
+      totalQuestions: questions.length,
+      pointsGained: gainedPoints,
+      createdAt: serverTimestamp(),
+    });
+
+    await updateDoc(userRef, {
+      totalPoints: increment(gainedPoints),
+      ekoPoints: increment(gainedPoints),
+      weeklyPoints: increment(gainedPoints),
+      monthlyPoints: increment(gainedPoints),
+      quizCompleted: increment(1),
+      updatedAt: serverTimestamp(),
+      [`topicProgress.${selectedTopic}.currentLevel`]: newCurrentLevel,
+      [`topicProgress.${selectedTopic}.levelPoints`]: newLevelPointsAfterReset,
+      [`topicProgress.${selectedTopic}.completedLevels`]: newCompletedLevels,
+    });
+
+    if (currentUserData?.groupId) {
+      try {
+        await updateDoc(doc(db, "groups", currentUserData.groupId), {
+          totalPoints: increment(gainedPoints),
+          weeklyPoints: increment(gainedPoints),
+          monthlyPoints: increment(gainedPoints),
+          quizCompleted: increment(1),
+          updatedAt: serverTimestamp(),
+        });
+      } catch (groupError) {
+        console.log("Group quiz points update error:", groupError);
+      }
+    }
+
+    const newStreak = await updateUserStreak(currentUser.uid);
+
+    if (newStreak && newStreak > 1) {
+      if ([3, 7, 14, 30, 100, 365].includes(newStreak)) {
+        await addStreakMilestoneNotification(newStreak);
+      } else {
+        await addUserNotification({
+          title: "Streak se nadaljuje!",
+          message: `Aktivna si že ${newStreak} dni zapored. Bravo!`,
+          type: "streak",
+          icon: "🔥",
+        });
+      }
+    }
+
+    await addDoc(collection(db, "users", currentUser.uid, "activities"), {
+      icon: "❓",
+      iconKey: "quiz",
+      iconBg: "#EDE9FE",
+      title: "Zaključen kviz",
+      description: `${topic.label} · Nivo ${selectedLevel}`,
+      points: `+${gainedPoints} točk`,
+      pointsColor: "#35A936",
+      type: "quiz",
+      time: "Pravkar",
+      createdAt: serverTimestamp(),
+    });
+
+    await addUserNotification({
+      title: "Kviz zaključen!",
+      message: `Zaključila si kviz ${topic.label} · Nivo ${selectedLevel} in osvojila ${gainedPoints} točk.`,
+      type: "quiz",
+      icon: "❓",
+    });
+
+    if (score === questions.length) {
+      await addUserNotification({
+        title: "Popoln rezultat!",
+        message: `Odgovorila si pravilno na vseh ${questions.length} vprašanj. Odlično!`,
+        type: "perfect_quiz",
+        icon: "🏆",
+      });
+    }
+
+    if (justCompleted && selectedLevel < 10) {
+      await addUserNotification({
+        title: "Nov nivo odklenjen!",
+        message: `Odklenila si Nivo ${selectedLevel + 1}. Nadaljuj z eko potjo!`,
+        type: "level_unlocked",
+        icon: "🚀",
+      });
+    }
+
+    setTotalPoints((previousPoints) => previousPoints + gainedPoints);
+  } catch (e) {
+    console.log("Save quiz result error:", e);
+  }
+};
+  const canSeeLeaderboard =
+  userRole === "teacher" ||
+  (userRole === "student" && userGroupId.trim() !== "");
 
 
   if (!currentUser) {
@@ -903,6 +925,89 @@ if (newStreak && newStreak > 1) {
     );
   }
 
+  if (currentScreen === "result") {
+  const topic = TOPICS.find((item) => item.id === selectedTopic);
+  const levelObj = LEVELS.find((item) => item.level === selectedLevel);
+  const percent = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+
+  return (
+    <SafeAreaView style={s.resultScreenContainer}>
+      <DecorativeBackground variant="profile" />
+
+      <View style={s.resultCard}>
+
+       <LottieView
+          source={require("../assets/animations/PeharAnimacija.json")}
+          style={s.resultTrophyAnimation}
+          autoPlay
+          loop
+          resizeMode="contain"
+        />
+
+        <Text style={s.resultTitle}>Kviz zaključen!</Text>
+
+        <Text style={s.resultSubtitle}>
+          {topic?.label ?? "Kviz"} · Nivo {selectedLevel}
+        </Text>
+
+        <View style={s.resultStatsRow}>
+          <View style={s.resultStatBox}>
+            <Text style={s.resultStatValue}>
+              {score}/{questions.length}
+            </Text>
+            <Text style={s.resultStatLabel}>pravilno</Text>
+          </View>
+
+          <View style={s.resultStatBox}>
+            <Text style={s.resultStatValue}>{percent}%</Text>
+            <Text style={s.resultStatLabel}>uspeh</Text>
+          </View>
+
+          <View style={s.resultStatBox}>
+            <Text style={s.resultStatValue}>+{gainedPoints}</Text>
+            <Text style={s.resultStatLabel}>točk</Text>
+          </View>
+        </View>
+
+        {levelUnlocked && (
+          <View style={s.levelUnlockedBox}>
+            <Text style={s.levelUnlockedText}>
+              Odklenila si nov nivo! ✨
+            </Text>
+          </View>
+        )}
+
+        <TouchableOpacity
+          style={s.resultPrimaryButton}
+          activeOpacity={0.9}
+          onPress={() => {
+            setCurrentScreen("path");
+            setCurrentQuestionIndex(0);
+            setSelectedAnswerIndex(null);
+            setIsAnswered(false);
+          }}
+        >
+          <Text style={s.resultPrimaryButtonText}>
+            NAZAJ NA EKO POT →
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={s.resultSecondaryButton}
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate("Profile")}
+        >
+          <Text style={s.resultSecondaryButtonText}>
+            Poglej profil
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <BottomNavBar navigation={navigation} activeRoute="Quiz" />
+    </SafeAreaView>
+  );
+}
+
   if (currentScreen === "topics") {
     return (
       <SafeAreaView style={s.container}>
@@ -925,22 +1030,24 @@ if (newStreak && newStreak > 1) {
           <Text style={s.sectionTitle}>Izberi temo:</Text>
 
           {/* ── Leaderboard banner ─────────────────────────────────── */}
-          <TouchableOpacity
-            style={s.leaderboardBanner}
-            onPress={() => navigation.navigate("Leaderboard")}
-            activeOpacity={0.88}
-          >
-            <View style={s.leaderboardBannerLeft}>
-              <Text style={s.leaderboardBannerEmoji}>🏆</Text>
-              <View>
-                <Text style={s.leaderboardBannerTitle}>Lestvica šol</Text>
-                <Text style={s.leaderboardBannerSub}>
-                  Poglej kako se kotirate
-                </Text>
+          {canSeeLeaderboard && (
+            <TouchableOpacity
+              style={s.leaderboardBanner}
+              onPress={() => navigation.navigate("Leaderboard")}
+              activeOpacity={0.88}
+            >
+              <View style={s.leaderboardBannerLeft}>
+                <Text style={s.leaderboardBannerEmoji}>🏆</Text>
+                <View>
+                  <Text style={s.leaderboardBannerTitle}>Lestvica šol</Text>
+                  <Text style={s.leaderboardBannerSub}>
+                    Poglej kako se kotirate
+                  </Text>
+                </View>
               </View>
-            </View>
-            <Text style={s.leaderboardBannerChevron}>›</Text>
-          </TouchableOpacity>
+              <Text style={s.leaderboardBannerChevron}>›</Text>
+            </TouchableOpacity>
+          )}
 
           {TOPICS.map((topic) => {
             const progress = getProgress(topic.id);

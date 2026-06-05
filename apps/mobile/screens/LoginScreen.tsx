@@ -23,10 +23,12 @@ import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/LoginScreen.styles";
 import { saveCity } from "../utils/cityStorage";
 import DecorativeBackground from "../components/DecorativeBackground";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function LoginScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -177,19 +179,36 @@ export default function LoginScreen({ navigation }: any) {
               />
             </View>
 
-            <View style={styles.inputGroup}>
+           <View style={styles.inputGroup}>
               <Text style={styles.label}>Geslo</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="vnesi geslo"
-                placeholderTextColor="#A0A0AA"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  setError("");
-                }}
-                secureTextEntry
-              />
+
+              <View style={styles.passwordInputWrap}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="vnesi geslo"
+                  placeholderTextColor="#A0A0AA"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError("");
+                  }}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  activeOpacity={0.75}
+                  onPress={() => setShowPassword((previous) => !previous)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#6B35C9"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             {error ? (

@@ -22,6 +22,7 @@ import {
 import { auth, db } from "../firebase/firebase";
 import { styles as s } from "../styles/LeaderBoardScreen.styles";
 import { getAvatarAsset } from "../utils/avatarAssets";
+import { getIconAsset } from "../utils/iconAssets";
 import { loadCity } from "../utils/cityStorage";
 import DecorativeBackground from "../components/DecorativeBackground";
 
@@ -76,6 +77,18 @@ const getDisplayName = (item: SchoolItem | UserItem) => {
 
   return item.name;
 };
+
+const getFilterLabel = (filter: FilterType) => {
+  if (filter === "weekly") return "Tedensko";
+  if (filter === "monthly") return "Mesečno";
+  return "Vsi časi";
+};
+
+const getFilterIcon = (filter: FilterType) => {
+  if (filter === "weekly") return getIconAsset("leaderboardWeekly");
+  if (filter === "monthly") return getIconAsset("leaderboardMonthly");
+  return getIconAsset("leaderboardAllTime");
+};
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function LeaderboardScreen({ navigation }: any) {
@@ -118,7 +131,7 @@ export default function LeaderboardScreen({ navigation }: any) {
     }
   }, [activeTab, currentUser, myMunicipality, cityLoaded]);
 
-  const loadSchools = async () => {
+const loadSchools = async () => {
   setLoading(true);
 
   try {
@@ -126,13 +139,7 @@ export default function LeaderboardScreen({ navigation }: any) {
       .toLowerCase()
       .trim();
 
-    const snap = await getDocs(
-      query(
-        collection(db, "groups"),
-        orderBy("totalPoints", "desc"),
-        limit(50)
-      )
-    );
+    const snap = await getDocs(collection(db, "groups"));
 
     const list: SchoolItem[] = [];
 
@@ -144,26 +151,25 @@ export default function LeaderboardScreen({ navigation }: any) {
         .toLowerCase()
         .trim();
 
-      if (groupMunicipality === municipalityId) {
-        const schoolName = data.schoolName ?? data.schoolId ?? "";
-
-        list.push({
-          id: d.id,
-          name: data.name ?? d.id,
-          displayName:
-            data.displayName ??
-            (schoolName ? `${data.name ?? d.id} · ${schoolName}` : data.name ?? d.id),
-          schoolName,
-          weeklyPoints: Number(data.weeklyPoints ?? 0),
-          monthlyPoints: Number(data.monthlyPoints ?? 0),
-          totalPoints: Number(data.totalPoints ?? 0),
-          streakDays: Number(data.streakDays ?? 0),
-        });
+      if (groupMunicipality !== municipalityId) {
+        return;
       }
-    });
 
-    console.log("Municipality filter:", municipalityId);
-    console.log("Loaded groups:", list.length, list);
+      const schoolName = data.schoolName ?? data.schoolId ?? "";
+
+      list.push({
+        id: d.id,
+        name: data.name ?? d.id,
+        displayName:
+          data.displayName ??
+          (schoolName ? `${data.name ?? d.id} · ${schoolName}` : data.name ?? d.id),
+        schoolName,
+        weeklyPoints: Number(data.weeklyPoints ?? 0),
+        monthlyPoints: Number(data.monthlyPoints ?? 0),
+        totalPoints: Number(data.totalPoints ?? 0),
+        streakDays: Number(data.streakDays ?? 0),
+      });
+    });
 
     setSchools(list);
   } catch (e) {
@@ -175,40 +181,64 @@ export default function LeaderboardScreen({ navigation }: any) {
 };
 
   const loadUsers = async () => {
-    setLoading(true);
-    try {
-      const snap = await getDocs(
-        query(
-          collection(db, "users"),
-          orderBy("totalPoints", "desc"),
-          limit(20),
-        ),
-      );
-      const list: UserItem[] = [];
-      snap.forEach((d) => {
-        const data = d.data();
-        list.push({
-          id: d.id,
-          name:
-            data.displayName ??
-            data.name ??
-            data.email?.split("@")[0] ??
-            "Učenec",
-          weeklyPoints: data.weeklyPoints ?? 0,
-          monthlyPoints: data.monthlyPoints ?? 0,
-          totalPoints: data.totalPoints ?? 0,
-          streakDays: data.streakDays ?? 0,
-          avatarKey: data.avatarKey,
-          schoolName: data.schoolName,
-        });
+  setLoading(true);
+
+  try {
+    const municipalityId = (myMunicipality || "Maribor")
+      .toLowerCase()
+      .trim();
+
+    const snap = await getDocs(collection(db, "users"));
+
+    const list: UserItem[] = [];
+
+    snap.forEach((d) => {
+      const data = d.data();
+
+      const userMunicipality = (data.municipalityId ?? "")
+        .toString()
+        .toLowerCase()
+        .trim();
+
+      if (userMunicipality !== municipalityId) {
+        return;
+      }
+
+      if (data.role === "teacher") {
+        return;
+      }
+      if (data.role !== "student") {
+        return;
+      }
+
+      if (!data.groupId || data.groupId.trim() === "") {
+        return;
+      }
+
+      list.push({
+        id: d.id,
+        name:
+          data.displayName ??
+          data.name ??
+          data.email?.split("@")[0] ??
+          "Učenec",
+        weeklyPoints: Number(data.weeklyPoints ?? 0),
+        monthlyPoints: Number(data.monthlyPoints ?? 0),
+        totalPoints: Number(data.totalPoints ?? 0),
+        streakDays: Number(data.streakDays ?? 0),
+        avatarKey: data.avatarKey,
+        schoolName: data.schoolName,
       });
-      setUsers(list);
-    } catch (e) {
-      console.log("loadUsers error:", e);
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+
+    setUsers(list);
+  } catch (e) {
+    console.log("loadUsers error:", e);
+    setUsers([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const rawList = activeTab === "razredi" ? schools : users;
   const sortedList = [...rawList].sort(
@@ -224,7 +254,11 @@ export default function LeaderboardScreen({ navigation }: any) {
     return (
       <SafeAreaView style={s.whiteContainer}>
         <View style={s.lockedContent}>
-          <Text style={s.lockedIcon}>🏆</Text>
+          <Image
+            source={getIconAsset("trophy")}
+            style={s.lockedImage}
+            resizeMode="contain"
+          />
           <Text style={s.lockedTitle}>Poglej lestvico</Text>
           <TouchableOpacity
             style={s.loginButton}
@@ -327,42 +361,82 @@ export default function LeaderboardScreen({ navigation }: any) {
         contentContainerStyle={s.scrollContent}
       >
         <View style={s.header}>
-          <Text style={s.title}>Lestvica ✨</Text>
+          <Text style={s.title}>Lestvica</Text>
           <View style={s.locationPill}>
-            <Text style={s.locationText}>📍 {myMunicipality}</Text>
+            <Image
+              source={getIconAsset("leaderboardLocation")}
+              style={s.locationIcon}
+              resizeMode="contain"
+            />
+
+            <Text style={s.locationText}>{myMunicipality}</Text>
           </View>
         </View>
         <View style={s.filterRow}>
-          {(["weekly", "monthly", "allTime"] as FilterType[]).map((f) => (
-            <TouchableOpacity
-              key={f}
-              style={[s.filterBtn, activeFilter === f && s.filterBtnActive]}
-              onPress={() => setActiveFilter(f)}
-            >
-              <Text
-                style={[s.filterText, activeFilter === f && s.filterTextActive]}
+          {(["weekly", "monthly", "allTime"] as FilterType[]).map((f) => {
+            const isActive = activeFilter === f;
+
+            return (
+              <TouchableOpacity
+                key={f}
+                style={[s.filterBtn, isActive && s.filterBtnActive]}
+                onPress={() => setActiveFilter(f)}
+                activeOpacity={0.85}
               >
-                {f === "weekly"
-                  ? "📊 Tedensko"
-                  : f === "monthly"
-                    ? "📅 Mesečno"
-                    : "👑 Vsi časi"}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                <Image
+                  source={getFilterIcon(f)}
+                  style={[s.filterIcon, isActive && s.filterIconActive]}
+                  resizeMode="contain"
+                />
+
+                <Text style={[s.filterText, isActive && s.filterTextActive]}>
+                  {getFilterLabel(f)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
         <View style={s.tabRow}>
           <TouchableOpacity
             style={[s.tabBtn, activeTab === "posamezniki" && s.tabBtnActive]}
             onPress={() => setActiveTab("posamezniki")}
+            activeOpacity={0.85}
           >
-            <Text style={s.tabText}>👤 Posamezniki</Text>
+            <Image
+              source={getIconAsset("leaderboardUsers")}
+              style={s.tabIcon}
+              resizeMode="contain"
+            />
+
+            <Text
+              style={[
+                s.tabText,
+                activeTab === "posamezniki" && s.tabTextActive,
+              ]}
+            >
+              Posamezniki
+            </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={[s.tabBtn, activeTab === "razredi" && s.tabBtnActive]}
             onPress={() => setActiveTab("razredi")}
+            activeOpacity={0.85}
           >
-            <Text style={s.tabText}>🏫 Razredi</Text>
+            <Image
+              source={getIconAsset("school")}
+              style={s.tabIcon}
+              resizeMode="contain"
+            />
+
+            <Text
+              style={[
+                s.tabText,
+                activeTab === "razredi" && s.tabTextActive,
+              ]}
+            >
+              Razredi
+            </Text>
           </TouchableOpacity>
         </View>
         

@@ -16,13 +16,15 @@ import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/firebase";
 import { styles } from "../styles/RegisterScreen.styles";
 import { saveCity } from "../utils/cityStorage";
-import DecorativeBackground from "../components/DecorativeBackground"; // 1. Увезена функцијата за локално зачувување
+import DecorativeBackground from "../components/DecorativeBackground"; 
+import { Ionicons } from "@expo/vector-icons";
+import { getIconAsset } from "../utils/iconAssets";
 
 const municipalities = ["Maribor", "Ljubljana", "Kranj", "Koper", "Celje"];
 
 const schoolRoles = [
-  { id: "student", label: "Učenec", icon: "🎒" },
-  { id: "teacher", label: "Učitelj", icon: "👩‍🏫" },
+  { id: "student", label: "Učenec", iconKey: "roleStudent" },
+  { id: "teacher", label: "Učitelj", iconKey: "roleTeacher" },
 ];
 
 const municipalityToId: Record<string, string> = {
@@ -38,6 +40,7 @@ export default function RegisterScreen({ navigation }: any) {
   const [email, setEmail] = useState("");
   const [municipality, setMunicipality] = useState("Maribor");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [isSchoolAccount, setIsSchoolAccount] = useState(false);
   const [selectedSchoolRole, setSelectedSchoolRole] = useState<
@@ -247,17 +250,34 @@ export default function RegisterScreen({ navigation }: any) {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Geslo</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="vsaj 6 znakov"
-                placeholderTextColor="#A0A0AA"
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  setError("");
-                }}
-                secureTextEntry
-              />
+
+              <View style={styles.passwordInputWrap}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="vsaj 6 znakov"
+                  placeholderTextColor="#A0A0AA"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setError("");
+                  }}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+
+               <TouchableOpacity
+                  style={styles.eyeButton}
+                  activeOpacity={0.75}
+                  onPress={() => setShowPassword((previous) => !previous)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off-outline" : "eye-outline"}
+                    size={22}
+                    color="#6B35C9"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -314,7 +334,11 @@ export default function RegisterScreen({ navigation }: any) {
                       }}
                       activeOpacity={0.85}
                     >
-                      <Text style={styles.roleIcon}>{role.icon}</Text>
+                      <Image
+                        source={getIconAsset(role.iconKey)}
+                        style={styles.roleIcon}
+                        resizeMode="contain"
+                      />
                       <Text
                         style={[
                           styles.roleText,

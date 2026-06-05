@@ -111,14 +111,14 @@ export default function MapScreen({ route, navigation }: any) {
   });
 
   const sendMarkersToMap = () => {
-    if (webViewRef.current && isMapReady) {
-      webViewRef.current.postMessage(
-        JSON.stringify({
-          center: currentCoords,
-          markers: filteredLocations,
-        }),
-      );
-    }
+    if (!webViewRef.current) return;
+
+    webViewRef.current.postMessage(
+      JSON.stringify({
+        center: currentCoords,
+        markers: filteredLocations,
+      }),
+    );
   };
 
   useEffect(() => {
@@ -216,29 +216,90 @@ export default function MapScreen({ route, navigation }: any) {
       }
       window.onload = function() { emitReady(); };
       
-      window.addEventListener("message", function(e) {
-        try {
-          var data = JSON.parse(e.data);
-          if (data.type === "MAP_READY") return;
-          if (data.center) map.setView([data.center.lat, data.center.lng], data.center.zoom || 14);
-          markerGroup.clearLayers();
-          if (data.markers) {
-            data.markers.forEach(function(loc) {
-              var color = loc.type === "collection_center" ? "#F59E0B" : loc.type === "bio_bin" ? "#8A5A32" : loc.type === "packaging_bin" ? "#F2B400" : "#35A936";
-              var iconText = loc.type === "collection_center" ? "Z" : loc.type === "bio_bin" ? "B" : loc.type === "packaging_bin" ? "E" : "♻";
-              var icon = L.divIcon({ 
-                className: 'custom-icon',
-                html: '<div style="background-color:' + color + ';width:38px;height:38px;border-radius:19px;border:3px solid white;display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:16px;box-shadow:0 4px 10px rgba(0,0,0,0.35);">' + iconText + '</div>', 
-                iconSize: [38, 38], 
-                iconAnchor: [19, 19] 
-              });
-              L.marker([loc.lat, loc.lng], { icon: icon }).addTo(markerGroup).on("click", function() {
-                window.ReactNativeWebView.postMessage(JSON.stringify({ type: "MARKER_CLICK", location: loc }));
-              });
+     function getMarkerColor(type) {
+  if (type === "collection_center") return "#F59E0B";
+  if (type === "bio_bin") return "#8A5A32";
+  if (type === "packaging_bin") return "#F2B400";
+  return "#35A936";
+}
+
+      function getMarkerIcon(type) {
+        if (type === "collection_center") return "Z";
+        if (type === "bio_bin") return "B";
+        if (type === "packaging_bin") return "E";
+        return "♻";
+      }
+
+      function renderMarkers(markers) {
+        markerGroup.clearLayers();
+
+        if (!markers || !Array.isArray(markers)) return;
+
+        markers.forEach(function(loc) {
+          var lat = Number(loc.lat);
+          var lng = Number(loc.lng);
+
+          if (!lat || !lng) return;
+
+          var color = getMarkerColor(loc.type);
+          var iconText = getMarkerIcon(loc.type);
+
+          var icon = L.divIcon({
+            className: "custom-icon",
+            html:
+              '<div style="' +
+              'background-color:' + color + ';' +
+              'width:42px;' +
+              'height:42px;' +
+              'border-radius:21px;' +
+              'border:3px solid white;' +
+              'display:flex;' +
+              'align-items:center;' +
+              'justify-content:center;' +
+              'color:white;' +
+              'font-weight:900;' +
+              'font-size:17px;' +
+              'box-shadow:0 4px 10px rgba(0,0,0,0.35);' +
+              '">' + iconText + '</div>',
+            iconSize: [42, 42],
+            iconAnchor: [21, 21]
+          });
+
+          L.marker([lat, lng], { icon: icon })
+            .addTo(markerGroup)
+            .on("click", function() {
+              window.ReactNativeWebView.postMessage(
+                JSON.stringify({ type: "MARKER_CLICK", location: loc })
+              );
             });
+        });
+      }
+
+      function handleMessage(e) {
+        try {
+          var rawData = e.data;
+
+          if (typeof rawData !== "string") return;
+
+          var data = JSON.parse(rawData);
+
+          if (data.type === "MAP_READY") return;
+
+          if (data.center) {
+            map.setView(
+              [Number(data.center.lat), Number(data.center.lng)],
+              data.center.zoom || 14
+            );
           }
-        } catch(err) {}
-      });
+
+          renderMarkers(data.markers);
+        } catch(err) {
+          console.log("Map message error", err);
+        }
+      }
+
+      window.addEventListener("message", handleMessage);
+      document.addEventListener("message", handleMessage);
     </script>
   </body>
   </html>
@@ -331,10 +392,22 @@ export default function MapScreen({ route, navigation }: any) {
             source={{ html: mapHtml }}
             style={styles.map}
             javaScriptEnabled={true}
+            domStorageEnabled={true}
+            onLoadEnd={() => {
+              setTimeout(() => {
+                sendMarkersToMap();
+              }, 500);
+            }}
             onMessage={(event) => {
               try {
                 const res = JSON.parse(event.nativeEvent.data);
-                if (res.type === "MAP_READY") setIsMapReady(true);
+                if (res.type === "MAP_READY") {
+                  setIsMapReady(true);
+
+                  setTimeout(() => {
+                    sendMarkersToMap();
+                  }, 300);
+                }
                 else if (res.type === "MARKER_CLICK")
                   setSelectedLocation(res.location);
               } catch (e) {}

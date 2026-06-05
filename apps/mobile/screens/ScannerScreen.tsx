@@ -120,39 +120,185 @@ const getLariTip = async (itemName: string, binName: string): Promise<string | n
   }
 };
 
+const getScanStatsKey = (binType: string, detectedClass?: string) => {
+  if (detectedClass === "glass") return "glass";
+  if (detectedClass === "paper" || detectedClass === "cardboard") return "paper";
+  if (detectedClass === "plastic") return "plastic";
+  if (detectedClass === "biodegradable") return "bio";
+  if (detectedClass === "metal") return "metal";
+  if (detectedClass === "trash") return "mixed";
+
+  if (binType === "glass") return "glass";
+  if (binType === "paper") return "paper";
+  if (binType === "bio") return "bio";
+  if (binType === "mixed") return "mixed";
+
+  return "other";
+};
+
 const BADGE_RULES = [
-  { id: "plastika-ne", check: (count: number, points: number, type: string) => type === "packaging" && count >= 20 },
-  { id: "varuh-planeta", check: (count: number, points: number, type: string) => count >= 30 },
-  { id: "eko-junak", check: (count: number, points: number, type: string) => points >= 1000 },
+  {
+    id: "firstScan",
+    check: ({ totalScanCount }: any) => totalScanCount >= 1,
+  },
+  {
+    id: "ecoHero",
+    check: ({ totalPoints }: any) => totalPoints >= 1000,
+  },
+  {
+    id: "plasticHunter",
+    check: ({ scanStats }: any) => (scanStats.plastic ?? 0) >= 20,
+  },
+  {
+    id: "paperSaver",
+    check: ({ scanStats }: any) => (scanStats.paper ?? 0) >= 15,
+  },
+  {
+    id: "glassGuardian",
+    check: ({ scanStats }: any) => (scanStats.glass ?? 0) >= 10,
+  },
 ];
+
+const getScanStatsField = (binType: string) => {
+  if (binType === "glass") return "scanStats.glass";
+  if (binType === "paper") return "scanStats.paper";
+  if (binType === "packaging") return "scanStats.packaging";
+  if (binType === "bio") return "scanStats.bio";
+  if (binType === "mixed") return "scanStats.mixed";
+  return "scanStats.other";
+};
+
+const getLocalDateKey = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const getYesterdayDateKey = () => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  const year = yesterday.getFullYear();
+  const month = String(yesterday.getMonth() + 1).padStart(2, "0");
+  const day = String(yesterday.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
 
 const saveScanToFirestore = async (
   itemName: string,
   binType: string,
   binName: string,
-  municipalityId: string
+  municipalityId: string,
+  detectedClass?: string
 ) => {
   const userId = auth.currentUser?.uid;
   if (!userId) return { newBadges: [] };
+
   try {
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
+
     if (!userSnap.exists()) return { newBadges: [] };
+
     const data = userSnap.data();
-    const currentBadges: string[] = data.badges ?? [];
-    const newScanCount = (data.scanCount ?? 0) + 1;
-    const newPoints = (data.ekoPoints ?? 0) + 15;
+
+    const currentBadges: string[] = data.earnedBadges ?? [];
+    const currentScanStats = data.scanStats ?? {};
+
+    const scanStatsKey = getScanStatsKey(binType, detectedClass);
+
+    const nextScanStats = {
+      ...currentScanStats,
+      [scanStatsKey]: (currentScanStats[scanStatsKey] ?? 0) + 1,
+    };
+
+    const nextTotalPoints = (data.totalPoints ?? 0) + 15;
+    const nextScanCount = (data.scanCount ?? 0) + 1;
+
+    const todayKey = getLocalDateKey();
+    const yesterdayKey = getYesterdayDateKey();
+    const lastActiveDate = data.lastActiveDate ?? "";
+    const currentStreak = data.streakDays ?? 0;
+
+    const shouldUpdateStreak = lastActiveDate !== todayKey;
+
+    const nextStreak = shouldUpdateStreak
+      ? lastActiveDate === yesterdayKey
+        ? currentStreak + 1
+        : 1
+      : currentStreak;
+
     const newBadges = BADGE_RULES
-      .filter(r => !currentBadges.includes(r.id) && r.check(newScanCount, newPoints, binType))
-      .map(r => r.id);
+      .filter((rule) => !currentBadges.includes(rule.id))
+      .filter((rule) =>
+        rule.check({
+          totalScanCount: nextScanCount,
+          totalPoints: nextTotalPoints,
+          scanStats: nextScanStats,
+        }),
+      )
+      .map((rule) => rule.id);
+
     await addDoc(collection(db, "scans"), {
-      userId, itemName, binType, municipalityId, pointsEarned: 15, scannedAt: serverTimestamp(),
+      userId,
+      itemName,
+      binType,
+      binName,
+      municipalityId,
+      pointsEarned: 15,
+      scannedAt: serverTimestamp(),
     });
-    await updateDoc(userRef, {
+
+    await addDoc(collection(db, "users", userId, "activities"), {
+      icon: "♻️",
+      iconKey: "scan",
+      iconBg: "#F0FDF4",
+      title: "Skeniran odpadek",
+      description: `${itemName} · ${binName}`,
+      points: "+15 točk",
+      pointsColor: "#35A936",
+      type: "scan",
+      time: "Pravkar",
+      createdAt: serverTimestamp(),
+    });
+
+    const userUpdateData: Record<string, any> = {
       scanCount: increment(1),
+      totalPoints: increment(15),
       ekoPoints: increment(15),
-      ...(newBadges.length > 0 && { badges: arrayUnion(...newBadges) }),
-    });
+      weeklyPoints: increment(15),
+      monthlyPoints: increment(15),
+      [`scanStats.${scanStatsKey}`]: increment(1),
+      updatedAt: serverTimestamp(),
+      ...(shouldUpdateStreak && {
+        streakDays: nextStreak,
+        lastActiveDate: todayKey,
+      }),
+      ...(newBadges.length > 0 && {
+        earnedBadges: arrayUnion(...newBadges),
+      }),
+    };
+
+    await updateDoc(userRef, userUpdateData);
+
+    if (data.groupId) {
+      try {
+        await updateDoc(doc(db, "groups", data.groupId), {
+          totalPoints: increment(15),
+          weeklyPoints: increment(15),
+          monthlyPoints: increment(15),
+          scanCount: increment(1),
+          updatedAt: serverTimestamp(),
+        });
+      } catch (groupError) {
+        console.log("Group scan points update error:", groupError);
+      }
+    }
+
     return { newBadges };
   } catch (e) {
     console.error("saveScan error:", e);
@@ -307,7 +453,13 @@ export default function ScannerScreen({ navigation }: any) {
     setResult({ item: displayName, bin, binId, confidence });
     const tip = await getLariTip(displayName, bin.name);
     if (tip) setResult({ item: displayName, bin: { ...bin, tip }, binId, confidence });
-    const { newBadges } = await saveScanToFirestore(displayName, binType, bin.name, municipalityId);
+    const { newBadges } = await saveScanToFirestore(
+      displayName,
+      binType,
+      bin.name,
+      municipalityId,
+      tfliteClass,
+    );
     if (newBadges.length > 0) {
       Alert.alert("Nova značka!", `Odklenil si: ${newBadges.join(", ")}`, [{ text: "Super!" }]);
     }

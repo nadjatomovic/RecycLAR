@@ -11,6 +11,15 @@ export const iconAssets: Record<string, any> = {
 
   teacherProfile: require("../assets/profilnaUcitelj.png"),
   teacherStudents: require("../assets/ucenici.png"),
+
+  roleStudent: require("../assets/roleStudent.png"),
+  roleTeacher: require("../assets/roleTeacher.png"),
+
+  leaderboardWeekly: require("../assets/leaderboardTedensko.png"),
+  leaderboardMonthly: require("../assets/leaderboardMesecno.png"),
+  leaderboardAllTime: require("../assets/leaderboardVsiCasi.png"),
+  leaderboardUsers: require("../assets/leaderboardPosamezniki.png"),
+  leaderboardLocation: require("../assets/location.png"),
 };
 
 export function getIconAsset(iconKey?: string) {

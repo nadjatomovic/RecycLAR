@@ -344,4 +344,34 @@ logoText: {
     fontSize: 14,
     fontWeight: "500",
   },
+
+  passwordInputWrap: {
+  minHeight: 58,
+  borderRadius: 16,
+  backgroundColor: "#F8F8FB",
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  flexDirection: "row",
+  alignItems: "center",
+  paddingLeft: 16,
+  paddingRight: 8,
+},
+
+passwordInput: {
+  flex: 1,
+  minHeight: 58,
+  fontSize: 16,
+  color: COLORS.text,
+  fontWeight: "600",
+  paddingVertical: 0,
+},
+
+eyeButton: {
+  width: 44,
+  height: 44,
+  borderRadius: 22,
+  alignItems: "center",
+  justifyContent: "center",
+},
+
 });

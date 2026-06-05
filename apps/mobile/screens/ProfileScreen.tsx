@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -33,6 +33,7 @@ import DecorativeBackground from "../components/DecorativeBackground";
 import { getBadgeAsset } from "../utils/badgeAssets";
 import { getAvatarAsset } from "../utils/avatarAssets";
 import { getIconAsset } from "../utils/iconAssets";
+import { useFocusEffect } from "@react-navigation/native";
 
 type UserData = {
   name: string;
@@ -40,8 +41,10 @@ type UserData = {
   municipalityId: string;
   municipalityName?: string;
   groupId?: string;
+  groupName?: string;
   schoolId?: string;
   schoolName?: string;
+  accountType?: string;
   totalPoints?: number;
   weeklyPoints?: number;
   monthlyPoints?: number;
@@ -51,6 +54,15 @@ type UserData = {
   role?: string;
   earnedBadges?: string[];
   avatarKey?: string;
+  ekoPoints?: number;
+  scanStats?: {
+    glass?: number;
+    paper?: number;
+    plastic?: number;
+    bio?: number;
+    mixed?: number;
+    packaging?: number;
+  };
 };
 
 type BadgeData = {
@@ -80,6 +92,7 @@ type GroupData = {
 type ActivityData = {
   id?: string;
   icon: string;
+  iconKey?: string;
   iconBg: string;
   title: string;
   description: string;
@@ -112,6 +125,7 @@ const avatarOptions = [
 const MOCK_STUDENT_ACTIVITY: ActivityData[] = [
   {
     icon: "♻️",
+    iconKey: "scan",
     iconBg: "#F0FDF4",
     title: "Skeniran odpadek",
     description: "Plastenka PET",
@@ -121,6 +135,7 @@ const MOCK_STUDENT_ACTIVITY: ActivityData[] = [
   },
   {
     icon: "❓",
+    iconKey: "quiz",
     iconBg: "#EDE9FE",
     title: "Zaključen kviz",
     description: "Ločevanje odpadkov – Nivo 1",
@@ -130,6 +145,7 @@ const MOCK_STUDENT_ACTIVITY: ActivityData[] = [
   },
   {
     icon: "🌱",
+    iconKey: "eco",
     iconBg: "#F0FDF4",
     title: "Eko točke za aktivnost",
     description: "Dnevni bonus",
@@ -278,12 +294,16 @@ const isBadgeUnlocked = (
     return streakDays >= badge.conditionValue;
   }
 
-  if (
-    badge.conditionType === "plastic_scans" ||
-    badge.conditionType === "paper_scans" ||
-    badge.conditionType === "glass_scans"
-  ) {
-    return scanCount >= badge.conditionValue;
+  if (badge.conditionType === "plastic_scans") {
+    return (userData.scanStats?.plastic ?? 0) >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "paper_scans") {
+    return (userData.scanStats?.paper ?? 0) >= badge.conditionValue;
+  }
+
+  if (badge.conditionType === "glass_scans") {
+    return (userData.scanStats?.glass ?? 0) >= badge.conditionValue;
   }
 
   return false;
@@ -311,24 +331,47 @@ export default function ProfileScreen({ navigation }: any) {
   );
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUid(user.uid);
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      setUid(null);
+      setUserData(null);
+      setLoading(false);
 
-        await Promise.all([
-          loadUserData(user.uid),
-          loadBadges(),
-          loadRecentActivities(user.uid),
-          loadNotifications(user.uid),
-          loadTeacherGroups(user.uid),
-        ]);
-      } else {
-        navigation.navigate("Login");
-      }
-    });
+      navigation.replace("Login");
+      return;
+    }
 
-    return unsubscribe;
-  }, []);
+    setUid(user.uid);
+
+    await Promise.all([
+      loadUserData(user.uid),
+      loadBadges(),
+      loadRecentActivities(user.uid),
+      loadNotifications(user.uid),
+      loadTeacherGroups(user.uid),
+    ]);
+  });
+
+  return unsubscribe;
+}, []);
+
+  useFocusEffect(
+  useCallback(() => {
+    const refreshProfile = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      await Promise.all([
+        loadUserData(user.uid),
+        loadRecentActivities(user.uid),
+        loadNotifications(user.uid),
+        loadTeacherGroups(user.uid),
+      ]);
+    };
+
+    refreshProfile();
+  }, []),
+);
 
   const loadUserData = async (userId: string) => {
     setLoading(true);
@@ -385,6 +428,7 @@ export default function ProfileScreen({ navigation }: any) {
         loaded.push({
           id: docSnap.id,
           icon: data.icon ?? "♻️",
+          iconKey: data.iconKey ?? "",
           iconBg: data.iconBg ?? "#F0FDF4",
           title: data.title ?? "Aktivnost",
           description: data.description ?? "",
@@ -1039,6 +1083,11 @@ function TeacherProfileCard({ userData, teacherGroups, onOpenEdit }: any) {
 }
 
 function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
+   const isSchoolStudent =
+    userData.accountType === "school" &&
+    !!userData.groupId &&
+    userData.groupId.trim() !== "";
+  
   return (
     <View style={styles.profileCard}>
       <View style={styles.avatarOuter}>
@@ -1097,9 +1146,13 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
             </View>
           </>
         ) : (
-          <View style={styles.profileMetaRow}>
-            <View style={styles.metaBlock}>
-              <Text style={styles.metaEmoji}>📍</Text>
+         <View style={styles.profileMetaRow}>
+            <View style={[styles.metaBlock, !isSchoolStudent && styles.metaBlockFull]}>
+              <Image
+                source={getIconAsset("location")}
+                style={styles.metaIcon}
+                resizeMode="contain"
+              />
 
               <View style={styles.metaTextWrap}>
                 <Text style={styles.metaLabel}>Občina</Text>
@@ -1114,22 +1167,30 @@ function ProfileCard({ userData, onOpenAvatar, onOpenEdit, teacher }: any) {
               </View>
             </View>
 
-            <View style={styles.metaDivider} />
+            {isSchoolStudent && (
+              <>
+                <View style={styles.metaDivider} />
 
-            <View style={styles.metaBlock}>
-              <Text style={styles.metaEmoji}>🏫</Text>
+                <View style={styles.metaBlock}>
+                  <Image
+                    source={getIconAsset("school")}
+                    style={styles.metaIcon}
+                    resizeMode="contain"
+                  />
 
-              <View style={styles.metaTextWrap}>
-                <Text style={styles.metaLabel}>Skupina</Text>
-                <Text
-                  style={styles.metaValue}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {userData.groupName || userData.groupId || "Ni skupine"}
-                </Text>
-              </View>
-            </View>
+                  <View style={styles.metaTextWrap}>
+                    <Text style={styles.metaLabel}>Skupina</Text>
+                    <Text
+                      style={styles.metaValue}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      {userData.groupName || userData.groupId || "Ni skupine"}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            )}
           </View>
         )}
       </View>
@@ -1165,14 +1226,36 @@ function StatsRow({ stats }: any) {
 }
 
 function BadgesSection({ badges, userData, teacherGroups = [], onViewAll }: any) {
-  const userRole = userData.role ?? "student";
+  const userRole = userData.role === "teacher" ? "teacher" : "student";
+  const isSchoolStudent =
+  userData.accountType === "school" &&
+  !!userData.groupId &&
+  userData.groupId.trim() !== "";
 
   const filteredBadges = badges.filter((badge: BadgeData) => {
     const badgeRole = (badge as any).role ?? "student";
-    return badgeRole === userRole;
+
+    if (userRole === "teacher") {
+      return badgeRole === "teacher";
+    }
+
+    if (!isSchoolStudent && badge.id === "classChampion") {
+      return false;
+    }
+
+    if (!isSchoolStudent && badge.conditionType === "class_rank") {
+      return false;
+    }
+
+    return badgeRole !== "teacher";
   });
 
-  const sortedBadges = [...filteredBadges].sort(
+  const safeBadges =
+    filteredBadges.length > 0 || userRole === "teacher"
+      ? filteredBadges
+      : badges.filter((badge: any) => (badge.role ?? "student") !== "teacher");
+
+  const sortedBadges = [...safeBadges].sort(
     (a: BadgeData, b: BadgeData) => {
       const aUnlocked = isBadgeUnlocked(a, userData, teacherGroups);
       const bUnlocked = isBadgeUnlocked(b, userData, teacherGroups);
@@ -1234,6 +1317,48 @@ function BadgesSection({ badges, userData, teacherGroups = [], onViewAll }: any)
   );
 }
 
+const getActivityIconKey = (item: ActivityData) => {
+  if (item.iconKey) return item.iconKey;
+
+  const title = item.title?.toLowerCase() ?? "";
+  const description = item.description?.toLowerCase() ?? "";
+
+  if (
+    title.includes("sken") ||
+    title.includes("odpadek") ||
+    description.includes("plastenka")
+  ) {
+    return "scan";
+  }
+
+  if (
+    title.includes("kviz") ||
+    description.includes("kviz") ||
+    item.icon === "❓"
+  ) {
+    return "quiz";
+  }
+
+  if (
+    title.includes("dosežek") ||
+    title.includes("dosezek") ||
+    item.icon === "🏆"
+  ) {
+    return "trophy";
+  }
+
+  if (
+    title.includes("eko") ||
+    title.includes("točke") ||
+    title.includes("tocke") ||
+    item.icon === "🌱"
+  ) {
+    return "eco";
+  }
+
+  return "eco";
+};
+
 function ActivityCard({ title, items, onViewAll }: any) {
   return (
     <View style={styles.sectionCard}>
@@ -1254,7 +1379,19 @@ function ActivityCard({ title, items, onViewAll }: any) {
                 { backgroundColor: item.iconBg },
               ]}
             >
-              <Text style={styles.activityIconEmoji}>{item.icon}</Text>
+              {item.iconKey ? (
+                <Image
+                  source={getIconAsset(item.iconKey)}
+                  style={styles.activityIconImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Image
+                  source={getIconAsset(getActivityIconKey(item))}
+                  style={styles.activityIconImage}
+                  resizeMode="contain"
+                />
+              )}
             </View>
 
             <View style={styles.activityTextWrap}>

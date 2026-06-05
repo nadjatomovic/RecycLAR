@@ -1082,4 +1082,19 @@ classInviteCode: {
   fontWeight: "700",
 },
 
+metaIcon: {
+  width: 24,
+  height: 24,
+  marginRight: 7,
+},
+
+metaBlockFull: {
+  flex: 1,
+},
+
+activityIconImage: {
+  width: 30,
+  height: 30,
+},
+
 });

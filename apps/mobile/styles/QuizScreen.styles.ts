@@ -605,21 +605,6 @@ export const styles = StyleSheet.create({
     marginBottom: 8,
   },
 
-  resultTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: COLORS.text,
-    marginBottom: 4,
-    letterSpacing: -0.5,
-  },
-
-  resultSubtitle: {
-    fontSize: 14,
-    color: COLORS.muted,
-    marginBottom: 24,
-    fontWeight: "600",
-  },
-
   statsCard: {
     backgroundColor: "#F9FAFB",
     borderRadius: 16,
@@ -702,29 +687,10 @@ export const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  resultPrimaryButton: {
-    borderRadius: RADIUS.pill,
-    paddingVertical: 17,
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-
   resultPrimaryText: {
     color: COLORS.white,
     fontWeight: "700",
     fontSize: 16,
-  },
-
-  resultSecondaryButton: {
-    borderWidth: 2,
-    borderColor: COLORS.border,
-    borderRadius: RADIUS.pill,
-    paddingVertical: 16,
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 10,
-    backgroundColor: COLORS.white,
   },
 
   resultSecondaryText: {
@@ -1481,23 +1447,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-  resultCard: {
-    width: "100%",
-    borderRadius: 16,
-    borderWidth: 3,
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 20,
-    paddingTop: 22,
-    paddingBottom: 24,
-    alignItems: "center",
-
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-  },
-
   resultLottie: {
     width: 260,
     height: 260,
@@ -1536,4 +1485,147 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.4,
   },
+
+  resultScreenContainer: {
+  flex: 1,
+  backgroundColor: "#F8FAF5",
+  paddingHorizontal: 24,
+  justifyContent: "center",
+},
+
+resultCard: {
+  backgroundColor: "#FFFFFF",
+  borderRadius: 28,
+  paddingHorizontal: 22,
+  paddingVertical: 26,
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "#E5E7EB",
+
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 14,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 5,
+},
+
+resultTrophyCircle: {
+  width: 74,
+  height: 74,
+  borderRadius: 37,
+  backgroundColor: "#FEF3C7",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 4,
+},
+
+resultTrophyEmoji: {
+  fontSize: 38,
+},
+
+resultLariAnimation: {
+  width: 210,
+  height: 210,
+  marginTop: -8,
+  marginBottom: -12,
+},
+
+resultTrophyAnimation: {
+  width: isSmallPhone ? 220 : 260,
+  height: isSmallPhone ? 220 : 260,
+  marginTop: -10,
+  marginBottom: -18,
+  backgroundColor: "transparent",
+},
+
+resultTitle: {
+  fontSize: 32,
+  lineHeight: 38,
+  color: "#111827",
+  fontWeight: "900",
+  textAlign: "center",
+  marginTop: 4,
+},
+
+resultSubtitle: {
+  fontSize: 16,
+  color: "#6B7280",
+  fontWeight: "700",
+  textAlign: "center",
+  marginTop: 6,
+  marginBottom: 18,
+},
+
+resultStatsRow: {
+  width: "100%",
+  flexDirection: "row",
+  gap: 10,
+  marginBottom: 16,
+},
+
+resultStatBox: {
+  flex: 1,
+  backgroundColor: "#F3ECFF",
+  borderRadius: 18,
+  paddingVertical: 14,
+  alignItems: "center",
+},
+
+resultStatValue: {
+  fontSize: 22,
+  color: "#6B35C9",
+  fontWeight: "900",
+},
+
+resultStatLabel: {
+  fontSize: 12,
+  color: "#6B7280",
+  fontWeight: "700",
+  marginTop: 2,
+},
+
+levelUnlockedBox: {
+  width: "100%",
+  backgroundColor: "#DCFCE7",
+  borderRadius: 16,
+  paddingVertical: 12,
+  paddingHorizontal: 14,
+  marginBottom: 14,
+  alignItems: "center",
+},
+
+levelUnlockedText: {
+  color: "#16A34A",
+  fontSize: 14,
+  fontWeight: "900",
+},
+
+resultPrimaryButton: {
+  width: "100%",
+  height: 58,
+  borderRadius: 29,
+  backgroundColor: "#22C55E",
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: 4,
+},
+
+resultPrimaryButtonText: {
+  color: "#FFFFFF",
+  fontSize: 16,
+  fontWeight: "900",
+  letterSpacing: 0.3,
+},
+
+resultSecondaryButton: {
+  marginTop: 14,
+  paddingVertical: 10,
+  paddingHorizontal: 16,
+},
+
+resultSecondaryButtonText: {
+  color: "#6B35C9",
+  fontSize: 15,
+  fontWeight: "800",
+},
 });

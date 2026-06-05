@@ -36,11 +36,23 @@ type BadgeData = {
 
 type UserData = {
   totalPoints?: number;
+  ekoPoints?: number;
   scanCount?: number;
   quizCompleted?: number;
   streakDays?: number;
   earnedBadges?: string[];
   role?: string;
+  accountType?: string;
+  groupId?: string;
+  scanStats?: {
+    glass?: number;
+    paper?: number;
+    packaging?: number;
+    plastic?: number;
+    bio?: number;
+    mixed?: number;
+    other?: number;
+  };
 };
 
 type GroupData = {
@@ -131,6 +143,14 @@ const fallbackBadges: BadgeData[] = [
   },
 ];
 
+const isSchoolStudent = (userData: UserData) => {
+  return (
+    userData.accountType === "school" &&
+    !!userData.groupId &&
+    userData.groupId.trim() !== ""
+  );
+};
+
 const getProgressValue = (
   badge: BadgeData,
   userData: UserData,
@@ -160,13 +180,25 @@ const getProgressValue = (
     return userData.streakDays ?? 0;
   }
 
-  if (
-    badge.conditionType === "plastic_scans" ||
-    badge.conditionType === "paper_scans" ||
-    badge.conditionType === "glass_scans"
-  ) {
-    return userData.scanCount ?? 0;
-  }
+  if (badge.conditionType === "plastic_scans") {
+  return (
+    userData.scanStats?.packaging ??
+    userData.scanStats?.plastic ??
+    0
+  );
+}
+
+if (badge.conditionType === "paper_scans") {
+  return userData.scanStats?.paper ?? 0;
+}
+
+if (badge.conditionType === "glass_scans") {
+  return userData.scanStats?.glass ?? 0;
+}
+
+if (badge.conditionType === "class_rank") {
+  return isSchoolStudent(userData) ? badge.conditionValue : 0;
+}
 
   return 0;
 };
@@ -244,25 +276,26 @@ export default function AchievementsScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      navigation.navigate("Login");
-      return;
-    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        navigation.navigate("Login");
+        return;
+      }
 
-    const loadedUserData = await loadUserData(user.uid);
+      const loadedUserData = await loadUserData(user.uid);
 
-    if (loadedUserData?.role === "teacher") {
-      await loadTeacherGroups(user.uid);
-    }
+      if (loadedUserData?.role === "teacher") {
+        await loadTeacherGroups(user.uid);
+      }
 
-    await loadBadges(loadedUserData?.role ?? "student");
+      const badgeRole = loadedUserData?.role === "teacher" ? "teacher" : "student";
+      await loadBadges(badgeRole);
 
-    setLoading(false);
-  });
+      setLoading(false);
+    });
 
-  return unsubscribe;
-}, []);
+    return unsubscribe;
+  }, []);
 
 const loadUserData = async (uid: string) => {
   try {
@@ -297,10 +330,33 @@ const loadBadges = async (role: string) => {
       return;
     }
 
+    const isSchoolStudent =
+      userData.accountType === "school" &&
+      !!userData.groupId &&
+      userData.groupId.trim() !== "";
+
     const filtered = loaded.filter((badge: any) => {
       const badgeRole = badge.role ?? "student";
-      return badgeRole === role;
+
+      if (role === "teacher") {
+        return badgeRole === "teacher";
+      }
+
+      if (!isSchoolStudent && badge.id === "classChampion") {
+        return false;
+      }
+
+      if (!isSchoolStudent && badge.conditionType === "class_rank") {
+        return false;
+      }
+
+      return badgeRole !== "teacher";
     });
+
+    if (filtered.length === 0 && role !== "teacher") {
+      setBadges(fallbackBadges);
+      return;
+    }
 
     filtered.sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
     setBadges(filtered);
