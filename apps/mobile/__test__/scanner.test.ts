@@ -1,6 +1,5 @@
 import { describe, it, expect } from "@jest/globals";
 
-// ─── Реплика на твојата логика од ScannerScreen.tsx ──────────────────────────
 const mapTextToBinType = (item: string): string => {
   const lower = item.toLowerCase();
 
