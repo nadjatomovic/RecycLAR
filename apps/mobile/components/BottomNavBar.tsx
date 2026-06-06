@@ -7,6 +7,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 type Route =
   | "Dashboard"
@@ -22,33 +23,54 @@ type Props = {
   municipality?: string;
 };
 
-const TABS: {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  activeIcon: keyof typeof Ionicons.glyphMap;
-  route: Route;
-}[] = [
+type Tab =
+  | {
+      label: string;
+      iconSet: "Ionicons";
+      icon: keyof typeof Ionicons.glyphMap;
+      activeIcon: keyof typeof Ionicons.glyphMap;
+      route: Route;
+    }
+  | {
+      label: string;
+      iconSet: "MaterialIcons";
+      icon: keyof typeof MaterialIcons.glyphMap;
+      activeIcon: keyof typeof MaterialIcons.glyphMap;
+      route: Route;
+    };
+
+const TABS: Tab[] = [
   {
     label: "Domov",
+    iconSet: "Ionicons",
     icon: "home-outline",
     activeIcon: "home",
     route: "Dashboard",
   },
   {
     label: "Kviz",
-    icon: "help-circle-outline",
-    activeIcon: "help-circle",
+    iconSet: "MaterialIcons",
+    icon: "quiz",
+    activeIcon: "quiz",
     route: "Quiz",
   },
   {
     label: "Skeniraj",
+    iconSet: "Ionicons",
     icon: "camera-outline",
     activeIcon: "camera",
     route: "Scanner",
-  }, // Главно копче
-  { label: "Zemljevid", icon: "map-outline", activeIcon: "map", route: "Map" },
+  },
+  {
+    label: "Zemljevid",
+    iconSet: "Ionicons",
+    icon: "map-outline",
+    activeIcon: "map",
+    route: "Map",
+  },
   {
     label: "Profil",
+    iconSet: "Ionicons",
     icon: "person-outline",
     activeIcon: "person",
     route: "Profile",
@@ -78,8 +100,9 @@ export default function BottomNavBar({
               activeOpacity={0.8}
             >
               <View style={[s.scannerCircle, active && s.scannerCircleActive]}>
-                <Ionicons name={tab.activeIcon} size={28} color="#FFFFFF" />
+                <Ionicons name="camera" size={28} color="#FFFFFF" />
               </View>
+
               <Text style={[s.label, s.scannerLabel, active && s.activeColor]}>
                 {tab.label}
               </Text>
@@ -93,6 +116,7 @@ export default function BottomNavBar({
             style={s.item}
             onPress={() => {
               if (active) return;
+
               if (tab.route === "Map") {
                 navigation.navigate("Map", {
                   municipality: municipality || "Maribor",
@@ -103,12 +127,22 @@ export default function BottomNavBar({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name={active ? tab.activeIcon : tab.icon}
-              size={22}
-              color={active ? "#35A936" : "#7A7A86"}
-              style={s.icon}
-            />
+            {tab.iconSet === "MaterialIcons" ? (
+              <MaterialIcons
+                name={active ? tab.activeIcon : tab.icon}
+                size={22}
+                color={active ? "#35A936" : "#7A7A86"}
+                style={s.icon}
+              />
+            ) : (
+              <Ionicons
+                name={active ? tab.activeIcon : tab.icon}
+                size={22}
+                color={active ? "#35A936" : "#7A7A86"}
+                style={s.icon}
+              />
+            )}
+
             <Text style={[s.label, active && s.activeColor]}>{tab.label}</Text>
           </TouchableOpacity>
         );
@@ -130,14 +164,15 @@ const s = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     paddingHorizontal: 8,
-    // Прекрасна мека сенка за iOS
+
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 },
-    // Сенка за Android
+
     elevation: 8,
   },
+
   item: {
     flex: 1,
     alignItems: "center",
@@ -145,12 +180,14 @@ const s = StyleSheet.create({
     height: "100%",
     paddingTop: 4,
   },
+
   scannerItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     top: -14,
   },
+
   scannerCircle: {
     width: 56,
     height: 56,
@@ -165,21 +202,26 @@ const s = StyleSheet.create({
     elevation: 6,
     marginBottom: 2,
   },
+
   scannerCircleActive: {
     backgroundColor: "#35A936",
     shadowColor: "#35A936",
   },
+
   icon: {
     marginBottom: 3,
   },
+
   label: {
     fontSize: 10,
     color: "#7A7A86",
     fontWeight: "500",
   },
+
   scannerLabel: {
     top: 3,
   },
+
   activeColor: {
     color: "#35A936",
     fontWeight: "700",

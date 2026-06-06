@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "174173387018",
+    "project_id": "recyclar",
+    "storage_bucket": "recyclar.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174173387018:android:823164fe986092dad922f3",
+        "android_client_info": {
+          "package_name": "com.recyclar.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "174173387018-49ufi3nphrv23rqj1ur8oinullnlgk4a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8c73eavnQvVqijI5fdODqYvTcpuS0e3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "174173387018-49ufi3nphrv23rqj1ur8oinullnlgk4a.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "174173387018-0qq9pnr7agt3a0t870v3q25hudb9b466.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.recyclar.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

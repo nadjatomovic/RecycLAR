@@ -454,8 +454,6 @@ const unlockedCount = badges.filter((badge) =>
           <View style={styles.headerSpacer} />
         </View>
 
-        <Text style={styles.screenTitle}>Dosežki ✦</Text>
-
         <View style={styles.summaryCard}>
           <View>
             <Text style={styles.summaryLabel}>Odklenjeno</Text>

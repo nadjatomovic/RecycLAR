@@ -1014,9 +1014,9 @@ teacherInfoLine: {
 },
 
 teacherInfoIcon: {
-  width: 34,
-  height: 34,
-  marginRight: 10,
+  width: 44,
+  height: 44,
+  marginRight: 8,
 },
 
 teacherInfoTextWrap: {

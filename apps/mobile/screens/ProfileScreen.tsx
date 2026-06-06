@@ -785,14 +785,6 @@ function StudentProfile({
           onOpenNotifications={onOpenNotifications}
         />
 
-        <Text style={styles.screenTitle}>Profil ✦</Text>
-
-        <ProfileCard
-          userData={userData}
-          onOpenAvatar={onOpenAvatar}
-          onOpenEdit={onOpenEdit}
-        />
-
         <StatsRow stats={stats} />
 
         <BadgesSection
@@ -898,8 +890,6 @@ function TeacherProfile({
           notifications={notifications}
           onOpenNotifications={onOpenNotifications}
         />
-
-        <Text style={styles.screenTitle}>Profil učitelja ✦</Text>
 
         <TeacherProfileCard
           userData={userData}

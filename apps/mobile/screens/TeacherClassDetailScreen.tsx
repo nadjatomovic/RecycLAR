@@ -175,7 +175,6 @@ export default function TeacherClassDetailScreen({ navigation, route }: any) {
         {!!inviteCode && (
             <View style={styles.inviteCodeCard}>
                 <View style={styles.inviteCodeIconCircle}>
-                <Text style={styles.inviteCodeIcon}>🔑</Text>
                 </View>
 
                 <View style={styles.inviteCodeContent}>

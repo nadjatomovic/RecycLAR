@@ -215,7 +215,7 @@ export const styles = StyleSheet.create({
   topicLevel: {
     fontSize: 13,
     fontWeight: "700",
-    marginTop: 3,
+    marginTop: 0,
   },
 
   topicPointsPill: {
@@ -301,7 +301,7 @@ export const styles = StyleSheet.create({
   pathSubtitle: {
     fontSize: 12,
     fontWeight: "700",
-    marginTop: 2,
+    marginTop: 0,
   },
 
   pathPointsPill: {
@@ -464,7 +464,7 @@ export const styles = StyleSheet.create({
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 1,
-    marginRight: 8,
+    marginRight: 0,
   },
 
   smallBadge: {
@@ -1628,4 +1628,111 @@ resultSecondaryButtonText: {
   fontSize: 15,
   fontWeight: "800",
 },
+
+  topicEmojiImg: {
+    width: 32,
+    height: 32,
+  },
+
+  topicLevelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 3,
+  },
+
+  topicLevelImg: {
+    width: 16,
+    height: 16,
+  },
+
+  pointsPillRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+
+  pointsStarImg: {
+    width: 16,
+    height: 16,
+  },
+
+  pathSubtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 2,
+  },
+
+  pathSubtitleImg: {
+    width: 14,
+    height: 14,
+  },
+
+  leaderboardBannerEmojiImg: {
+    width: 36,
+    height: 36,
+    marginRight: 4,
+  },
+
+  duoNodeEmojiImg: {
+    width: 36,
+    height: 36,
+  },
+
+  quizMetaTextWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginRight: 8,
+  },
+
+  quizMetaImg: {
+    width: 14,
+    height: 14,
+  },
+
+  resultEmojiImg: {
+    width: 72,
+    height: 72,
+    marginBottom: 8,
+  },
+
+  unlockSubtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 4,
+  },
+
+  unlockSubtitleImg: {
+    width: 18,
+    height: 18,
+  },
+
+  resultSubtitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 6,
+    marginBottom: 18,
+  },
+
+  resultSubtitleImg: {
+    width: 18,
+    height: 18,
+  },
+
+  resultProgressTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+
+  resultProgressTitleImg: {
+    width: 14,
+    height: 14,
+  },
 });

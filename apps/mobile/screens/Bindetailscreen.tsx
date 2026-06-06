@@ -308,18 +308,17 @@ export default function BinDetailScreen({ route, navigation }: any) {
             <Text style={styles.backText}>‹</Text>
           </TouchableOpacity>
 
-          <View style={styles.brandRow}>
+          <View style={styles.brandLogoWrapper}>
             <Image
               source={require("../assets/icon-logo.png")}
-              style={styles.brandIcon}
+              style={styles.topBrandIcon}
               resizeMode="contain"
             />
-            <Image
-              source={require("../assets/logo.png")}
-              style={styles.brandLogo}
-              resizeMode="contain"
-            />
-          </View>
+            <Text style={styles.topBrandText}>
+              <Text style={styles.topBrandGreen}>Recyc</Text>
+              <Text style={styles.topBrandPurple}>LAR</Text>
+            </Text>
+           </View>
 
           <View style={styles.headerSpacer} />
         </View>

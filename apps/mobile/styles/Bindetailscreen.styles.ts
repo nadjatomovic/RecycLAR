@@ -52,6 +52,34 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
+
+  brandLogoWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+},
+  topBrandText: {
+    fontSize: 28,
+    lineHeight: 34,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+  },
+
+  topBrandGreen: {
+    color: COLORS.green,
+  },
+
+  topBrandPurple: {
+    color: COLORS.purple,
+  },
+
+  topBrandIcon: {
+    width: 42,
+    height: 42,
+    marginRight: 8,
+  }, 
+  
   brandIcon: {
     width: 38,
     height: 38,

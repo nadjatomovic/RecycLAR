@@ -162,131 +162,139 @@ export const styles = StyleSheet.create({
     color: COLORS.muted,
   },
 
+  podiumWrapper: {
+    backgroundColor: "transparent",
+    borderRadius: 24,
+    paddingTop: 16,
+    paddingBottom: 0,
+    marginHorizontal: 0,
+    marginBottom: 16,
+  },
+
   podiumRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "flex-end",
     justifyContent: "center",
-    marginBottom: 20,
-    minHeight: 250,
-    paddingTop: 42,
+    paddingHorizontal: 8,
   },
 
   podiumCenter: {
     flex: 1,
     alignItems: "center",
-    zIndex: 2,
-    marginTop: 0,
+    zIndex: 3,
   },
 
   podiumSide: {
-    flex: 0.85,
+    flex: 1,
     alignItems: "center",
-    marginTop: 42,
+    zIndex: 2,
   },
 
   podiumCard: {
+    alignSelf: "stretch",
+  },
+
+  podiumColumn: {
     width: "100%",
-    height: 178,
-    borderRadius: 16,
-    padding: 14,
     alignItems: "center",
-    justifyContent: "flex-start",
-    borderWidth: 1.5,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.white,
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
-    position: "relative",
+  },
+
+  podiumInfo: {
+    alignItems: "center",
+    width: "100%",
   },
 
   podiumCard1: {
-    height: 200,
-    borderColor: "#FDE68A",
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
+    height: 120,
+    backgroundColor: "#22C55E",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
 
   podiumCard2: {
-    borderColor: "#D1D5DB",
+    height: 90,
+    backgroundColor: "#7C3AED",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
 
   podiumCard3: {
-    borderColor: "#FDDBB4",
+    height: 70,
+    backgroundColor: "#A78BFA",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
+
   podiumCardMe: {
-    borderColor: COLORS.green,
-    shadowColor: COLORS.shadow,
-    shadowOpacity: 0.05,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.6)",
   },
+
   podiumPlaceholder: {
-    flex: 0.85,
+    flex: 1,
   },
 
   medalBadge: {
-    position: "absolute",
-    top: -14,
-    flexDirection: "row",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: RADIUS.pill,
-    borderWidth: 1.5,
-    borderColor: COLORS.white,
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    marginBottom: 6,
   },
+
   medalText: {
     fontSize: 14,
     marginRight: 2,
   },
+
   medalRank: {
     fontSize: 13,
-    fontWeight: "700",
-    color: "#374151",
+    fontWeight: "800",
+    color: "#111827",
   },
 
   podiumAvatarWrap: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
-    backgroundColor: "#F0FDF4",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 12,
-    marginBottom: 8,
-    borderWidth: 2.5,
-    borderColor: COLORS.white,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 1 },
-    elevation: 2,
+    marginBottom: 6,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.6)",
+    overflow: "hidden",
   },
+
   podiumAvatarWrap1: {
-    width: 74,
-    height: 74,
-    borderRadius: 37,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
   },
 
   podiumName: {
     fontSize: 12,
     fontWeight: "700",
-    color: COLORS.text,
+    color: "#111827",
     textAlign: "center",
-    lineHeight: 16,
-    marginBottom: 4,
-    minHeight: 38,
+    marginBottom: 2,
   },
+
   podiumName1: {
     fontSize: 14,
   },
+
   podiumPts: {
     fontSize: 11,
-    fontWeight: "700",
-    color: COLORS.green,
-    marginTop: "auto",
+    fontWeight: "600",
+    color: "#22C55E",
+    textAlign: "center",
+    marginBottom: 8,
   },
+
   podiumPts1: {
     fontSize: 13,
   },
@@ -482,8 +490,8 @@ export const styles = StyleSheet.create({
   },
 
   filterIcon: {
-    width: 20,
-    height: 20,
+    width: 34,
+    height: 34,
     marginRight: 6,
   },
 
@@ -492,9 +500,9 @@ export const styles = StyleSheet.create({
   },
 
   tabIcon: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
+    width: 34,
+    height: 34,
+    marginRight: 6,
   },
 
   tabTextActive: {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -103,6 +104,95 @@ export default function LeaderboardScreen({ navigation }: any) {
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [myMunicipality, setMyMunicipality] = useState<string>("Maribor");
   const [cityLoaded, setCityLoaded] = useState(false); // Додадено за контрола на вчитување
+
+  // ── Animation refs ────────────────────────────────────────────────────────
+  const ROW_ANIM_COUNT = 50;
+
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+  const headerTranslateY = useRef(new Animated.Value(-20)).current;
+
+  const blockHeights = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
+  const infoOpacities = useRef([
+    new Animated.Value(0),
+    new Animated.Value(0),
+    new Animated.Value(0),
+  ]).current;
+  const infoTranslates = useRef([
+    new Animated.Value(-15),
+    new Animated.Value(-15),
+    new Animated.Value(-15),
+  ]).current;
+
+  const rowOpacities = useRef(
+    Array.from({ length: ROW_ANIM_COUNT }, () => new Animated.Value(0)),
+  ).current;
+  const rowTranslates = useRef(
+    Array.from({ length: ROW_ANIM_COUNT }, () => new Animated.Value(30)),
+  ).current;
+
+  const restLengthRef = useRef(0);
+
+  useEffect(() => {
+    if (loading) {
+      headerOpacity.setValue(0);
+      headerTranslateY.setValue(-20);
+      blockHeights.forEach((v) => v.setValue(0));
+      infoOpacities.forEach((v) => v.setValue(0));
+      infoTranslates.forEach((v) => v.setValue(-15));
+      rowOpacities.forEach((v) => v.setValue(0));
+      rowTranslates.forEach((v) => v.setValue(30));
+      return;
+    }
+
+    Animated.parallel([
+      Animated.timing(headerOpacity, { toValue: 1, duration: 300, useNativeDriver: true }),
+      Animated.timing(headerTranslateY, { toValue: 0, duration: 300, useNativeDriver: true }),
+    ]).start();
+
+    // Podium: block grows from ground up, then user info fades in above it
+    // Reveal order: rank3 (idx 2) → rank2 (idx 0) → rank1 (idx 1)
+    const animatePodium = (idx: number, targetHeight: number, delay: number) => {
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.timing(blockHeights[idx], {
+          toValue: targetHeight,
+          duration: 400,
+          useNativeDriver: false,
+        }),
+      ]).start(() => {
+        Animated.parallel([
+          Animated.timing(infoOpacities[idx], {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(infoTranslates[idx], {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
+    };
+
+    animatePodium(0, 120, 0);
+    animatePodium(1, 90, 500);
+    animatePodium(2, 70, 1000);
+
+    for (let i = 0; i < restLengthRef.current && i < ROW_ANIM_COUNT; i++) {
+      Animated.sequence([
+        Animated.delay(i * 100),
+        Animated.parallel([
+          Animated.timing(rowOpacities[i], { toValue: 1, duration: 250, useNativeDriver: true }),
+          Animated.timing(rowTranslates[i], { toValue: 0, duration: 250, useNativeDriver: true }),
+        ]),
+      ]).start();
+    }
+  }, [loading]);
 
   useFocusEffect(
     useCallback(() => {
@@ -247,6 +337,8 @@ export default function LeaderboardScreen({ navigation }: any) {
   const myRank = sortedList.findIndex((item) => item.id === myId);
   const myItem = myRank >= 0 ? sortedList[myRank] : null;
 
+  restLengthRef.current = rest.length;
+
   if (!currentUser)
     return (
       <SafeAreaView style={s.whiteContainer}>
@@ -293,35 +385,47 @@ export default function LeaderboardScreen({ navigation }: any) {
     const pts = getPoints(item, activeFilter);
     const isMe = item.id === myId;
     return (
-      <View
-        style={[
-          s.podiumCard,
-          rank === 1
-            ? s.podiumCard1
-            : rank === 2
-              ? s.podiumCard2
-              : s.podiumCard3,
-          isMe && s.podiumCardMe,
-        ]}
-      >
-        <View
+      <View style={s.podiumColumn}>
+        <Animated.View
           style={[
-            s.medalBadge,
+            s.podiumInfo,
             {
-              backgroundColor:
-                rank === 1 ? "#FDE68A" : rank === 2 ? "#E5E7EB" : "#FDDBB4",
+              opacity: infoOpacities[index],
+              transform: [{ translateY: infoTranslates[index] }],
             },
           ]}
         >
-          <Text style={s.medalRank}>{rank}</Text>
-        </View>
-        <View style={s.podiumAvatarWrap}>
-          {renderAvatar(item, index, rank === 1 ? 70 : 56)}
-        </View>
-        <Text style={s.podiumName} numberOfLines={2}>
-          {getDisplayName(item)}
-        </Text>
-        <Text style={s.podiumPts}>🌿 {pts.toLocaleString()} točk</Text>
+          <View
+            style={[
+              s.medalBadge,
+              {
+                backgroundColor:
+                  rank === 1 ? "#FDE68A" : rank === 2 ? "#E5E7EB" : "#FDDBB4",
+              },
+            ]}
+          >
+            <Text style={s.medalRank}>{rank}</Text>
+          </View>
+          <View style={[s.podiumAvatarWrap, rank === 1 && s.podiumAvatarWrap1]}>
+            {renderAvatar(item, index, rank === 1 ? 72 : 56)}
+          </View>
+          <Text style={s.podiumName} numberOfLines={2}>
+            {getDisplayName(item)}
+          </Text>
+          <Text style={s.podiumPts}>{pts.toLocaleString()} točk</Text>
+        </Animated.View>
+        <Animated.View
+          style={[
+            s.podiumCard,
+            rank === 1
+              ? s.podiumCard1
+              : rank === 2
+                ? s.podiumCard2
+                : s.podiumCard3,
+            isMe && s.podiumCardMe,
+            { height: blockHeights[index] },
+          ]}
+        />
       </View>
     );
   };
@@ -357,19 +461,12 @@ export default function LeaderboardScreen({ navigation }: any) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={s.scrollContent}
       >
-        <View style={s.header}>
-          <Text style={s.title}>Lestvica</Text>
-          <View style={s.locationPill}>
-            <Image
-              source={getIconAsset("leaderboardLocation")}
-              style={s.locationIcon}
-              resizeMode="contain"
-            />
-
-            <Text style={s.locationText}>{myMunicipality}</Text>
-          </View>
-        </View>
-        <View style={s.filterRow}>
+        <Animated.View
+          style={[
+            s.filterRow,
+            { opacity: headerOpacity, transform: [{ translateY: headerTranslateY }] },
+          ]}
+        >
           {(["weekly", "monthly", "allTime"] as FilterType[]).map((f) => {
             const isActive = activeFilter === f;
 
@@ -392,8 +489,13 @@ export default function LeaderboardScreen({ navigation }: any) {
               </TouchableOpacity>
             );
           })}
-        </View>
-        <View style={s.tabRow}>
+        </Animated.View>
+        <Animated.View
+          style={[
+            s.tabRow,
+            { opacity: headerOpacity, transform: [{ translateY: headerTranslateY }] },
+          ]}
+        >
           <TouchableOpacity
             style={[s.tabBtn, activeTab === "posamezniki" && s.tabBtnActive]}
             onPress={() => setActiveTab("posamezniki")}
@@ -432,7 +534,7 @@ export default function LeaderboardScreen({ navigation }: any) {
               Razredi
             </Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         {loading ? (
           <View style={s.loadingBox}>
@@ -449,22 +551,34 @@ export default function LeaderboardScreen({ navigation }: any) {
           </View>
         ) : (
           <>
-            <View style={s.podiumRow}>
-              <View style={s.podiumSide}>
-                {renderPodiumCard(top3[1], 2, 1)}
-              </View>
+            <View style={s.podiumWrapper}>
+              <View style={s.podiumRow}>
+                <View style={s.podiumSide}>
+                  {renderPodiumCard(top3[1], 2, 1)}
+                </View>
 
-              <View style={s.podiumCenter}>
-                {renderPodiumCard(top3[0], 1, 0)}
-              </View>
+                <View style={s.podiumCenter}>
+                  {renderPodiumCard(top3[0], 1, 0)}
+                </View>
 
-              <View style={s.podiumSide}>
-                {renderPodiumCard(top3[2], 3, 2)}
+                <View style={s.podiumSide}>
+                  {renderPodiumCard(top3[2], 3, 2)}
+                </View>
               </View>
             </View>
 
             <View style={s.listSection}>
-              {rest.map((item, i) => renderRow(item, i + 4, i))}
+              {rest.map((item, i) => (
+                <Animated.View
+                  key={item.id}
+                  style={{
+                    opacity: rowOpacities[i],
+                    transform: [{ translateX: rowTranslates[i] }],
+                  }}
+                >
+                  {renderRow(item, i + 4, i)}
+                </Animated.View>
+              ))}
             </View>
           </>
         )}
