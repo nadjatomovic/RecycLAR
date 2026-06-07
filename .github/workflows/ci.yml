@@ -35,7 +35,13 @@ jobs:
         run: npx tsc --noEmit --skipLibCheck --strict false
         continue-on-error: true
 
-      # Step 5 — Verify setup
+      # Step 5 — Run tests
+      - name: Run tests
+        working-directory: apps/mobile
+        run: npm test -- --watchAll=false --passWithNoTests
+        continue-on-error: true
+
+      # Step 6 — Verify setup
       - name: Verify build setup
         working-directory: apps/mobile
         run: |
@@ -43,6 +49,6 @@ jobs:
           npx expo doctor
         continue-on-error: true
         
-      # Step 6 — Success message
+      # Step 7 — Success message
       - name: CI passed!
         run: echo "✅ RecycLAR build successful!"
