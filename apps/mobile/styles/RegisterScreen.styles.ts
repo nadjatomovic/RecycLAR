@@ -396,6 +396,49 @@ eyeButton: {
   justifyContent: "center",
 },
 
+  gdprRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 14,
+    marginTop: 4,
+  },
+
+  gdprCheckbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: COLORS.purple,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.white,
+  },
+
+  gdprCheckboxActive: {
+    backgroundColor: COLORS.purple,
+  },
+
+  gdprCheckmark: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: "700",
+    lineHeight: 16,
+  },
+
+  gdprText: {
+    flex: 1,
+    fontSize: 13,
+    color: COLORS.muted,
+    fontWeight: "600",
+    lineHeight: 18,
+  },
+
+  gdprLink: {
+    color: COLORS.purple,
+    fontWeight: "700",
+  },
+
 eyeText: {
   fontSize: 20,
 },

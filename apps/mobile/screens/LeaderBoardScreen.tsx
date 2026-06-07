@@ -103,7 +103,7 @@ export default function LeaderboardScreen({ navigation }: any) {
   const [mySchoolId, setMySchoolId] = useState<string | null>(null);
   const [myUserId, setMyUserId] = useState<string | null>(null);
   const [myMunicipality, setMyMunicipality] = useState<string>("Maribor");
-  const [cityLoaded, setCityLoaded] = useState(false); // Додадено за контрола на вчитување
+  const [cityLoaded, setCityLoaded] = useState(false); // Guards data fetch until city resolves from AsyncStorage
 
   // ── Animation refs ────────────────────────────────────────────────────────
   const ROW_ANIM_COUNT = 50;
@@ -134,6 +134,7 @@ export default function LeaderboardScreen({ navigation }: any) {
     Array.from({ length: ROW_ANIM_COUNT }, () => new Animated.Value(30)),
   ).current;
 
+  // Ref avoids adding the unstable 'rest' array to useEffect deps, which would cause infinite re-renders
   const restLengthRef = useRef(0);
 
   useEffect(() => {
@@ -161,7 +162,7 @@ export default function LeaderboardScreen({ navigation }: any) {
         Animated.timing(blockHeights[idx], {
           toValue: targetHeight,
           duration: 400,
-          useNativeDriver: false,
+          useNativeDriver: false, // height is a layout property — cannot run on the native thread
         }),
       ]).start(() => {
         Animated.parallel([

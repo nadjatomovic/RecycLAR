@@ -52,8 +52,14 @@ export default function RegisterScreen({ navigation }: any) {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [agreed, setAgreed] = useState(false);
 
   const handleRegister = async () => {
+    if (!agreed) {
+      setError("Strinjati se moraš z zasebnostjo podatkov.");
+      return;
+    }
+
     if (!fullName.trim() || !email.trim() || !password.trim()) {
       setError("Prosimo, izpolni vsa obvezna polja.");
       return;
@@ -95,7 +101,6 @@ export default function RegisterScreen({ navigation }: any) {
       const user = userCredential.user;
       const municipalityId = municipalityToId[municipality] ?? "maribor";
 
-      // Зачувување во Firestore базата
       await setDoc(doc(db, "users", user.uid), {
         name: fullName.trim(),
         email: email.trim().toLowerCase(),
@@ -121,7 +126,7 @@ export default function RegisterScreen({ navigation }: any) {
         lastActiveAt: serverTimestamp(),
       });
 
-      // 2. КЛУЧЕН ЧЕКОР: Го зачувуваме градот и локално на телефонот веднаш по регистрација
+      // Save city locally so the leaderboard and scanner use the right municipality on first open
       await saveCity(municipality);
 
       navigation.navigate("Login");
@@ -400,10 +405,27 @@ export default function RegisterScreen({ navigation }: any) {
             ) : null}
 
             <TouchableOpacity
-              style={[styles.primaryButton, loading && styles.disabledButton]}
+              style={styles.gdprRow}
+              activeOpacity={0.8}
+              onPress={() => {
+                setAgreed((prev) => !prev);
+                setError("");
+              }}
+            >
+              <View style={[styles.gdprCheckbox, agreed && styles.gdprCheckboxActive]}>
+                {agreed && <Text style={styles.gdprCheckmark}>✓</Text>}
+              </View>
+              <Text style={styles.gdprText}>
+                Strinjam se z{" "}
+                <Text style={styles.gdprLink}>zasebnostjo podatkov</Text>
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.primaryButton, (!agreed || loading) && styles.disabledButton]}
               onPress={handleRegister}
               activeOpacity={0.9}
-              disabled={loading}
+              disabled={!agreed || loading}
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />

@@ -396,6 +396,8 @@ export default function QuizScreen({ navigation }: any) {
     );
   };
 
+  // Adaptive difficulty: serve easier questions when the user is struggling (<30% progress),
+  // harder ones when they're close to completing the level (>80% progress)
   const getQuestionLevel = (topicId: string, level: number): number => {
     const progress = getProgress(topicId);
     const levelObj = LEVELS.find((levelItem) => levelItem.level === level);
