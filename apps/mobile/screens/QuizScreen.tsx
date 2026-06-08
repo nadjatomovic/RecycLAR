@@ -316,6 +316,7 @@ export default function QuizScreen({ navigation }: any) {
 
   const [totalPoints, setTotalPoints] = useState(0);
   const [userRole, setUserRole] = useState("student");
+  const [userGroupId, setUserGroupId] = useState("");
 
   const [topicProgress, setTopicProgress] = useState<
     Record<string, TopicProgress>
@@ -358,6 +359,7 @@ export default function QuizScreen({ navigation }: any) {
 
         setTotalPoints(data.totalPoints ?? 0);
         setUserRole(data.role ?? "student");
+        setUserGroupId(data.groupId ?? "");
 
         if (data.topicProgress) {
           setTopicProgress(data.topicProgress);
@@ -865,6 +867,10 @@ if (newStreak && newStreak > 1) {
     }
   };
 
+  const canSeeLeaderboard =
+  userRole === "teacher" ||
+  (userRole === "student" && userGroupId.trim() !== "");
+
 
   if (!currentUser) {
     return (
@@ -927,22 +933,24 @@ if (newStreak && newStreak > 1) {
           <Text style={s.sectionTitle}>Izberi temo:</Text>
 
           {/* ── Leaderboard banner ─────────────────────────────────── */}
-          <TouchableOpacity
-            style={s.leaderboardBanner}
-            onPress={() => navigation.navigate("Leaderboard")}
-            activeOpacity={0.88}
-          >
-            <View style={s.leaderboardBannerLeft}>
-              <Text style={s.leaderboardBannerEmoji}>🏆</Text>
-              <View>
-                <Text style={s.leaderboardBannerTitle}>Lestvica šol</Text>
-                <Text style={s.leaderboardBannerSub}>
-                  Poglej kako se kotirate
-                </Text>
-              </View>
-            </View>
-            <Text style={s.leaderboardBannerChevron}>›</Text>
-          </TouchableOpacity>
+            {canSeeLeaderboard && (
+              <TouchableOpacity
+                style={s.leaderboardBanner}
+                onPress={() => navigation.navigate("Leaderboard")}
+                activeOpacity={0.88}
+              >
+                <View style={s.leaderboardBannerLeft}>
+                  <Text style={s.leaderboardBannerEmoji}>🏆</Text>
+                  <View>
+                    <Text style={s.leaderboardBannerTitle}>Lestvica šol</Text>
+                    <Text style={s.leaderboardBannerSub}>
+                      Poglej kako se kotirate
+                    </Text>
+                  </View>
+                </View>
+                <Text style={s.leaderboardBannerChevron}>›</Text>
+              </TouchableOpacity>
+            )}
 
           {TOPICS.map((topic) => {
             const progress = getProgress(topic.id);

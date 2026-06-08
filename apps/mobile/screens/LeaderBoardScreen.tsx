@@ -13,9 +13,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import BottomNavBar from "../components/BottomNavBar";
 import {
   collection,
-  query,
-  orderBy,
-  limit,
   getDocs,
   doc,
   getDoc,
@@ -208,7 +205,8 @@ export default function LeaderboardScreen({ navigation }: any) {
       getDoc(doc(db, "users", currentUser.uid)).then((snap) => {
         if (snap.exists()) {
           const data = snap.data();
-          setMySchoolId(data.schoolId ?? null);
+
+          setMySchoolId(data.groupId ?? data.schoolId ?? null);
         }
       });
     }, [currentUser]),
@@ -225,10 +223,11 @@ export default function LeaderboardScreen({ navigation }: any) {
     setLoading(true);
 
     try {
-      const municipalityId = (myMunicipality || "Maribor").toLowerCase().trim();
+      const municipalityId = (myMunicipality || "Maribor")
+        .toLowerCase()
+        .trim();
 
       const snap = await getDocs(collection(db, "groups"));
-
       const list: SchoolItem[] = [];
 
       snap.forEach((d) => {
@@ -252,7 +251,7 @@ export default function LeaderboardScreen({ navigation }: any) {
             data.displayName ??
             (schoolName
               ? `${data.name ?? d.id} · ${schoolName}`
-              : (data.name ?? d.id)),
+              : data.name ?? d.id),
           schoolName,
           weeklyPoints: Number(data.weeklyPoints ?? 0),
           monthlyPoints: Number(data.monthlyPoints ?? 0),
@@ -274,10 +273,11 @@ export default function LeaderboardScreen({ navigation }: any) {
     setLoading(true);
 
     try {
-      const municipalityId = (myMunicipality || "Maribor").toLowerCase().trim();
+      const municipalityId = (myMunicipality || "Maribor")
+        .toLowerCase()
+        .trim();
 
       const snap = await getDocs(collection(db, "users"));
-
       const list: UserItem[] = [];
 
       snap.forEach((d) => {
@@ -292,9 +292,6 @@ export default function LeaderboardScreen({ navigation }: any) {
           return;
         }
 
-        if (data.role === "teacher") {
-          return;
-        }
         if (data.role !== "student") {
           return;
         }
@@ -328,54 +325,54 @@ export default function LeaderboardScreen({ navigation }: any) {
     }
   };
 
-  const rawList = activeTab === "razredi" ? schools : users;
-  const sortedList = [...rawList].sort(
-    (a, b) => getPoints(b, activeFilter) - getPoints(a, activeFilter),
-  );
-  const top3 = sortedList.slice(0, 3);
-  const rest = sortedList.slice(3);
-  const myId = activeTab === "razredi" ? mySchoolId : myUserId;
-  const myRank = sortedList.findIndex((item) => item.id === myId);
-  const myItem = myRank >= 0 ? sortedList[myRank] : null;
-
-  restLengthRef.current = rest.length;
-
-  if (!currentUser)
-    return (
-      <SafeAreaView style={s.whiteContainer}>
-        <View style={s.lockedContent}>
-          <Image
-            source={getIconAsset("trophy")}
-            style={s.lockedImage}
-            resizeMode="contain"
-          />
-          <Text style={s.lockedTitle}>Poglej lestvico</Text>
-          <TouchableOpacity
-            style={s.loginButton}
-            onPress={() => navigation.navigate("Login")}
-          >
-            <Text style={s.loginButtonText}>Prijavi se v svoj profil</Text>
-          </TouchableOpacity>
-        </View>
-        <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
-      </SafeAreaView>
+    const rawList = activeTab === "razredi" ? schools : users;
+    const sortedList = [...rawList].sort(
+      (a, b) => getPoints(b, activeFilter) - getPoints(a, activeFilter),
     );
+    const top3 = sortedList.slice(0, 3);
+    const rest = sortedList.slice(3);
+    const myId = activeTab === "razredi" ? mySchoolId : myUserId;
+    const myRank = sortedList.findIndex((item) => item.id === myId);
+    const myItem = myRank >= 0 ? sortedList[myRank] : null;
 
-  const renderAvatar = (
-    item: SchoolItem | UserItem,
-    index: number,
-    size: number,
-  ) => {
-    const avatarKey =
-      (item as UserItem).avatarKey ??
-      SCHOOL_AVATAR_KEYS[index % SCHOOL_AVATAR_KEYS.length];
-    return (
-      <Image
-        source={getAvatarAsset(avatarKey)}
-        style={{ width: size, height: size, borderRadius: size / 2 }}
-      />
-    );
-  };
+    restLengthRef.current = rest.length;
+
+    if (!currentUser)
+      return (
+        <SafeAreaView style={s.whiteContainer}>
+          <View style={s.lockedContent}>
+            <Image
+              source={getIconAsset("trophy")}
+              style={s.lockedImage}
+              resizeMode="contain"
+            />
+            <Text style={s.lockedTitle}>Poglej lestvico</Text>
+            <TouchableOpacity
+              style={s.loginButton}
+              onPress={() => navigation.navigate("Login")}
+            >
+              <Text style={s.loginButtonText}>Prijavi se v svoj profil</Text>
+            </TouchableOpacity>
+          </View>
+          <BottomNavBar navigation={navigation} activeRoute="Leaderboard" />
+        </SafeAreaView>
+      );
+
+    const renderAvatar = (
+      item: SchoolItem | UserItem,
+      index: number,
+      size: number,
+    ) => {
+      const avatarKey =
+        (item as UserItem).avatarKey ??
+        SCHOOL_AVATAR_KEYS[index % SCHOOL_AVATAR_KEYS.length];
+      return (
+        <Image
+          source={getAvatarAsset(avatarKey)}
+          style={{ width: size, height: size, borderRadius: size / 2 }}
+        />
+      );
+    };
 
   const renderPodiumCard = (
     item: SchoolItem | UserItem | undefined,
