@@ -784,6 +784,11 @@ function StudentProfile({
           notifications={notifications}
           onOpenNotifications={onOpenNotifications}
         />
+        <ProfileCard
+          userData={userData}
+          onOpenAvatar={onOpenAvatar}
+          onOpenEdit={onOpenEdit}
+        />
 
         <StatsRow stats={stats} />
 
