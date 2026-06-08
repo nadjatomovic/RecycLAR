@@ -103,7 +103,7 @@ export default function LeaderboardScreen({ navigation }: any) {
   const [cityLoaded, setCityLoaded] = useState(false); // Guards data fetch until city resolves from AsyncStorage
 
   // ── Animation refs ────────────────────────────────────────────────────────
-  const ROW_ANIM_COUNT = 50;
+  const ROW_ANIM_COUNT = 120;
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const headerTranslateY = useRef(new Animated.Value(-20)).current;
@@ -566,17 +566,30 @@ export default function LeaderboardScreen({ navigation }: any) {
             </View>
 
             <View style={s.listSection}>
-              {rest.map((item, i) => (
-                <Animated.View
-                  key={item.id}
-                  style={{
-                    opacity: rowOpacities[i],
-                    transform: [{ translateX: rowTranslates[i] }],
-                  }}
-                >
-                  {renderRow(item, i + 4, i)}
-                </Animated.View>
-              ))}
+              {rest.map((item, i) => {
+                const opacityAnim = rowOpacities[i];
+                const translateAnim = rowTranslates[i];
+
+                if (!opacityAnim || !translateAnim) {
+                  return (
+                    <View key={item.id}>
+                      {renderRow(item, i + 4, i)}
+                    </View>
+                  );
+                }
+
+                return (
+                  <Animated.View
+                    key={item.id}
+                    style={{
+                      opacity: opacityAnim,
+                      transform: [{ translateX: translateAnim }],
+                    }}
+                  >
+                    {renderRow(item, i + 4, i)}
+                  </Animated.View>
+                );
+              })}
             </View>
           </>
         )}
