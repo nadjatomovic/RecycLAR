@@ -13,6 +13,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import BottomNavBar from "../components/BottomNavBar";
 import {
   collection,
+  query,
+  where,
   getDocs,
   doc,
   getDoc,
@@ -103,7 +105,7 @@ export default function LeaderboardScreen({ navigation }: any) {
   const [cityLoaded, setCityLoaded] = useState(false); // Guards data fetch until city resolves from AsyncStorage
 
   // ── Animation refs ────────────────────────────────────────────────────────
-  const ROW_ANIM_COUNT = 120;
+  const ROW_ANIM_COUNT = 30;
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const headerTranslateY = useRef(new Animated.Value(-20)).current;
@@ -227,21 +229,16 @@ export default function LeaderboardScreen({ navigation }: any) {
         .toLowerCase()
         .trim();
 
-      const snap = await getDocs(collection(db, "groups"));
+      const groupsQuery = query(
+        collection(db, "groups"),
+        where("municipalityId", "==", municipalityId),
+      );
+
+      const snap = await getDocs(groupsQuery);
       const list: SchoolItem[] = [];
 
       snap.forEach((d) => {
         const data = d.data();
-
-        const groupMunicipality = (data.municipalityId ?? "")
-          .toString()
-          .toLowerCase()
-          .trim();
-
-        if (groupMunicipality !== municipalityId) {
-          return;
-        }
-
         const schoolName = data.schoolName ?? data.schoolId ?? "";
 
         list.push({
@@ -277,24 +274,17 @@ export default function LeaderboardScreen({ navigation }: any) {
         .toLowerCase()
         .trim();
 
-      const snap = await getDocs(collection(db, "users"));
+      const usersQuery = query(
+        collection(db, "users"),
+        where("municipalityId", "==", municipalityId),
+        where("role", "==", "student"),
+      );
+
+      const snap = await getDocs(usersQuery);
       const list: UserItem[] = [];
 
       snap.forEach((d) => {
         const data = d.data();
-
-        const userMunicipality = (data.municipalityId ?? "")
-          .toString()
-          .toLowerCase()
-          .trim();
-
-        if (userMunicipality !== municipalityId) {
-          return;
-        }
-
-        if (data.role !== "student") {
-          return;
-        }
 
         if (!data.groupId || data.groupId.trim() === "") {
           return;

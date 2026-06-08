@@ -16,6 +16,7 @@ import * as ExpoAsset from "expo-asset";
 import * as ImageManipulator from "expo-image-manipulator";
 import { collection, getDocs, doc, getDoc, updateDoc, addDoc, increment, arrayUnion, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../firebase/firebase";
+import { loadCity } from "../utils/cityStorage";
 import { styles as s } from "../styles/ScannerScreen.styles";
 
 let useTensorflowModel: any = null;
@@ -336,6 +337,14 @@ const preprocessImage = async (imageUri: string): Promise<Float32Array | null> =
   }
 };
 
+const cityNameToMunicipalityId = (city: string) => {
+  return city.toLowerCase().trim();
+};
+
+const formatMunicipalityName = (municipalityId: string) => {
+  return municipalityId.charAt(0).toUpperCase() + municipalityId.slice(1);
+};
+
 export default function ScannerScreen({ navigation }: any) {
   const [permission, requestPermission] = useCameraPermissions();
   const [photo, setPhoto] = useState<string | null>(null);
@@ -382,22 +391,41 @@ export default function ScannerScreen({ navigation }: any) {
 
   const loadUserAndBins = async () => {
     setLoadingBins(true);
+
     try {
       const userId = auth.currentUser?.uid;
       let munId = "maribor";
+      let munName = "Maribor";
+
       if (userId) {
         const userDoc = await getDoc(doc(db, "users", userId));
+
         if (userDoc.exists()) {
-          munId = userDoc.data().municipalityId ?? "maribor";
-          setMunicipalityId(munId);
-          setMunicipalityName(munId.charAt(0).toUpperCase() + munId.slice(1));
+          const data = userDoc.data();
+
+          munId = data.municipalityId ?? "maribor";
+          munName = data.municipalityName ?? formatMunicipalityName(munId);
         }
+      } else {
+        const savedCity = await loadCity();
+
+        munName = savedCity ?? "Maribor";
+        munId = cityNameToMunicipalityId(munName);
       }
-      const binsSnap = await getDocs(collection(db, "municipalities", munId, "bins"));
+
+      setMunicipalityId(munId);
+      setMunicipalityName(munName);
+
+      const binsSnap = await getDocs(
+        collection(db, "municipalities", munId, "bins")
+      );
+
       const binsData: BinsMap = {};
+
       binsSnap.forEach((docSnap) => {
         binsData[docSnap.id] = docSnap.data() as BinData;
       });
+
       if (Object.keys(binsData).length > 0) {
         setBins(binsData);
       } else {

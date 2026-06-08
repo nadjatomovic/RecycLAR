@@ -1735,4 +1735,12 @@ resultSecondaryButtonText: {
     width: 14,
     height: 14,
   },
+
+  resultAnimationWrap: {
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: 8,
+},
+
 });

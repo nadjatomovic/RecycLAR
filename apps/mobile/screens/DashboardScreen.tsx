@@ -15,7 +15,7 @@ import LottieView from "lottie-react-native";
 const binsByMunicipality: Record<string, any[]> = {
   Maribor: [
     { id: "yellow", label: "Embalaža", image: "zutaKanta" },
-    { id: "red", label: "Papir", image: "rdecaKanta" },
+    { id: "blue", label: "Papir", image: "modraKanta" },
     { id: "white", label: "Steklo", image: "belaKanta" },
     { id: "brown", label: "BIO", image: "rjavaKanta" },
     { id: "mixed", label: "Mešani", image: "crnaKanta" },

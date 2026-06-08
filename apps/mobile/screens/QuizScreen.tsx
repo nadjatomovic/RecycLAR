@@ -1447,13 +1447,21 @@ if (newStreak && newStreak > 1) {
           </View>
         )}
 
-        <Text style={s.resultEmoji}>
-          {score === questions.length
-            ? "🏆"
-            : score >= questions.length * 0.6
-              ? "⭐"
-              : "💪"}
-        </Text>
+        {score === questions.length ? (
+          <View style={s.resultAnimationWrap}>
+            <LottieView
+              source={require("../assets/animations/PeharAnimacija.json")}
+              style={s.resultTrophyAnimation}
+              autoPlay
+              loop={false}
+              resizeMode="contain"
+            />
+          </View>
+        ) : (
+          <Text style={s.resultEmoji}>
+            {score >= questions.length * 0.6 ? "⭐" : "💪"}
+          </Text>
+        )}
 
         <Text style={s.resultTitle}>
           {score === questions.length
