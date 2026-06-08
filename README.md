@@ -121,6 +121,15 @@ Municipality-specific rules are stored in Firestore and returned with every scan
 
 ## Distribution
 
+### Android Preview Build
+
+You can install the latest Android preview build using the link or QR code below:
+
+**Build link:**  
+https://expo.dev/accounts/ljupka/projects/recyclar/builds/780fd472-65a5-44e8-a255-0bf02f62427b
+
+![RecycLAR Android preview build QR code](./docs/recyclar-build-qr.png)
+
 ```bash
 # Android APK — share directly
 eas build --platform android --profile preview
