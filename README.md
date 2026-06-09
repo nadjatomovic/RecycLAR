@@ -21,13 +21,11 @@ Mobile app for Slovenian students to learn recycling. Scan waste to find the rig
 
 ## Screenshots
 
-<img src="docs/HomeScreen.png" width="18%" title="Home"/> <img src="docs/DashboardScreen1.png" width="18%" title="Dashboard"/> <img src="docs/ScannerScreen1.png" width="18%" title="Scanner"/> <img src="docs/ScannerScreen2.png" width="18%" title="Scan Result"/> <img src="docs/BarCodeScreen.png" width="18%" title="Barcode Scan"/>
+<img src="docs/HomeScreen.png" width="18%" title="Home"/> <img src="docs/DashboardScreen1.png" width="18%" title="Dashboard"/> <img src="docs/DashboardScreen2.png"width="18%" title="Scanner"/> <img src="docs/ScannerScreen3.png" width="18%" title="Scan Result"/> <img src="docs/BarCodeScreen.png" width="18%" title="Barcode Scan"/>
 
-**Home &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Dashboard &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scanner &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Scan Result &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Barcode Scan**
+---
 
 <img src="docs/QuizScreen.png" width="18%" title="Quiz Topics"/> <img src="docs/QuizDetailsScreen.png" width="18%" title="Quiz Levels"/> <img src="docs/MapScreen.png" width="18%" title="Map"/> <img src="docs/ProfileStudentScreen.png" width="18%" title="Student Profile"/> <img src="docs/ProfileTeacherScreen.png" width="18%" title="Teacher Profile"/>
-
-**Quiz Topics &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Quiz Levels &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Map &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Student Profile &nbsp;&nbsp;&nbsp; Teacher Profile**
 
 ---
 
