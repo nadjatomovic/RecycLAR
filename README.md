@@ -21,7 +21,7 @@ Mobile app for Slovenian students to learn recycling. Scan waste to find the rig
 
 ## Screenshots
 
-<img src="docs/HomeScreen.png" width="18%" title="Home"/> <img src="docs/DashboardScreen1.png" width="18%" title="Dashboard"/> <img src="docs/DashboardScreen2.png"width="18%" title="Scanner"/> <img src="docs/ScannerScreen3.png" width="18%" title="Scan Result"/> <img src="docs/BarCodeScreen.png" width="18%" title="Barcode Scan"/>
+<img src="docs/HomeScreen.png" width="18%" title="Home"/> <img src="docs/DashboardScreen1.png" width="18%" title="Dashboard"/> <img src="docs/DashboardScreen2.png" width="18%" title="Scanner"/> <img src="docs/ScannerScreen3.png" width="18%" title="Scan Result"/> <img src="docs/BarCodeScreen.png" width="18%" title="Barcode Scan"/>
 
 ---
 
