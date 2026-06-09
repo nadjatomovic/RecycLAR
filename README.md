@@ -208,7 +208,6 @@ The current TFLite model was trained on a limited dataset. We plan to collect re
 - **iOS release** — currently Android only; iOS build planned once core features are stable
 - **Push notifications** — remind students about daily streaks and new quiz levels
 - **Teacher dashboard** — dedicated web view for teachers to manage classes and view analytics
-- **Offline mode** — basic scanning without internet connection
 - **More municipalities** — expand bin rules beyond current supported cities
 - **Multilingual** — full Serbian and Macedonian translations
 
