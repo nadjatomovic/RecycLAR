@@ -1,0 +1,22 @@
+RecycLAR
+
+Skeniraj. Loči. Uči se.
+
+Leto izdelave: 2026
+
+Avtorji:
+Nađa Tomović
+Ljupka Koteska
+Petar Kolev
+
+Domača stran(na telefonu): https://expo.dev/accounts/ljupka/projects/recyclar/builds/780fd472-65a5-44e8-a255-0bf02f62427b 
+
+Vir podatkov: Firebase Firestore, podatki o ločevanju odpadkov po občinah
+Koda: https://github.com/nadjatomovic/RecycLAR
+
+Kategorizacija: mobilna aplikacija, celovita informacijska rešitev, uporaba AI, izobraževalna aplikacija
+
+Oznake: React Native, Expo, TypeScript, Firebase, Firestore, Firebase Auth, TensorFlow Lite, Google Gemini Vision, Lottie, GitHub, UporabaAI, mobilna aplikacija, recikliranje, izobraževanje
+
+Opis projekta:
+RecycLAR je mobilna aplikacija za učenje pravilnega ločevanja odpadkov. Namenjena je predvsem učencem in učiteljem, lahko pa jo uporabljajo tudi običajni uporabniki. Uporabnik lahko izbere občino, pregleda pravila ločevanja, poišče bližnje eko otoke na zemljevidu in s pomočjo kamere skenira odpadek. Aplikacija nato predlaga ustrezen zabojnik glede na občinska pravila. Učenci lahko rešujejo kvize, zbirajo eko točke, odklepajo dosežke in spremljajo svoj napredek. Učitelji imajo pregled nad razredi, učenci in skupnimi rezultati. Projekt povezuje izobraževanje, igrifikacijo in umetno inteligenco z namenom spodbujanja okoljsko odgovornega vedenja.
