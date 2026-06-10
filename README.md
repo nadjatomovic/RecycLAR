@@ -87,7 +87,7 @@ See `package.json` for the full list. Key external dependencies:
 
 ```bash
 git clone https://github.com/nadjatomovic/RecycLAR
-cd recyclar/apps/mobile
+cd RecycLAR/apps/mobile
 npm install
 ```
 
@@ -144,13 +144,11 @@ https://expo.dev/accounts/ljupka/projects/recyclar/builds/780fd472-65a5-44e8-a25
 # Android APK — share directly
 eas build --platform android --profile preview
 
-# iOS TestFlight
-eas build --platform ios --profile preview
-eas submit --platform ios
+# iOS — not available yet
+# Requires Apple Developer account ($99/year)
 
-# Production stores
-eas build --platform all --profile production
-eas submit --platform all
+# Production stores — planned
+# Requires Google Play ($25) and Apple Developer ($99/year) accounts
 ```
 
 Requires a Google Play Developer account ($25 one-time) and/or Apple Developer account ($99/year) for store release.
