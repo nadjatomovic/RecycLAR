@@ -86,7 +86,7 @@ See `package.json` for the full list. Key external dependencies:
 ### Install
 
 ```bash
-git clone https://github.com/your-org/recyclar.git
+git clone https://github.com/nadjatomovic/RecycLAR
 cd recyclar/apps/mobile
 npm install
 ```
